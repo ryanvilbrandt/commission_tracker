@@ -1,0 +1,7 @@
+toml
+bcrypt
+fasteners
+GitPython
+git+https://github.com/ryanvilbrandt/bottle.git@master
+git+https://github.com/ryanvilbrandt/python-markdown2.git@master
+bottle_websocket
