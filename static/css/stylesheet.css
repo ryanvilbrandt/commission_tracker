@@ -1,0 +1,15 @@
+.collapsible {
+  padding: 5px;
+  border: 2px solid black;
+  border-radius: 10px;
+  transition: max-height 0.2s ease-out;
+}
+
+.header {
+  cursor: pointer;
+}
+
+.body {
+  animation: 1s fadeIn;
+  animation-fill-mode: forwards;
+}

@@ -1,0 +1,9 @@
+[Settings]
+host = localhost
+port = 8000
+run as thread = False
+
+[Logging]
+level = INFO
+format = %(asctime)s.%(msecs)03d %(levelname) 8s/%(name)s   %(message)s
+date format = %y-%m-%d %H:%M:%S

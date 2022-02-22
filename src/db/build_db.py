@@ -62,7 +62,8 @@ def create_tables(cur):
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE,
         password_hash TEXT,
-        role TEXT DEFAULT 'user'
+        role TEXT DEFAULT 'user',
+        full_name TEXT DEFAULT ''
     );
     CREATE TABLE IF NOT EXISTS commissions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -106,7 +107,7 @@ def show_tables(cur):
 def main():
     db, cur = open_db()
 
-    # drop_tables(cur)
+    drop_tables(cur)
     create_tables(cur)
     db.commit()
 

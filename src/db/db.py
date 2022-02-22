@@ -3,18 +3,20 @@ import sqlite3
 from collections import OrderedDict
 from typing import List, Optional
 
+DB_CONN = None
 VERSION_NEEDED = 1
 
 
 class Db:
 
-    def __init__(self, filename="database_files/main.db", auto_commit=True):
+    def __init__(self, filename="database_files/main.db", auto_commit=True, auto_close=True):
         if not os.path.isfile(filename):
             raise FileNotFoundError
         self.conn = sqlite3.connect(filename)
         self.cur = self.conn.cursor()
         self.check_version()
         self.auto_commit = auto_commit
+        self.auto_close = auto_close
 
     def __enter__(self):
         return self
@@ -27,7 +29,8 @@ class Db:
                 elif self.auto_commit:
                     self.conn.commit()
             finally:
-                self.close()
+                if self.auto_close:
+                    self.close()
 
     def close(self):
         if self.conn:
@@ -58,14 +61,14 @@ class Db:
         god_users = list(self.cur.execute(sql))
         if len(god_users) == 0:
             sql = """
-                INSERT INTO users(username, password_hash, role) VALUES (?, ?, 'god');
+                INSERT INTO users(username, password_hash, role, full_name) VALUES (?, ?, 'god', ?);
             """
-            self.cur.execute(sql, [username, password_hash])
+            self.cur.execute(sql, [username, password_hash, username])
         elif len(god_users) == 1:
             sql = """
-                UPDATE users SET username=?, password_hash=?;
+                UPDATE users SET username=?, password_hash=?, full_name=?;
             """
-            self.cur.execute(sql, [username, password_hash])
+            self.cur.execute(sql, [username, password_hash, username])
         else:
             raise ValueError(f"{len(god_users)} god users found. Something fucky is going on, please audit users in DB.")
 
@@ -73,9 +76,9 @@ class Db:
         if role not in ["admin", "user"]:
             raise ValueError("role must be either 'admin' or 'user'")
         sql = """
-            INSERT INTO users(username, password_hash, role) VALUES (?, ?, ?);
+            INSERT INTO users(username, password_hash, role, full_name) VALUES (?, ?, ?, ?);
         """
-        self.cur.execute(sql, [username, password_hash, role])
+        self.cur.execute(sql, [username, password_hash, role, username])
 
     def change_username(self, user_id, username):
         sql = """
@@ -96,6 +99,15 @@ class Db:
             UPDATE users SET role=? WHERE id=?;
         """
         self.cur.execute(sql, [role, user_id])
+
+    def get_password_hash_for_username(self, username):
+        sql = """
+            SELECT password_hash FROM users WHERE username=?;
+        """
+        password_hash = self.cur.execute(sql, [username]).fetchone()
+        if password_hash:
+            return password_hash[0]
+        return None
 
     def get_all_commissions(self) -> List[dict]:
         sql = """
@@ -210,7 +222,7 @@ class Db:
         """
         return self.fetch_dict(sql, [finished, message_id])
 
-#
-# if __name__ == "__main__":
-#     with Db(filename="../../database_files/main.db") as db:
-#         db.cur.execute("DELETE FROM commissions;")
+
+def connect_to_db():
+    global DB_CONN
+    DB_CONN = Db(auto_close=False)
