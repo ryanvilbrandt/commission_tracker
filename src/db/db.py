@@ -1,7 +1,7 @@
 import os.path
 import sqlite3
 from collections import OrderedDict
-from typing import List, Optional
+from typing import Optional, Iterator
 
 DB_CONN = None
 VERSION_NEEDED = 1
@@ -36,17 +36,31 @@ class Db:
         if self.conn:
             self.conn.close()
 
-    def row_to_dict(self, row):
+    def _row_to_dict(self, row):
         d = OrderedDict()
         for i, col in enumerate(self.cur.description):
             d[col[0]] = row[i]
         return d
 
-    def fetch_dict(self, sql, params):
+    def _fetch_dict(self, sql, params):
         result = self.cur.execute(sql, params).fetchone()
         if result is None:
             return None
-        return self.row_to_dict(result)
+        return self._row_to_dict(result)
+
+    def _fetch_one(self, sql, params):
+        result = self.cur.execute(sql, params).fetchone()
+        if result is None:
+            return None
+        return result[0]
+
+    def _yield_dicts(self, sql, params=None) -> Iterator[dict]:
+        if params is None:
+            ex = self.cur.execute(sql)
+        else:
+            ex = self.cur.execute(sql, params)
+        for row in ex.fetchall():
+            yield self._row_to_dict(row)
 
     def check_version(self):
         sql = "SELECT version FROM version;"
@@ -104,24 +118,31 @@ class Db:
         sql = """
             SELECT password_hash FROM users WHERE username=?;
         """
-        password_hash = self.cur.execute(sql, [username]).fetchone()
-        if password_hash:
-            return password_hash[0]
-        return None
+        return self._fetch_one(sql, [username])
 
-    def get_all_commissions(self) -> List[dict]:
+    def get_users(self) -> Iterator[dict]:
+        sql = """
+            SELECT id, username, full_name, role FROM users; 
+        """
+        return self._yield_dicts(sql)
+
+    def get_user_role(self, username) -> Iterator[dict]:
+        sql = """
+            SELECT role FROM users WHERE username=?; 
+        """
+        return self._fetch_one(sql, [username])
+
+    def get_all_commissions(self) -> Iterator[dict]:
         sql = """
             SELECT * FROM commissions;
         """
-        for row in self.cur.execute(sql).fetchall():
-            yield self.row_to_dict(row)
+        return self._yield_dicts(sql)
 
-    def get_all_commissions_for_queue(self, channel_name: str) -> List[dict]:
+    def get_all_commissions_for_queue(self, channel_name: str) -> Iterator[dict]:
         sql = """
             SELECT * FROM commissions WHERE channel_name=?;
         """
-        for row in self.cur.execute(sql, [channel_name]).fetchall():
-            yield self.row_to_dict(row)
+        return self._yield_dicts(sql, [channel_name])
 
     def add_commission(self, row) -> dict:
         sql = """
@@ -132,25 +153,25 @@ class Db:
         """
         values = row.copy()
         # print(f"Adding to DB: {values}")
-        return self.fetch_dict(sql, values)
+        return self._fetch_dict(sql, values)
 
     def get_commission_by_email(self, timestamp: str, email: str) -> Optional[dict]:
         sql = """
             SELECT * FROM commissions WHERE timestamp=? AND email=?;
         """
-        return self.fetch_dict(sql, [timestamp, email])
+        return self._fetch_dict(sql, [timestamp, email])
 
     def get_commission_by_message_id(self, message_id: int) -> Optional[dict]:
         sql = """
             SELECT * FROM commissions WHERE message_id=?;
         """
-        return self.fetch_dict(sql, [message_id])
+        return self._fetch_dict(sql, [message_id])
 
     def get_commission_by_id(self, db_id: int) -> Optional[dict]:
         sql = """
             SELECT * FROM commissions WHERE id=?;
         """
-        return self.fetch_dict(sql, [db_id])
+        return self._fetch_dict(sql, [db_id])
 
     def increment_channel_counter(self, channel_name: str) -> int:
         sql = """
@@ -162,13 +183,13 @@ class Db:
         sql = """
             UPDATE commissions SET counter=? WHERE timestamp=? AND email=? RETURNING *;
         """
-        return self.fetch_dict(sql, [counter, timestamp, email])
+        return self._fetch_dict(sql, [counter, timestamp, email])
 
     def update_message_id(self, timestamp: str, email: str, channel_name: str, message_id: int) -> dict:
         sql = """
             UPDATE commissions SET channel_name=?, message_id=? WHERE timestamp=? AND email=? RETURNING *;
         """
-        return self.fetch_dict(sql, [channel_name, message_id, timestamp, email])
+        return self._fetch_dict(sql, [channel_name, message_id, timestamp, email])
 
     def assign_commission(self, assigned_to: Optional[str], timestamp: str=None, email: str=None,
                           message_id: int=None) -> dict:
@@ -180,47 +201,47 @@ class Db:
             params = [assigned_to, message_id]
         else:
             raise ValueError("Either message_id or (timestamp and email) must be set.")
-        return self.fetch_dict(sql, params)
+        return self._fetch_dict(sql, params)
 
     def set_allow_any_artist(self, allow_any_artist: bool, timestamp: str=None, email: str=None) -> dict:
         sql = "UPDATE commissions SET allow_any_artist=? WHERE timestamp=? AND email=? RETURNING *;"
         params = [allow_any_artist, timestamp, email]
-        return self.fetch_dict(sql, params)
+        return self._fetch_dict(sql, params)
 
     def set_specialty(self, specialty: bool, timestamp: str=None, email: str=None) -> dict:
         sql = "UPDATE commissions SET specialty=? WHERE timestamp=? AND email=? RETURNING *;"
         params = [specialty, timestamp, email]
-        return self.fetch_dict(sql, params)
+        return self._fetch_dict(sql, params)
 
     def accept_commission(self, message_id: int, accepted=True):
         sql = """
             UPDATE commissions SET accepted=? WHERE message_id=? RETURNING *; 
         """
-        return self.fetch_dict(sql, [accepted, message_id])
+        return self._fetch_dict(sql, [accepted, message_id])
 
     def hide_commission(self, message_id: int, hidden):
         sql = """
             UPDATE commissions SET hidden=? WHERE message_id=? RETURNING *; 
         """
-        return self.fetch_dict(sql, [hidden, message_id])
+        return self._fetch_dict(sql, [hidden, message_id])
 
     def invoice_commission(self, message_id: int, invoiced=True):
         sql = """
             UPDATE commissions SET invoiced=? WHERE message_id=? RETURNING *; 
         """
-        return self.fetch_dict(sql, [invoiced, message_id])
+        return self._fetch_dict(sql, [invoiced, message_id])
 
     def pay_commission(self, message_id: int, paid=True):
         sql = """
             UPDATE commissions SET paid=? WHERE message_id=? RETURNING *; 
         """
-        return self.fetch_dict(sql, [paid, message_id])
+        return self._fetch_dict(sql, [paid, message_id])
 
     def finish_commission(self, message_id: int, finished=True):
         sql = """
             UPDATE commissions SET finished=? WHERE message_id=? RETURNING *; 
         """
-        return self.fetch_dict(sql, [finished, message_id])
+        return self._fetch_dict(sql, [finished, message_id])
 
 
 def connect_to_db():

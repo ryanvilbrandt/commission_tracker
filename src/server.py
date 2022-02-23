@@ -47,8 +47,7 @@ class Server:
         self._init_server(
             host=cfg.get("Settings", "host") if host is None else host,
             port=cfg.getint("Settings", "port") if port is None else port,
-            run_as_thread=cfg.getboolean("Settings", "run as thread") if run_as_thread is None else run_as_thread,
-            debug=debug
+            run_as_thread=cfg.getboolean("Settings", "run as thread") if run_as_thread is None else run_as_thread
         )
 
     @staticmethod
@@ -57,7 +56,7 @@ class Server:
         if not lock.acquire(blocking=False):
             raise ChildProcessError("Server process is already running")
 
-    def _init_server(self, host=None, port=None, run_as_thread=None, debug=False):
+    def _init_server(self, host=None, port=None, run_as_thread=False):
         if run_as_thread:
             from threading import Thread
             self.server_thread = Thread(name="CommissionServer", target=self._run_server, args=[host, port],
@@ -65,10 +64,9 @@ class Server:
             self.server_thread.start()
             print("Server thread started.")
         else:
-            self._run_server(host, port, debug)
+            self._run_server(host, port)
 
-    def _run_server(self, host, port, debug=False):
-        # self.app.run(host=host, port=port, reloader=debug)
+    def _run_server(self, host, port):
         self.app.run(host=host, port=port, reloader=True, server=GeventWebSocketServer)
         print("Server instance is ending.")
 

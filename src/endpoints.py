@@ -20,7 +20,26 @@ def load_wsgi_endpoints(app: Bottle):
     @view("index.tpl")
     @auth_basic(auth_check)
     def index():
-        return {"title": "Home page!", "username": request.auth[0]}
+        username = request.auth[0]
+        with Db() as db:
+            current_user_role = db.get_user_role(username)
+            if current_user_role in ["god", "admin"]:
+                users = list(db.get_users())
+            else:
+                users = []
+        if users:
+            # Sort users by role
+            users = sorted(users, key=lambda u: {"god": 0, "admin": 1, "user": 2}[u["role"]])
+            # Determine if user buttons should be enabled or disabled for each user
+            for user in users:
+                if user["role"] == "god":
+                    disable_user_buttons = True
+                elif user["role"] == "admin":
+                    disable_user_buttons = current_user_role != "god"
+                else:
+                    disable_user_buttons = False
+                user["disable_user_buttons"] = disable_user_buttons
+        return {"title": "Home page!", "users": users}
 
     @app.get("/static/<path:path>", name="static")
     @auth_basic(auth_check)
