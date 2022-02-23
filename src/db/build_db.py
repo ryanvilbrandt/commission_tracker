@@ -61,9 +61,9 @@ def create_tables(cur):
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE,
+        full_name TEXT DEFAULT '',
         password_hash TEXT,
-        role TEXT DEFAULT 'user',
-        full_name TEXT DEFAULT ''
+        role TEXT DEFAULT 'user'
     );
     CREATE TABLE IF NOT EXISTS commissions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

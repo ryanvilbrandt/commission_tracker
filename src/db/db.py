@@ -52,6 +52,12 @@ class Db:
         result = self.cur.execute(sql, params).fetchone()
         if result is None:
             return None
+        return self._row_to_dict(result[0])
+
+    def _scalar(self, sql, params):
+        result = self.cur.execute(sql, params).fetchone()
+        if result is None:
+            return None
         return result[0]
 
     def _yield_dicts(self, sql, params=None) -> Iterator[dict]:
@@ -86,19 +92,31 @@ class Db:
         else:
             raise ValueError(f"{len(god_users)} god users found. Something fucky is going on, please audit users in DB.")
 
-    def add_user(self, username, password_hash, role="user"):
+    def add_user(self, username, full_name, password_hash, role="user"):
         if role not in ["admin", "user"]:
             raise ValueError("role must be either 'admin' or 'user'")
         sql = """
-            INSERT INTO users(username, password_hash, role, full_name) VALUES (?, ?, ?, ?);
+            INSERT INTO users(username, full_name, password_hash, role) VALUES (?, ?, ?, ?);
         """
-        self.cur.execute(sql, [username, password_hash, role, username])
+        self.cur.execute(sql, [username, full_name, password_hash, role])
+
+    def delete_user(self, user_id):
+        sql = """
+            DELETE FROM users WHERE id=? AND NOT role='god' RETURNING id;
+        """
+        return self._scalar(sql, [user_id])
 
     def change_username(self, user_id, username):
         sql = """
-            UPDATE users SET username=? WHERE id=? AND NOT role='god';
+            UPDATE users SET username=? WHERE id=? AND NOT role='god' RETURNING id;
         """
-        self.cur.execute(sql, [username, user_id])
+        return self._scalar(sql, [username, user_id])
+
+    def change_full_name(self, user_id, full_name):
+        sql = """
+            UPDATE users SET full_name=? WHERE id=? AND NOT role='god';
+        """
+        self.cur.execute(sql, [full_name, user_id])
 
     def change_password(self, user_id, password_hash):
         sql = """
@@ -118,7 +136,7 @@ class Db:
         sql = """
             SELECT password_hash FROM users WHERE username=?;
         """
-        return self._fetch_one(sql, [username])
+        return self._scalar(sql, [username])
 
     def get_users(self) -> Iterator[dict]:
         sql = """
@@ -126,11 +144,17 @@ class Db:
         """
         return self._yield_dicts(sql)
 
-    def get_user_role(self, username) -> Iterator[dict]:
+    def get_user_role_from_username(self, username) -> Iterator[dict]:
         sql = """
             SELECT role FROM users WHERE username=?; 
         """
-        return self._fetch_one(sql, [username])
+        return self._scalar(sql, [username])
+
+    def get_user_role_from_id(self, user_id) -> Iterator[dict]:
+        sql = """
+            SELECT role FROM users WHERE id=?; 
+        """
+        return self._scalar(sql, [user_id])
 
     def get_all_commissions(self) -> Iterator[dict]:
         sql = """
