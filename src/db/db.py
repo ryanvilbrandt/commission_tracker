@@ -114,21 +114,21 @@ class Db:
 
     def change_full_name(self, user_id, full_name):
         sql = """
-            UPDATE users SET full_name=? WHERE id=? AND NOT role='god';
+            UPDATE users SET full_name=? WHERE id=? AND NOT role='god' RETURNING id;
         """
-        self.cur.execute(sql, [full_name, user_id])
+        return self._scalar(sql, [full_name, user_id])
 
     def change_password(self, user_id, password_hash):
         sql = """
-            UPDATE users SET password_hash=? WHERE id=? AND NOT role='god';
+            UPDATE users SET password_hash=? WHERE id=? AND NOT role='god' RETURNING id;
         """
-        self.cur.execute(sql, [password_hash, user_id])
+        return self._scalar(sql, [password_hash, user_id])
 
     def change_role(self, user_id, role):
         if role not in ["admin", "user"]:
             raise ValueError("role must be either 'admin' or 'user'")
         sql = """
-            UPDATE users SET role=? WHERE id=?;
+            UPDATE users SET role=? WHERE id=? AND NOT role='god' RETURNING id;
         """
         self.cur.execute(sql, [role, user_id])
 

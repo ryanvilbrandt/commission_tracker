@@ -105,7 +105,7 @@ def load_wsgi_endpoints(app: Bottle):
             if not username:
                 abort(400, f"{username} is not a valid username.")
             try:
-                response = db.change_username(user_id, username)
+                response = db.change_username(user_id, username.lower())
                 if response is None:
                     abort(400, f"No user found with id={user_id}")
             except sqlite3.IntegrityError as e:
@@ -115,6 +115,38 @@ def load_wsgi_endpoints(app: Bottle):
         return {
             "title": f"Changed user id={user_id} username to '{username}'",
             "message": f"User with id='{user_id}' has had their username changed to '{username}'."
+        }
+
+    @app.get("/change_full_name/<user_id>/<full_name>")
+    @view("redirect_to_main.tpl")
+    @auth_basic(auth_check)
+    def change_full_name(user_id, full_name):
+        with Db() as db:
+            _admin_check(db, request.auth[0], user_id)
+            if not full_name:
+                abort(400, f"{full_name} is not a valid name.")
+            response = db.change_full_name(user_id, full_name)
+            if response is None:
+                abort(400, f"No user found with id={user_id}")
+        return {
+            "title": f"Changed user id={user_id} full name to '{full_name}'",
+            "message": f"User with id='{user_id}' has had their full name changed to '{full_name}'."
+        }
+
+    @app.get("/change_password/<user_id>/<password>")
+    @view("redirect_to_main.tpl")
+    @auth_basic(auth_check)
+    def change_password(user_id, password):
+        with Db() as db:
+            _admin_check(db, request.auth[0], user_id)
+            if not password:
+                abort(400, f"{password} is not a valid password.")
+            response = db.change_password(user_id, bcrypt.hashpw(password.encode(), bcrypt.gensalt()))
+            if response is None:
+                abort(400, f"No user found with id={user_id}")
+        return {
+            "title": f"Changed user id={user_id} password",
+            "message": f"User with id='{user_id}' has had their password changed."
         }
 
 
