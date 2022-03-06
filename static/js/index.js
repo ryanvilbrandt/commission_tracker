@@ -1,12 +1,4 @@
 export function init() {
-    let header = document.querySelector(".header");
-    header.onclick = function() {
-        let open_arrow = document.querySelector(".open-arrow");
-        let body = document.querySelector(".body");
-        open_arrow.innerText = body.hidden ? "▲" : "▼";
-        body.hidden = !body.hidden;
-    };
-    console.log(document.querySelectorAll(".change_user_username"));
     document.querySelectorAll(".change_user_username").forEach(e => e.onclick = click_change_username);
     document.querySelectorAll(".change_user_full_name").forEach(e => e.onclick = click_change_full_name);
     document.querySelectorAll(".change_user_password").forEach(e => e.onclick = click_change_password);

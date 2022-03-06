@@ -117,5 +117,6 @@ def main():
 
 
 if __name__ == "__main__":
-    os.chdir("../..")
-    main()
+    raise Exception("Run scripts/set_god_password.py instead.")
+    # os.chdir("../..")
+    # main()

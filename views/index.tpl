@@ -1,16 +1,25 @@
 % rebase("base.tpl", title=title)
-<div class="collapsible">
-  <div class="header" commission_id="1">
-    <span class="open-arrow">▼</span>
-    <span class="name">Test Commission</span>
-  </div>
-  <div class="body" commission_id="1" hidden>
+
+<h1>
+    {{ current_user["full_name"] }}
+    % if current_user["role"] != "user":
+    ({{ current_user["role"].title() }})
+    % end
+    % if current_user["role"] != "god":
+    <button class="change_user_username" title="Change Username" user_id="{{current_user['id']}}">🇺</button>
+    <button class="change_user_full_name" title="Change Full Name" user_id="{{current_user['id']}}">🇫</button>
+    <button class="change_user_password" title="Change Password" user_id="{{current_user['id']}}">🔒</button>
+    % end
+</h1>
+
+<details class="details-animated">
+    <summary>Test Commission</summary>
     <p>I'm some text.</p>
     <p>I'm some more text.</p>
     <p>I'm even more text.</p>
-  </div>
-</div>
+</details>
 
+% if current_user["role"] != "user":
 <br>
 
 <table id="users-table" border="1">
@@ -22,17 +31,18 @@
     <th>Controls</th>
   </tr>
   % for user in users:
-  %     disabled = " disabled" if user["disable_user_buttons"] else ""
   <tr>
     <td class="user_id" user_id="{{user['id']}}">{{user["id"]}}</td>
     <td class="username" user_id="{{user['id']}}">{{user["username"]}}</td>
     <td class="full_name" user_id="{{user['id']}}">{{user["full_name"]}}</td>
     <td class="role" user_id="{{user['id']}}">{{user["role"].title()}}</td>
     <td>
-      <button class="change_user_username" title="Change Username" user_id="{{user['id']}}"{{disabled}}>🇺</button>
-      <button class="change_user_full_name" title="Change Full Name" user_id="{{user['id']}}"{{disabled}}>🇫</button>
-      <button class="change_user_password" title="Change Password" user_id="{{user['id']}}"{{disabled}}>🔒</button>
-      <button class="delete_user" title="Delete User" user_id="{{user['id']}}"{{disabled}}>❌</button>
+      % if not user["disable_user_buttons"]:
+      <button class="change_user_username" title="Change Username" user_id="{{user['id']}}">🇺</button>
+      <button class="change_user_full_name" title="Change Full Name" user_id="{{user['id']}}">🇫</button>
+      <button class="change_user_password" title="Change Password" user_id="{{user['id']}}">🔒</button>
+      <button class="delete_user" title="Delete User" user_id="{{user['id']}}">❌</button>
+      % end
     </td>
   </tr>
   % end
@@ -56,6 +66,8 @@
   </p>
   <input type="submit" value="Add New User">
 </form>
+
+% end
 
 <script type="module">
     import { init } from "/static/js/index.js";

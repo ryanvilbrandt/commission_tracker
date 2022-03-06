@@ -13,8 +13,11 @@ if dirname == cwd:
 print("This script will set the God user and their password hash in the DB.")
 print("")
 
-username = input("What's the username you want to use for the God user? ")
-password = input("What's the password you want to use for the God user? ")
+username = input("What username do you want to use for the God user? ")
+password = input("What password do you want to use for the God user? ")
+full_name = input("What name do you want to give the God user? (blank for the same as the username) ")
+if full_name == "":
+    full_name = username
 salt = bcrypt.gensalt()
 password_hash = bcrypt.hashpw(password.encode(), salt)
 
@@ -25,7 +28,7 @@ except FileNotFoundError:
     db_obj = Db()
 
 with db_obj as db:
-    db.set_god_user(username, password_hash)
+    db.set_god_user(username, full_name, password_hash)
 
 print("")
 print("Username and password have been saved to the DB.")
