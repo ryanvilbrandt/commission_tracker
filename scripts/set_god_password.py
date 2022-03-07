@@ -5,7 +5,7 @@ import bcrypt
 from src.db import build_db
 from src.db.db import Db
 
-dirname = os.path.dirname(__file__)
+dirname = os.path.dirname(__file__).replace("\\", "/")
 cwd = os.getcwd().replace("\\", "/")
 if dirname == cwd:
     os.chdir("..")

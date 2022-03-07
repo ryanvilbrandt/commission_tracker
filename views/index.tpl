@@ -12,15 +12,17 @@
     % end
 </h1>
 
-<details class="details-animated">
-    <summary>Test Commission</summary>
-    <p>I'm some text.</p>
-    <p>I'm some more text.</p>
-    <p>I'm even more text.</p>
-</details>
+<h2>Commissions assigned to me:</h2>
+<div id="my-commissions"></div>
+
+<h2>Available commissions:</h2>
+<div id="available-commissions"></div>
+
+<h2>Commissions assigned to others:</h2>
+<div id="other-commissions"></div>
 
 % if current_user["role"] != "user":
-<br>
+<hr>
 
 <table id="users-table" border="1">
   <tr>

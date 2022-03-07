@@ -73,22 +73,19 @@ def create_tables(cur):
         twitch TEXT DEFAULT '',
         twitter TEXT DEFAULT '',
         discord TEXT DEFAULT '',
+        num_characters TEXT DEFAULT '',
         reference_images TEXT DEFAULT '',
         description TEXT DEFAULT '',
         expression TEXT DEFAULT '',
         notes TEXT DEFAULT '',
         artist_choice TEXT DEFAULT '',
         if_queue_is_full TEXT DEFAULT '',
-        assigned_to INTEGER DEFAULT NULL,
+        assigned_to INTEGER DEFAULT -1,
         allow_any_artist BOOLEAN DEFAULT FALSE,
-        hidden BOOLEAN DEFAULT FALSE,
         accepted BOOLEAN DEFAULT FALSE,
         invoiced BOOLEAN DEFAULT FALSE,
         paid BOOLEAN DEFAULT FALSE,
         finished BOOLEAN DEFAULT FALSE,
-        channel_name TEXT DEFAULT NULL,
-        message_id INTEGER DEFAULT NULL,
-        counter INTEGER DEFAULT NULL,
         UNIQUE (timestamp, email) ON CONFLICT IGNORE
     );
     PRAGMA case_sensitive_like=ON;
@@ -96,6 +93,14 @@ def create_tables(cur):
     cur.executescript(sql)
 
     set_version(cur, 1)
+
+
+def add_unassigned_user(cur):
+    sql = """
+        INSERT INTO users(id, username, full_name, password_hash, role) 
+        VALUES (-1, 'unassigned', 'Unassigned', '', 'system');
+    """
+    cur.execute(sql)
 
 
 def show_tables(cur):
@@ -109,6 +114,7 @@ def main():
 
     drop_tables(cur)
     create_tables(cur)
+    add_unassigned_user(cur)
     db.commit()
 
     show_tables(cur)

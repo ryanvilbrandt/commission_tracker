@@ -23,10 +23,7 @@ def load_wsgi_endpoints(app: Bottle):
     def index():
         username = request.auth[0]
         with Db(auto_commit=False) as db:
-            current_user = db.get_user_from_username(username)
-            if current_user is None:
-                delete_from_password_cache(username)
-                abort(401)
+            current_user = _get_user(db, username)
             if current_user["role"] in ["god", "admin"]:
                 users = list(db.get_users())
             else:
@@ -43,7 +40,7 @@ def load_wsgi_endpoints(app: Bottle):
                 else:
                     disable_user_buttons = False
                 user["disable_user_buttons"] = disable_user_buttons
-        return {"title": "Home page!", "users": users}
+        return {"title": "Home page!", "users": users, "current_user": current_user}
 
     @app.get("/static/<path:path>", name="static")
     @auth_basic(auth_check)
@@ -54,6 +51,30 @@ def load_wsgi_endpoints(app: Bottle):
     @auth_basic(auth_check)
     def favicon():
         return static_file("favicon.ico", root="static")
+
+    @app.get("/fetch_commissions")
+    @auth_basic(auth_check)
+    def fetch_commissions():
+        username = request.auth[0]
+        my_commissions = []
+        available_commissions = []
+        other_commissions = []
+        with Db(auto_commit=False) as db:
+            current_user = _get_user(db, username)
+            commissions = list(db.get_all_commissions_with_users())
+            for commission in commissions:
+                del commission["password_hash"]  # So we don't have to convert it to a string to return JSON
+                if commission["assigned_to"] == current_user["id"]:
+                    my_commissions.append(commission)
+                elif commission["assigned_to"] == -1 and commission["allow_any_artist"]:  # Unassigned and claimable
+                    available_commissions.append(commission)
+                else:
+                    other_commissions.append(commission)
+        return {
+            "my_commissions": my_commissions,
+            "available_commissions": available_commissions,
+            "other_commissions": other_commissions
+        }
 
     @app.post("/add_new_user")
     @view("redirect_to_main.tpl")
@@ -183,15 +204,20 @@ def load_wsgi_endpoints(app: Bottle):
             delete_from_password_cache(request.auth[0])
 
 
-def _permissions_check(db, current_user: str, user_id: Optional[int]=None, allow_change_self=True) -> bool:
+def _get_user(db: Db, username: str):
+    current_user = db.get_user_from_username(username)
+    if current_user is None:
+        delete_from_password_cache(username)
+        abort(401)
+    return current_user
+
+
+def _permissions_check(db, username: str, user_id: Optional[int]=None, allow_change_self=True) -> bool:
     """
     Returns True if the user is trying to edit themselves, False otherwise. Raises a 403 HTTPError if
     they are not allowed to perform the current operation.
     """
-    current_user = db.get_user_from_username(current_user)
-    if current_user is None:
-        delete_from_password_cache(current_user)
-        abort(401)
+    current_user = _get_user(db, username)
     if allow_change_self and str(current_user["id"]) == user_id:
         return True
     if current_user["role"] == "user":

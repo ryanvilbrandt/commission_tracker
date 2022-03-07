@@ -68,6 +68,8 @@ class Db:
         if not version == VERSION_NEEDED:
             raise ValueError(f"Incorrect DB version: {version} != {VERSION_NEEDED}")
 
+    # USER MANAGEMENT
+
     def set_god_user(self, username: str, full_name: str, password_hash: bytes):
         sql = """
             SELECT * FROM users WHERE role='god';
@@ -97,25 +99,25 @@ class Db:
 
     def delete_user(self, user_id):
         sql = """
-            DELETE FROM users WHERE id=? AND NOT role='god' RETURNING id;
+            DELETE FROM users WHERE id=? AND NOT role='god' AND NOT role='system' RETURNING id;
         """
         return self._scalar(sql, [user_id])
 
     def change_username(self, user_id, username):
         sql = """
-            UPDATE users SET username=? WHERE id=? AND NOT role='god' RETURNING id;
+            UPDATE users SET username=? WHERE id=? AND NOT role='god' AND NOT role='system' RETURNING id;
         """
         return self._scalar(sql, [username, user_id])
 
     def change_full_name(self, user_id, full_name):
         sql = """
-            UPDATE users SET full_name=? WHERE id=? AND NOT role='god' RETURNING id;
+            UPDATE users SET full_name=? WHERE id=? AND NOT role='god' AND NOT role='system' RETURNING id;
         """
         return self._scalar(sql, [full_name, user_id])
 
     def change_password(self, user_id, password_hash):
         sql = """
-            UPDATE users SET password_hash=? WHERE id=? AND NOT role='god' RETURNING id;
+            UPDATE users SET password_hash=? WHERE id=? AND NOT role='god' AND NOT role='system' RETURNING id;
         """
         return self._scalar(sql, [password_hash, user_id])
 
@@ -123,45 +125,53 @@ class Db:
         if role not in ["admin", "user"]:
             raise ValueError("role must be either 'admin' or 'user'")
         sql = """
-            UPDATE users SET role=? WHERE id=? AND NOT role='god' RETURNING id;
+            UPDATE users SET role=? WHERE id=? AND NOT role='god' AND NOT role='system' RETURNING id;
         """
         self.cur.execute(sql, [role, user_id])
 
     def get_users(self) -> Iterator[dict]:
         sql = """
-            SELECT id, username, full_name, role FROM users; 
+            SELECT id, username, full_name, role FROM users WHERE NOT role='system'; 
         """
         return self._yield_dicts(sql)
 
     def get_password_hash_for_username(self, username) -> Optional[str]:
         sql = """
-            SELECT password_hash FROM users WHERE username=?;
+            SELECT password_hash FROM users WHERE username=? AND NOT role='system';
         """
         return self._scalar(sql, [username])
 
     def get_user_from_username(self, username) -> Optional[dict]:
         sql = """
-            SELECT id, username, full_name, role FROM users WHERE username=?;
+            SELECT id, username, full_name, role FROM users WHERE username=? AND NOT role='system';
         """
         return self._fetch_one(sql, [username])
 
     def get_user_role_from_username(self, username) -> Optional[str]:
         sql = """
-            SELECT role FROM users WHERE username=?;
+            SELECT role FROM users WHERE username=? AND NOT role='system';
         """
         return self._scalar(sql, [username])
 
+    def get_user_id_from_full_name(self, full_name) -> Optional[int]:
+        sql = """
+            SELECT id FROM users WHERE full_name=? AND NOT role='system';
+        """
+        return self._scalar(sql, [full_name])
+
     def get_username_from_id(self, user_id) -> Optional[str]:
         sql = """
-            SELECT username FROM users WHERE id=?; 
+            SELECT username FROM users WHERE id=? AND NOT role='system';
         """
         return self._scalar(sql, [user_id])
 
     def get_user_role_from_id(self, user_id) -> Optional[str]:
         sql = """
-            SELECT role FROM users WHERE id=?; 
+            SELECT role FROM users WHERE id=? AND NOT role='system';
         """
         return self._scalar(sql, [user_id])
+
+    # COMMISSIONS
 
     def get_all_commissions(self) -> Iterator[dict]:
         sql = """
@@ -169,17 +179,23 @@ class Db:
         """
         return self._yield_dicts(sql)
 
-    def get_all_commissions_for_queue(self, channel_name: str) -> Iterator[dict]:
+    def get_all_commissions_with_users(self) -> Iterator[dict]:
         sql = """
-            SELECT * FROM commissions WHERE channel_name=?;
+            SELECT * FROM commissions INNER JOIN users ON commissions.assigned_to = users.id;
         """
-        return self._yield_dicts(sql, [channel_name])
+        return self._yield_dicts(sql)
+
+    def get_all_commissions_for_user(self, user_id: str) -> Iterator[dict]:
+        sql = """
+            SELECT * FROM commissions WHERE assigned_to=?;
+        """
+        return self._yield_dicts(sql, [user_id])
 
     def add_commission(self, row) -> dict:
         sql = """
-        INSERT INTO commissions(timestamp, email, twitch, twitter, discord, 
-            reference_images, description, expression, notes, artist_choice, if_queue_is_full, name) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO commissions(timestamp, name, email, twitch, twitter, discord, num_characters,
+            reference_images, description, expression, notes, artist_choice, if_queue_is_full)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         RETURNING *;
         """
         values = row.copy()
@@ -192,89 +208,36 @@ class Db:
         """
         return self._fetch_one(sql, [timestamp, email])
 
-    def get_commission_by_message_id(self, message_id: int) -> Optional[dict]:
-        sql = """
-            SELECT * FROM commissions WHERE message_id=?;
-        """
-        return self._fetch_one(sql, [message_id])
-
-    def get_commission_by_id(self, db_id: int) -> Optional[dict]:
+    def get_commission_by_id(self, commission_id: int) -> Optional[dict]:
         sql = """
             SELECT * FROM commissions WHERE id=?;
         """
-        return self._fetch_one(sql, [db_id])
+        return self._fetch_one(sql, [commission_id])
 
-    def increment_channel_counter(self, channel_name: str) -> int:
-        sql = """
-            UPDATE channels SET counter=counter + 1 WHERE channel_name=? RETURNING counter;
-        """
-        return self.cur.execute(sql, [channel_name]).fetchone()[0]
+    def assign_commission(self, commission_id: int, assigned_to: int) -> dict:
+        sql = "UPDATE commissions SET assigned_to=? WHERE id=? RETURNING *;"
+        return self._fetch_one(sql, [assigned_to, commission_id])
 
-    def update_commission_counter(self, timestamp: str, email: str, counter: int):
-        sql = """
-            UPDATE commissions SET counter=? WHERE timestamp=? AND email=? RETURNING *;
-        """
-        return self._fetch_one(sql, [counter, timestamp, email])
+    def set_allow_any_artist(self, commission_id: int, allow_any_artist: bool) -> dict:
+        sql = "UPDATE commissions SET allow_any_artist=? WHERE id=? RETURNING *;"
+        return self._fetch_one(sql, [allow_any_artist, commission_id])
 
-    def update_message_id(self, timestamp: str, email: str, channel_name: str, message_id: int) -> dict:
-        sql = """
-            UPDATE commissions SET channel_name=?, message_id=? WHERE timestamp=? AND email=? RETURNING *;
-        """
-        return self._fetch_one(sql, [channel_name, message_id, timestamp, email])
+    def accept_commission(self, commission_id: int, accepted=True):
+        sql = "UPDATE commissions SET accepted=? WHERE id=? RETURNING *;"
+        return self._fetch_one(sql, [accepted, commission_id])
 
-    def assign_commission(self, assigned_to: Optional[str], timestamp: str=None, email: str=None,
-                          message_id: int=None) -> dict:
-        if timestamp and email:
-            sql = "UPDATE commissions SET assigned_to=? WHERE timestamp=? AND email=? RETURNING *;"
-            params = [assigned_to, timestamp, email]
-        elif message_id:
-            sql = "UPDATE commissions SET assigned_to=? WHERE message_id=? RETURNING *;"
-            params = [assigned_to, message_id]
-        else:
-            raise ValueError("Either message_id or (timestamp and email) must be set.")
-        return self._fetch_one(sql, params)
+    def hide_commission(self, commission_id: int, hidden):
+        sql = "UPDATE commissions SET hidden=? WHERE id=? RETURNING *;"
+        return self._fetch_one(sql, [hidden, commission_id])
 
-    def set_allow_any_artist(self, allow_any_artist: bool, timestamp: str=None, email: str=None) -> dict:
-        sql = "UPDATE commissions SET allow_any_artist=? WHERE timestamp=? AND email=? RETURNING *;"
-        params = [allow_any_artist, timestamp, email]
-        return self._fetch_one(sql, params)
+    def invoice_commission(self, commission_id: int, invoiced=True):
+        sql = "UPDATE commissions SET invoiced=? WHERE id=? RETURNING *;"
+        return self._fetch_one(sql, [invoiced, commission_id])
 
-    def set_specialty(self, specialty: bool, timestamp: str=None, email: str=None) -> dict:
-        sql = "UPDATE commissions SET specialty=? WHERE timestamp=? AND email=? RETURNING *;"
-        params = [specialty, timestamp, email]
-        return self._fetch_one(sql, params)
+    def pay_commission(self, commission_id: int, paid=True):
+        sql = "UPDATE commissions SET paid=? WHERE id=? RETURNING *;"
+        return self._fetch_one(sql, [paid, commission_id])
 
-    def accept_commission(self, message_id: int, accepted=True):
-        sql = """
-            UPDATE commissions SET accepted=? WHERE message_id=? RETURNING *; 
-        """
-        return self._fetch_one(sql, [accepted, message_id])
-
-    def hide_commission(self, message_id: int, hidden):
-        sql = """
-            UPDATE commissions SET hidden=? WHERE message_id=? RETURNING *; 
-        """
-        return self._fetch_one(sql, [hidden, message_id])
-
-    def invoice_commission(self, message_id: int, invoiced=True):
-        sql = """
-            UPDATE commissions SET invoiced=? WHERE message_id=? RETURNING *; 
-        """
-        return self._fetch_one(sql, [invoiced, message_id])
-
-    def pay_commission(self, message_id: int, paid=True):
-        sql = """
-            UPDATE commissions SET paid=? WHERE message_id=? RETURNING *; 
-        """
-        return self._fetch_one(sql, [paid, message_id])
-
-    def finish_commission(self, message_id: int, finished=True):
-        sql = """
-            UPDATE commissions SET finished=? WHERE message_id=? RETURNING *; 
-        """
-        return self._fetch_one(sql, [finished, message_id])
-
-
-def connect_to_db():
-    global DB_CONN
-    DB_CONN = Db(auto_close=False)
+    def finish_commission(self, commission_id: int, finished=True):
+        sql = "UPDATE commissions SET finished=? WHERE id=? RETURNING *;"
+        return self._fetch_one(sql, [finished, commission_id])
