@@ -1,6 +1,6 @@
 import sqlite3
 from time import ctime
-from typing import Optional
+from typing import Optional, List
 
 import bcrypt
 from bottle_websocket import websocket
@@ -30,7 +30,7 @@ def load_wsgi_endpoints(app: Bottle):
                 users = list(db.get_users())
             else:
                 users = []
-            commissions = _fetch_commissions(db, current_user)
+            commissions = _fetch_commissions(db, current_user, [])
         if users:
             # Sort users by role
             users = sorted(users, key=lambda u: ({"god": 0, "admin": 1, "user": 2}[u["role"]], u["id"]))
@@ -53,13 +53,13 @@ def load_wsgi_endpoints(app: Bottle):
     def favicon():
         return static_file("favicon.ico", root="static")
 
-    @app.get("/fetch_commissions")
+    @app.get("/fetch_commissions/<opened_details>")
     @view("commissions.tpl")
     @auth_basic(_auth_check)
-    def fetch_commissions():
+    def fetch_commissions(opened_details):
         with Db() as db:
             current_user = db.get_user_from_username(request.auth[0])
-            commissions = _fetch_commissions(db, current_user)
+            commissions = _fetch_commissions(db, current_user, opened_details.split(","))
         return {"commissions": commissions}
 
     @app.get('/commissions_websocket', apply=[websocket])
@@ -239,12 +239,14 @@ def _delete_from_password_cache(username):
         del password_hash_cache[username]
 
 
-def _fetch_commissions(db: Db, current_user: dict):
+def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]):
     my_commissions = []
     available_commissions = []
     other_commissions = []
     commissions = list(db.get_all_commissions_with_users())
     for commission in commissions:
+        if str(commission["id"]) in opened_commissions:
+            commission["open"] = True
         if commission["assigned_to"] == current_user["id"]:
             my_commissions.append(commission)
         elif commission["assigned_to"] == -1 and commission["allow_any_artist"]:  # Unassigned and claimable

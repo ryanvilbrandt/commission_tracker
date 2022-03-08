@@ -181,7 +181,12 @@ class Db:
 
     def get_all_commissions_with_users(self) -> Iterator[dict]:
         sql = """
-            SELECT * FROM commissions INNER JOIN users ON commissions.assigned_to = users.id;
+            SELECT 
+                c.*,
+                u.username,
+                u.full_name
+            FROM commissions c
+            INNER JOIN users u ON c.assigned_to = u.id;
         """
         return self._yield_dicts(sql)
 

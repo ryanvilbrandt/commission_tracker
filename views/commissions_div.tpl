@@ -2,7 +2,7 @@
     <p><em>None</em></p>
 % else:
     % for commission in commissions:
-    <details class="details-animated" commission_id="{{ commission['id'] }}">
+    <details commission_id="{{ commission['id'] }}"{{ " open" if commission.get('open') else "" }}>
         <summary>{{ commission["name"] }}</summary>
         <p>{{ commission["description"] }}</p>
     </details>
