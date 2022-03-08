@@ -28,6 +28,7 @@ def load_wsgi_endpoints(app: Bottle):
                 users = list(db.get_users())
             else:
                 users = []
+            commissions = _fetch_commissions(db, current_user)
         if users:
             # Sort users by role
             users = sorted(users, key=lambda u: ({"god": 0, "admin": 1, "user": 2}[u["role"]], u["id"]))
@@ -40,7 +41,7 @@ def load_wsgi_endpoints(app: Bottle):
                 else:
                     disable_user_buttons = False
                 user["disable_user_buttons"] = disable_user_buttons
-        return {"title": "Home page!", "users": users, "current_user": current_user}
+        return {"title": "Home page!", "users": users, "current_user": current_user, "commissions": commissions}
 
     @app.get("/static/<path:path>", name="static")
     @auth_basic(auth_check)
@@ -53,28 +54,13 @@ def load_wsgi_endpoints(app: Bottle):
         return static_file("favicon.ico", root="static")
 
     @app.get("/fetch_commissions")
+    @view("commissions.tpl")
     @auth_basic(auth_check)
     def fetch_commissions():
-        username = request.auth[0]
-        my_commissions = []
-        available_commissions = []
-        other_commissions = []
-        with Db(auto_commit=False) as db:
-            current_user = _get_user(db, username)
-            commissions = list(db.get_all_commissions_with_users())
-            for commission in commissions:
-                del commission["password_hash"]  # So we don't have to convert it to a string to return JSON
-                if commission["assigned_to"] == current_user["id"]:
-                    my_commissions.append(commission)
-                elif commission["assigned_to"] == -1 and commission["allow_any_artist"]:  # Unassigned and claimable
-                    available_commissions.append(commission)
-                else:
-                    other_commissions.append(commission)
-        return {
-            "my_commissions": my_commissions,
-            "available_commissions": available_commissions,
-            "other_commissions": other_commissions
-        }
+        with Db() as db:
+            current_user = db.get_user_from_username(request.auth[0])
+            commissions = _fetch_commissions(db, current_user)
+        return {"commissions": commissions}
 
     @app.post("/add_new_user")
     @view("redirect_to_main.tpl")
@@ -241,3 +227,22 @@ def auth_check(username, password):
 def delete_from_password_cache(username):
     if username in password_hash_cache:
         del password_hash_cache[username]
+
+
+def _fetch_commissions(db: Db, current_user: dict):
+    my_commissions = []
+    available_commissions = []
+    other_commissions = []
+    commissions = list(db.get_all_commissions_with_users())
+    for commission in commissions:
+        if commission["assigned_to"] == current_user["id"]:
+            my_commissions.append(commission)
+        elif commission["assigned_to"] == -1 and commission["allow_any_artist"]:  # Unassigned and claimable
+            available_commissions.append(commission)
+        else:
+            other_commissions.append(commission)
+    return {
+        "my_commissions": my_commissions,
+        "available_commissions": available_commissions,
+        "other_commissions": other_commissions
+    }

@@ -89,7 +89,7 @@ class Db:
             raise ValueError(f"{len(god_users)} god users found. "
                              f"Something fucky is going on, please audit users in DB.")
 
-    def add_user(self, username, full_name, password_hash, role="user"):
+    def add_user(self, username: str, full_name: str, password_hash: bytes, role="user"):
         if role not in ["admin", "user"]:
             raise ValueError("role must be either 'admin' or 'user'")
         sql = """
@@ -97,31 +97,31 @@ class Db:
         """
         self.cur.execute(sql, [username, full_name, password_hash, role])
 
-    def delete_user(self, user_id):
+    def delete_user(self, user_id: int):
         sql = """
             DELETE FROM users WHERE id=? AND NOT role='god' AND NOT role='system' RETURNING id;
         """
         return self._scalar(sql, [user_id])
 
-    def change_username(self, user_id, username):
+    def change_username(self, user_id: int, username: str):
         sql = """
             UPDATE users SET username=? WHERE id=? AND NOT role='god' AND NOT role='system' RETURNING id;
         """
         return self._scalar(sql, [username, user_id])
 
-    def change_full_name(self, user_id, full_name):
+    def change_full_name(self, user_id: int, full_name: str):
         sql = """
             UPDATE users SET full_name=? WHERE id=? AND NOT role='god' AND NOT role='system' RETURNING id;
         """
         return self._scalar(sql, [full_name, user_id])
 
-    def change_password(self, user_id, password_hash):
+    def change_password(self, user_id: int, password_hash: bytes):
         sql = """
             UPDATE users SET password_hash=? WHERE id=? AND NOT role='god' AND NOT role='system' RETURNING id;
         """
         return self._scalar(sql, [password_hash, user_id])
 
-    def change_role(self, user_id, role):
+    def change_role(self, user_id: int, role: str):
         if role not in ["admin", "user"]:
             raise ValueError("role must be either 'admin' or 'user'")
         sql = """
@@ -135,37 +135,37 @@ class Db:
         """
         return self._yield_dicts(sql)
 
-    def get_password_hash_for_username(self, username) -> Optional[str]:
+    def get_password_hash_for_username(self, username: str) -> Optional[str]:
         sql = """
             SELECT password_hash FROM users WHERE username=? AND NOT role='system';
         """
         return self._scalar(sql, [username])
 
-    def get_user_from_username(self, username) -> Optional[dict]:
+    def get_user_from_username(self, username: str) -> Optional[dict]:
         sql = """
             SELECT id, username, full_name, role FROM users WHERE username=? AND NOT role='system';
         """
         return self._fetch_one(sql, [username])
 
-    def get_user_role_from_username(self, username) -> Optional[str]:
+    def get_user_role_from_username(self, username: str) -> Optional[str]:
         sql = """
             SELECT role FROM users WHERE username=? AND NOT role='system';
         """
         return self._scalar(sql, [username])
 
-    def get_user_id_from_full_name(self, full_name) -> Optional[int]:
+    def get_user_id_from_full_name(self, full_name: str) -> Optional[int]:
         sql = """
             SELECT id FROM users WHERE full_name=? AND NOT role='system';
         """
         return self._scalar(sql, [full_name])
 
-    def get_username_from_id(self, user_id) -> Optional[str]:
+    def get_username_from_id(self, user_id: int) -> Optional[str]:
         sql = """
             SELECT username FROM users WHERE id=? AND NOT role='system';
         """
         return self._scalar(sql, [user_id])
 
-    def get_user_role_from_id(self, user_id) -> Optional[str]:
+    def get_user_role_from_id(self, user_id: int) -> Optional[str]:
         sql = """
             SELECT role FROM users WHERE id=? AND NOT role='system';
         """

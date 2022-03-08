@@ -12,17 +12,17 @@
     % end
 </h1>
 
-<h2>Commissions assigned to me:</h2>
-<div id="my-commissions"></div>
+<button id="refresh_button">🔄 Refresh commissions</button>
 
-<h2>Available commissions:</h2>
-<div id="available-commissions"></div>
-
-<h2>Commissions assigned to others:</h2>
-<div id="other-commissions"></div>
+<div id="commissions_container">
+    % include("commissions.tpl", commissions=commissions)
+</div>
 
 % if current_user["role"] != "user":
+<br>
 <hr>
+
+<h2>Users:</h2>
 
 <table id="users-table" border="1">
   <tr>

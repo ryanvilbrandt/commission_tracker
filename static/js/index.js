@@ -1,41 +1,18 @@
+import {ajax_call} from "./utils.js";
+
 export function init() {
-    add_commissions_to_div(
-        document.querySelector("#my-commissions"),
-        [
-            {
-                "id": 999,
-                "name": "This is a name",
-                "description": "This is a description."
-            }
-        ]
-    )
+    document.querySelector("#refresh_button").onclick = function() {
+        // document.querySelector("#commissions_container").innerHTML = "";
+        ajax_call("/fetch_commissions", fetch_commissions_callback)
+    }
     document.querySelectorAll(".change_user_username").forEach(e => e.onclick = click_change_username);
     document.querySelectorAll(".change_user_full_name").forEach(e => e.onclick = click_change_full_name);
     document.querySelectorAll(".change_user_password").forEach(e => e.onclick = click_change_password);
     document.querySelectorAll(".delete_user").forEach(e => e.onclick = click_delete_user);
 }
 
-function add_commissions_to_div(div, commissions) {
-    commissions.forEach(function (commission) {
-        div.appendChild(build_commission(commission));
-    })
-}
-
-function build_commission(commission) {
-    let details = document.createElement("details");
-    details.className = "details-animated";
-    details.commission_id = commission["id"];
-
-    let summary = document.createElement("summary");
-    summary.innerText = commission["name"];
-
-    let details_body = document.createElement("p");
-    details_body.innerHTML = commission["description"];
-
-    details.appendChild(summary);
-    details.appendChild(details_body);
-
-    return details;
+function fetch_commissions_callback(xhttp) {
+    document.querySelector("#commissions_container").innerHTML = xhttp.responseText;
 }
 
 function change_user_property(event, property) {
