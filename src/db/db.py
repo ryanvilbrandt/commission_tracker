@@ -82,7 +82,7 @@ class Db:
             self.cur.execute(sql, [username, full_name, password_hash])
         elif len(god_users) == 1:
             sql = """
-                UPDATE users SET username=?, full_name=?, password_hash=?;
+                UPDATE users SET username=?, full_name=?, password_hash=? WHERE role='god';
             """
             self.cur.execute(sql, [username, full_name, password_hash])
         else:
