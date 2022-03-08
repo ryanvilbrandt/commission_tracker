@@ -3,8 +3,10 @@ from time import ctime
 from typing import Optional
 
 import bcrypt
-from bottle import static_file, Bottle, view, auth_basic, request, abort, template
+from bottle_websocket import websocket
 
+from bottle import static_file, Bottle, view, auth_basic, request, abort, template
+from src import utils
 from src.db.db import Db
 
 START_TIME = None
@@ -19,7 +21,7 @@ def init(cfg):
 def load_wsgi_endpoints(app: Bottle):
     @app.get('/')
     @view("index.tpl")
-    @auth_basic(auth_check)
+    @auth_basic(_auth_check)
     def index():
         username = request.auth[0]
         with Db(auto_commit=False) as db:
@@ -44,27 +46,35 @@ def load_wsgi_endpoints(app: Bottle):
         return {"title": "Home page!", "users": users, "current_user": current_user, "commissions": commissions}
 
     @app.get("/static/<path:path>", name="static")
-    @auth_basic(auth_check)
     def static(path):
         return static_file(path, root="static")
 
     @app.get("/favicon.ico", name="favicon")
-    @auth_basic(auth_check)
     def favicon():
         return static_file("favicon.ico", root="static")
 
     @app.get("/fetch_commissions")
     @view("commissions.tpl")
-    @auth_basic(auth_check)
+    @auth_basic(_auth_check)
     def fetch_commissions():
         with Db() as db:
             current_user = db.get_user_from_username(request.auth[0])
             commissions = _fetch_commissions(db, current_user)
         return {"commissions": commissions}
 
+    @app.get('/commissions_websocket', apply=[websocket])
+    @auth_basic(_auth_check)
+    def commissions_websocket(ws):
+        utils.websocket_loop(ws)
+
+    @app.get("/send_to_websockets")
+    @auth_basic(_auth_check)
+    def send_to_websockets():
+        utils.send_to_websockets("refresh")
+
     @app.post("/add_new_user")
     @view("redirect_to_main.tpl")
-    @auth_basic(auth_check)
+    @auth_basic(_auth_check)
     def add_new_user():
         current_user = request.auth[0]
         new_username = request.forms["username"].lower()
@@ -96,7 +106,7 @@ def load_wsgi_endpoints(app: Bottle):
 
     @app.get("/delete_user/<user_id>")
     @view("redirect_to_main.tpl")
-    @auth_basic(auth_check)
+    @auth_basic(_auth_check)
     def delete_user(user_id):
         with Db() as db:
             _permissions_check(db, request.auth[0], user_id, allow_change_self=False)
@@ -109,7 +119,7 @@ def load_wsgi_endpoints(app: Bottle):
         }
 
     @app.get("/change_username/<user_id>/<username>")
-    @auth_basic(auth_check)
+    @auth_basic(_auth_check)
     def change_username(user_id, username):
         with Db() as db:
             change_self = _permissions_check(db, request.auth[0], user_id)
@@ -124,7 +134,7 @@ def load_wsgi_endpoints(app: Bottle):
                 if str(e) == "UNIQUE constraint failed: users.username":
                     abort(400, f"A user with the username '{username}' already exists.")
                 raise
-        delete_from_password_cache(old_username)
+        _delete_from_password_cache(old_username)
         if change_self:
             return template("logout.tpl", {
                 "title": "Username successfully changed",
@@ -139,7 +149,7 @@ def load_wsgi_endpoints(app: Bottle):
 
     @app.get("/change_full_name/<user_id>/<full_name>")
     @view("redirect_to_main.tpl")
-    @auth_basic(auth_check)
+    @auth_basic(_auth_check)
     def change_full_name(user_id, full_name):
         with Db() as db:
             change_self = _permissions_check(db, request.auth[0], user_id)
@@ -160,7 +170,7 @@ def load_wsgi_endpoints(app: Bottle):
             }
 
     @app.get("/change_password/<user_id>/<password>")
-    @auth_basic(auth_check)
+    @auth_basic(_auth_check)
     def change_password(user_id, password):
         with Db() as db:
             change_self = _permissions_check(db, request.auth[0], user_id)
@@ -170,7 +180,7 @@ def load_wsgi_endpoints(app: Bottle):
             if response is None:
                 abort(400, f"No user found with id={user_id}")
             username = db.get_username_from_id(user_id)
-        delete_from_password_cache(username)
+        _delete_from_password_cache(username)
         if change_self:
             return template("logout.tpl", {
                 "title": "Password successfully changed",
@@ -187,13 +197,13 @@ def load_wsgi_endpoints(app: Bottle):
     @view("error_401.tpl")
     def invalid_user(*args):
         if request.auth is not None:
-            delete_from_password_cache(request.auth[0])
+            _delete_from_password_cache(request.auth[0])
 
 
 def _get_user(db: Db, username: str):
     current_user = db.get_user_from_username(username)
     if current_user is None:
-        delete_from_password_cache(username)
+        _delete_from_password_cache(username)
         abort(401)
     return current_user
 
@@ -213,18 +223,18 @@ def _permissions_check(db, username: str, user_id: Optional[int]=None, allow_cha
     return str(current_user["id"]) == user_id
 
 
-def password_check(password, password_hash):
+def _password_check(password, password_hash):
     return password_hash is not None and bcrypt.checkpw(password.encode("utf-8"), password_hash)
 
 
-def auth_check(username, password):
-    if username not in password_hash_cache or not password_check(password, password_hash_cache[username]):
+def _auth_check(username, password):
+    if username not in password_hash_cache or not _password_check(password, password_hash_cache[username]):
         with Db(auto_commit=False) as db:
             password_hash_cache[username] = db.get_password_hash_for_username(username)
-    return password_check(password, password_hash_cache[username])
+    return _password_check(password, password_hash_cache[username])
 
 
-def delete_from_password_cache(username):
+def _delete_from_password_cache(username):
     if username in password_hash_cache:
         del password_hash_cache[username]
 

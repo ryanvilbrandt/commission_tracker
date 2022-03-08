@@ -5,6 +5,11 @@ from configparser import RawConfigParser
 from logging.handlers import TimedRotatingFileHandler
 from shutil import copyfile
 
+import gevent
+from geventwebsocket import WebSocketError
+
+websocket_list = []
+
 
 # Taken from http://www.electricmonk.nl/log/2011/08/14/redirect-stdout-and-stderr-to-a-logger-in-python/
 class StreamToLogger(object):
@@ -68,3 +73,43 @@ def ordinal(num: str):
 
 def str_to_bool(s):
     return s and str(s).lower()[0] in ["t", "1", "y"]
+
+
+def websocket_loop(ws):
+    # TODO Figure out why this stops processing of the main loop when sleep() is called
+    global websocket_list
+    print("Opening Websocket {}".format(ws), flush=True)
+    websocket_list.append(ws)
+    try:
+        while True:
+            # Checking if websocket has been closed by the client
+            with gevent.Timeout(1.0, False):
+                ws.receive()
+            if ws.closed:
+                print("WebSocket was closed by the client: {}".format(ws), flush=True)
+                break
+    except Exception as e:
+        print("Error in WebSocket loop: {}".format(e), flush=True)
+    finally:
+        if not ws.closed:
+            print("Closing WebSocket: {}".format(ws), flush=True)
+            ws.close()
+        try:
+            websocket_list.remove(ws)
+        except ValueError as e:
+            print(e, ws)
+
+
+def send_to_websockets(payload):
+    global websocket_list
+    print(websocket_list, flush=True)
+    for ws in websocket_list[:]:
+        try:
+            print(f"Sending payload to {ws}", flush=True)
+            ws.send(payload)
+        except WebSocketError:
+            print(f"Failed to send message to {ws}. Removing from list", flush=True)
+            websocket_list.remove(ws)
+        except Exception as e:
+            print(f"Error when sending message to {ws}. {e}", flush=True)
+            websocket_list.remove(ws)

@@ -1,7 +1,12 @@
 import {ajax_call} from "./utils.js";
+import {ws_init, ws_load, ws_close} from "./mywebsocket.js";
+
+let refresh_button = null;
 
 export function init() {
-    document.querySelector("#refresh_button").onclick = function() {
+    refresh_button = document.querySelector("#refresh_button");
+    refresh_button.onclick = function() {
+        refresh_button.disabled = true;
         // document.querySelector("#commissions_container").innerHTML = "";
         ajax_call("/fetch_commissions", fetch_commissions_callback)
     }
@@ -9,10 +14,25 @@ export function init() {
     document.querySelectorAll(".change_user_full_name").forEach(e => e.onclick = click_change_full_name);
     document.querySelectorAll(".change_user_password").forEach(e => e.onclick = click_change_password);
     document.querySelectorAll(".delete_user").forEach(e => e.onclick = click_delete_user);
+
+    ws_init("/commissions_websocket", handle_websocket);
+    ws_load();
+
+    window.addEventListener("beforeunload", event => {
+        console.log("Closing websocket");
+        ws_close();
+    });
 }
 
 function fetch_commissions_callback(xhttp) {
     document.querySelector("#commissions_container").innerHTML = xhttp.responseText;
+    refresh_button.disabled = false;
+}
+
+function handle_websocket(msg) {
+    refresh_button.disabled = true;
+    console.log(msg);
+    ajax_call("/fetch_commissions", fetch_commissions_callback);
 }
 
 function change_user_property(event, property) {
