@@ -59,7 +59,9 @@ def load_wsgi_endpoints(app: Bottle):
     def fetch_commissions(opened_details):
         with Db() as db:
             current_user = db.get_user_from_username(request.auth[0])
-            commissions = _fetch_commissions(db, current_user, opened_details.split(","))
+            commissions = _fetch_commissions(
+                db, current_user, [] if opened_details == "_" else opened_details.split(",")
+            )
         return {"commissions": commissions}
 
     @app.get('/commissions_websocket', apply=[websocket])
@@ -243,15 +245,24 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
     my_commissions = []
     available_commissions = []
     other_commissions = []
-    commissions = list(db.get_all_commissions_with_users())
-    for commission in commissions:
+    for commission in db.get_all_commissions_with_users():
+        # Modify data
         if str(commission["id"]) in opened_commissions:
             commission["open"] = True
+        if commission["assigned_to"] == -1:
+            commission["assigned_string"] = "Unassigned"
+        else:
+            commission["assigned_string"] = "Assigned to {}".format(commission["full_name"])
+        commission["reference_images"] = commission["reference_images"].split(", ")
+        # Assign to queue
         if commission["assigned_to"] == current_user["id"]:
+            commission["claimable"] = False
             my_commissions.append(commission)
         elif commission["assigned_to"] == -1 and commission["allow_any_artist"]:  # Unassigned and claimable
+            commission["claimable"] = True
             available_commissions.append(commission)
         else:
+            commission["claimable"] = True
             other_commissions.append(commission)
     return {
         "my_commissions": my_commissions,

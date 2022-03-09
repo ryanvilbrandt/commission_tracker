@@ -17,7 +17,7 @@ export function ajax_call(url, func, params=null) {
                 if (this.status === 200) {
                     func(this);
                 } else {
-                    console.log("Ajax error: " + this.status + " / " + this.error());
+                    console.log("Ajax error: " + this.status + " / " + this.error);
                 }
                 break;
             default:

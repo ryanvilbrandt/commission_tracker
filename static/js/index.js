@@ -9,7 +9,8 @@ export function init() {
     refresh_button.onclick = function() {
         refresh_button.disabled = true;
         // document.querySelector("#commissions_container").innerHTML = "";
-        ajax_call(`/fetch_commissions/${opened_details.join(",")}`, fetch_commissions_callback)
+        let arg = opened_details.length === 0 ? "_" : opened_details.join(",");
+        ajax_call(`/fetch_commissions/${arg}`, fetch_commissions_callback)
     }
 
     document.querySelectorAll("details").forEach(e => e.ontoggle = open_details)
@@ -37,7 +38,8 @@ function fetch_commissions_callback(xhttp) {
 function handle_websocket(msg) {
     refresh_button.disabled = true;
     console.log(msg);
-    ajax_call(`/fetch_commissions/${opened_details.join(",")}`, fetch_commissions_callback);
+    let arg = opened_details.length === 0 ? "_" : opened_details.join(",");
+    ajax_call(`/fetch_commissions/${arg}`, fetch_commissions_callback);
 }
 
 function open_details(e) {

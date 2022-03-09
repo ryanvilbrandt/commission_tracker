@@ -1,9 +1,11 @@
 import logging
 import os
+import re
 import sys
 from configparser import RawConfigParser
 from logging.handlers import TimedRotatingFileHandler
 from shutil import copyfile
+from typing import List
 
 import gevent
 from geventwebsocket import WebSocketError
@@ -113,3 +115,11 @@ def send_to_websockets(payload):
         except Exception as e:
             print(f"Error when sending message to {ws}. {e}", flush=True)
             websocket_list.remove(ws)
+
+
+def add_hrefs_to_string(s: str) -> str:
+    return re.sub(r"(https?://[^\s'\",]+)", r'<a href="\1">\1</a>', s)
+
+
+def link_images(s: str) -> List[str]:
+    return [f'<a href="{image}">' for image in s.split(", ")]

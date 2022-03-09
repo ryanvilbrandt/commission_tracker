@@ -2,20 +2,16 @@ details {
   padding: 5px;
   border: 2px solid black;
   border-radius: 10px;
-  /*transition: max-height 0.2s ease-out;*/
-  /*animation: 1s fadeIn;*/
-  /*animation-fill-mode: forwards;*/
 }
 
 summary {
   cursor: pointer;
 }
 
-/*details[open] summary ~ * {*/
-/*  animation: sweep .5s ease-in-out;*/
-/*}*/
+#refresh_button {
+  font-size: 1rem;
+}
 
-/*@keyframes sweep {*/
-/*  0%    {opacity: 0; margin-left: -10px}*/
-/*  100%  {opacity: 1; margin-left: 0}*/
-/*}*/
+.claim_button, .accept_button, .reject_button, .invoiced_button, .paid_button, .finished_button {
+  font-size: 1.2rem;
+}
