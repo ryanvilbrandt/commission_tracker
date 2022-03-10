@@ -13,7 +13,7 @@ export function init() {
         ajax_call(`/fetch_commissions/${arg}`, fetch_commissions_callback)
     }
 
-    document.querySelectorAll("details").forEach(e => e.ontoggle = open_details)
+    apply_commission_hooks();
 
     document.querySelectorAll(".change_user_username").forEach(e => e.onclick = click_change_username);
     document.querySelectorAll(".change_user_full_name").forEach(e => e.onclick = click_change_full_name);
@@ -29,9 +29,19 @@ export function init() {
     });
 }
 
+function apply_commission_hooks() {
+    document.querySelectorAll("details").forEach(e => e.ontoggle = open_details);
+    document.querySelectorAll(".claim_button").forEach(e => e.onclick = claim);
+    document.querySelectorAll(".accept_button").forEach(e => e.onclick = accept);
+    document.querySelectorAll(".reject_button").forEach(e => e.onclick = reject);
+    document.querySelectorAll(".invoiced_button").forEach(e => e.onclick = invoiced);
+    document.querySelectorAll(".paid_button").forEach(e => e.onclick = paid);
+    document.querySelectorAll(".finished_button").forEach(e => e.onclick = finished);
+}
+
 function fetch_commissions_callback(xhttp) {
     document.querySelector("#commissions_container").innerHTML = xhttp.responseText;
-    document.querySelectorAll("details").forEach(e => e.ontoggle = open_details)
+    apply_commission_hooks();
     refresh_button.disabled = false;
 }
 
@@ -90,4 +100,32 @@ function click_delete_user(event) {
     if (!confirmation) return;
     let user_id = event.target.attributes.user_id.value;
     window.location.href = `/delete_user/${user_id}`;
+}
+
+function claim(event) {
+    ajax_call(`/commission_action/claim/${event.target.attributes["commission_id"].value}`, callback);
+}
+
+function accept(event) {
+    ajax_call(`/commission_action/accept/${event.target.attributes["commission_id"].value}`, callback);
+}
+
+function reject(event) {
+    ajax_call(`/commission_action/reject/${event.target.attributes["commission_id"].value}`, callback);
+}
+
+function invoiced(event) {
+    ajax_call(`/commission_action/invoiced/${event.target.attributes["commission_id"].value}`, callback);
+}
+
+function paid(event) {
+    ajax_call(`/commission_action/paid/${event.target.attributes["commission_id"].value}`, callback);
+}
+
+function finished(event) {
+    ajax_call(`/commission_action/finished/${event.target.attributes["commission_id"].value}`, callback);
+}
+
+function callback(xhttp) {
+    console.log(xhttp);
 }

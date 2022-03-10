@@ -86,29 +86,27 @@ def get_commissions_info_from_spreadsheet(sheet_range) -> List:
     return result
 
 
-def claim_commission(user_id: int, commission_id: int) -> Optional[dict]:
-    with Db() as db:
-        commission = db.get_commission_by_id(commission_id)
-        # The commission must not currently be assigned to anyone to allow a claim
-        if commission["assigned_to"] is not None:
-            print(f"A user (id={user_id}) tried to claim a commission that was already claimed. How??")
-            raise Exception(
-                f"You tried to claim a commission that was already claimed. Please tell Trick-Candle how."
-            )
-        # If the commission is exclusive and in the voided-queue, claim will give it back to the original
-        # requested artist
-        if not commission["allow_any_artist"] and commission["channel_name"] == "voided-queue":
-            name = commission["artist_choice"]
-            auto_accept = False
-        else:
-            # If the commission is limited to a specific artist, the claiming artist must be that artist
-            if not commission["allow_any_artist"] and commission["artist_choice_id"] != user_id:
-                return None
-            auto_accept = True
-        commission = db.assign_commission(name, message_id=commission_id)
-        if auto_accept:
-            commission = db.accept_commission(commission_id, accepted=True)
-        return commission
+def claim_commission(db: Db, user_id: int, commission_id: int) -> Optional[dict]:
+    # commission = db.get_commission_by_id(commission_id)
+    # The commission must not currently be assigned to anyone to allow a claim
+    # if commission["assigned_to"] != -1:
+    #     print(f"A user (id={user_id}) tried to claim a commission that was already claimed. How??")
+    #     raise Exception(
+    #         f"You tried to claim a commission that was already claimed. Please tell Trick-Candle how."
+    #     )
+    # # If the commission is exclusive and in the voided-queue, claim will give it back to the original
+    # # requested artist
+    # if not commission["allow_any_artist"] and commission["channel_name"] == "voided-queue":
+    #     name = commission["artist_choice"]
+    #     auto_accept = False
+    # else:
+    #     # If the commission is limited to a specific artist, the claiming artist must be that artist
+    #     if not commission["allow_any_artist"] and commission["artist_choice_id"] != user_id:
+    #         return None
+    #     auto_accept = True
+    db.assign_commission(commission_id, user_id)
+    # if auto_accept:
+    return db.accept_commission(commission_id, accepted=True)
 
 
 # @staticmethod
@@ -123,32 +121,25 @@ def claim_commission(user_id: int, commission_id: int) -> Optional[dict]:
 #     return commission
 
 
-def reject_commission(commission_id: int) -> bool:
-    with Db() as db:
-        db.assign_commission(None, message_id=commission_id)
-        commission = db.accept_commission(commission_id, accepted=False)
-        return commission
+def accept_commission(db: Db, commission_id: int) -> Optional[dict]:
+    return db.accept_commission(commission_id, accepted=True)
 
 
-def accept_commission(user_id: int, commission_id: int) -> Optional[dict]:
-    with Db() as db:
-        return db.accept_commission(commission_id, accepted=True)
+def reject_commission(db: Db, commission_id: int) -> bool:
+    db.assign_commission(commission_id, -1)
+    return db.accept_commission(commission_id, accepted=False)
 
 
-def invoice_commission(message_id: int) -> dict:
-    with Db() as db:
-        return db.invoice_commission(message_id)
+def invoice_commission(db: Db, commission_id: int) -> Optional[dict]:
+    return db.invoice_commission(commission_id)
 
 
-def pay_commission(message_id: int) -> dict:
-    with Db() as db:
-        return db.pay_commission(message_id)
+def pay_commission(db: Db, commission_id: int) -> Optional[dict]:
+    return db.pay_commission(commission_id)
 
 
-def finish_commission(message_id: int) -> dict:
-    with Db() as db:
-        db.finish_commission(message_id)
-        return db.hide_commission(message_id, hidden=True)
+def finish_commission(db: Db, commission_id: int) -> Optional[dict]:
+    return db.finish_commission(commission_id)
 
 
 if __name__ == "__main__":

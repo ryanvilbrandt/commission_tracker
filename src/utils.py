@@ -5,7 +5,7 @@ import sys
 from configparser import RawConfigParser
 from logging.handlers import TimedRotatingFileHandler
 from shutil import copyfile
-from typing import List
+from typing import List, Tuple
 
 import gevent
 from geventwebsocket import WebSocketError
@@ -123,3 +123,20 @@ def add_hrefs_to_string(s: str) -> str:
 
 def link_images(s: str) -> List[str]:
     return [f'<a href="{image}">' for image in s.split(", ")]
+
+
+def get_status(commission: dict) -> Tuple[str, str]:
+    if commission["finished"]:
+        return "E6E7E8", r"Finished! \o/"
+    elif commission["paid"]:
+        return "78B159", "Paid"
+    elif commission["invoiced"]:
+        return "FDCB58", "Invoiced"
+    elif commission["accepted"]:
+        return "F4900C", "Claimed"
+    elif commission["assigned_to"] != -1:
+        return "FFC0CB", "Not yet accepted"
+    elif commission["allow_any_artist"]:
+        return "55ACEE", "Claimable by Anyone"
+    else:
+        return "AA8ED6", f"Claimable Only by {commission['artist_choice']}"

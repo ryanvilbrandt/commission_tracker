@@ -6,7 +6,7 @@ import bcrypt
 from bottle_websocket import websocket
 
 from bottle import static_file, Bottle, view, auth_basic, request, abort, template
-from src import utils
+from src import utils, functions
 from src.db.db import Db
 
 START_TIME = None
@@ -72,7 +72,30 @@ def load_wsgi_endpoints(app: Bottle):
     @app.get("/send_to_websockets")
     @auth_basic(_auth_check)
     def send_to_websockets():
+        with Db() as db:
+            _permissions_check(db, request.auth[0])
         utils.send_to_websockets("refresh")
+
+    @app.get("/commission_action/<action>/<commission_id>")
+    @auth_basic(_auth_check)
+    def commission_action(action: str, commission_id: int):
+        with Db() as db:
+            if action == "claim":
+                current_user = db.get_user_from_username(request.auth[0])
+                functions.claim_commission(db, current_user["id"], commission_id)
+            elif action == "accept":
+                functions.accept_commission(db, commission_id)
+            elif action == "reject":
+                functions.reject_commission(db, commission_id)
+            elif action == "invoiced":
+                functions.invoice_commission(db, commission_id)
+            elif action == "paid":
+                functions.pay_commission(db, commission_id)
+            elif action == "finished":
+                functions.finish_commission(db, commission_id)
+            else:
+                abort(400, f"Unknown action: {action}")
+            utils.send_to_websockets("refresh")
 
     @app.post("/add_new_user")
     @view("redirect_to_main.tpl")
@@ -219,7 +242,7 @@ def _permissions_check(db, username: str, user_id: Optional[int]=None, allow_cha
     if allow_change_self and str(current_user["id"]) == user_id:
         return True
     if current_user["role"] == "user":
-        abort(403, "Sorry, only admins can edit users.")
+        abort(403, "Sorry, only admins can perform that action.")
     if current_user["role"] == "admin" and db.get_user_role_from_id(user_id) == "admin":
         abort(403, "Sorry, admins cannot edit other admins.")
     return str(current_user["id"]) == user_id
@@ -245,6 +268,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
     my_commissions = []
     available_commissions = []
     other_commissions = []
+    finished_commissions = []
     for commission in db.get_all_commissions_with_users():
         # Modify data
         if str(commission["id"]) in opened_commissions:
@@ -254,8 +278,12 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
         else:
             commission["assigned_string"] = "Assigned to {}".format(commission["full_name"])
         commission["reference_images"] = commission["reference_images"].split(", ")
+        commission["background_color"], commission["status"] = utils.get_status(commission)
         # Assign to queue
-        if commission["assigned_to"] == current_user["id"]:
+        if commission["finished"]:
+            commission["claimable"] = False
+            finished_commissions.append(commission)
+        elif commission["assigned_to"] == current_user["id"]:
             commission["claimable"] = False
             my_commissions.append(commission)
         elif commission["assigned_to"] == -1 and commission["allow_any_artist"]:  # Unassigned and claimable
@@ -267,5 +295,6 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
     return {
         "my_commissions": my_commissions,
         "available_commissions": available_commissions,
-        "other_commissions": other_commissions
+        "other_commissions": other_commissions,
+        "finished_commissions": finished_commissions,
     }

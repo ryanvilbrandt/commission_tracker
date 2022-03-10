@@ -6,3 +6,6 @@
 
 <h2>Commissions assigned to others:</h2>
 % include("commissions_div.tpl", commissions=commissions["other_commissions"], claimable=True)
+
+<h2>Finished commissions:</h2>
+% include("commissions_div.tpl", commissions=commissions["finished_commissions"], claimable=False)

@@ -5,19 +5,19 @@ export function ajax_call(url, func, params=null) {
             case 0:
                 break;
             case 1:
-                console.log("Ajax opened " + url);
+                console.debug("Ajax opened " + url);
                 break;
             case 2:
-                console.log("Ajax status/headers received " + this.status + " / " + this.getAllResponseHeaders());
+                console.debug("Ajax status/headers received " + this.status + " / " + this.getAllResponseHeaders());
                 break;
             case 3:
-                console.log("Ajax loading response text");
+                console.debug("Ajax loading response text");
                 break;
             case 4:
                 if (this.status === 200) {
                     func(this);
                 } else {
-                    console.log("Ajax error: " + this.status + " / " + this.error);
+                    console.error("Ajax error: " + this.status + " / " + this.error);
                 }
                 break;
             default:

@@ -231,10 +231,6 @@ class Db:
         sql = "UPDATE commissions SET accepted=? WHERE id=? RETURNING *;"
         return self._fetch_one(sql, [accepted, commission_id])
 
-    def hide_commission(self, commission_id: int, hidden):
-        sql = "UPDATE commissions SET hidden=? WHERE id=? RETURNING *;"
-        return self._fetch_one(sql, [hidden, commission_id])
-
     def invoice_commission(self, commission_id: int, invoiced=True):
         sql = "UPDATE commissions SET invoiced=? WHERE id=? RETURNING *;"
         return self._fetch_one(sql, [invoiced, commission_id])
