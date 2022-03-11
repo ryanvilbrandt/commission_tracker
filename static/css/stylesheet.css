@@ -1,10 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Courgette&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@500;900&display=swap');
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-image: url('/static/moroccan-flower-dark.png');
+}
+
+#content {
+  width: 80vw;
+  margin: auto;
+  background-color: white;
+  padding: 1rem;
+  box-shadow: black;
+}
+
+#header {
+  display: flex;
+  border-bottom: solid 5px;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+#header h1 {
+  font-family: 'Courgette', cursive;
+  line-height: 1.8rem;
+  margin-top: 0.25rem;
+  padding: 1rem;
+}
+
+#user-information {
+  display: block;
+  height: auto;
+  text-align: right;
+  flex-grow: 2;
+  padding-right: 1rem;
+}
+
+#user-information h2 {
+  font-family: 'Courgette', cursive;
+  margin-bottom: 0.25rem;
+}
+
+#commissions {
+  /*padding: 2rem;*/
+  width: 100%;
+}
+
+#commissions table {
+  width: 100%;
+}
+
+#commissions table td:first-child {
+  width: 20%;
+}
+
+#commissions table td:last-child {
+  width: 80%;
+}
+
+#my-commissions {
+  width: 100%;
+}
+
+#my-commissions details {
+  width: 100%;
+}
+
+#available-commissions {
+  width: 100%;
+}
+
+#available-commissions details {
+    width: 100%;
+}
+
+#other-commissions {
+  width: 100%;
+}
+
 details {
   padding: 5px;
   border: 2px solid black;
-  border-radius: 10px;
 }
 
 summary {
+  padding: 5px;
+  margin: -5px;
   cursor: pointer;
 }
 
