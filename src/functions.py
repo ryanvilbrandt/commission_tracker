@@ -1,33 +1,24 @@
 import os
 import sys
 from random import shuffle
+from time import sleep, ctime
 from typing import Optional, List
 
 from googleapiclient.discovery import build
 
 from src.db.db import Db
 
-GOOGLE_SHEETS_DEVELOPER_KEY = os.environ["GOOGLE_SHEETS_DEVELOPER_KEY"]
-SPREADSHEET_ID = os.environ["SPREADSHEET_ID"]
 
-
-def __init__():
-    with Db() as db:
-        db.check_version()
-
-
-def send_status_update(action_name: str, commission_id: id, user_name: str, channel_name: str):
-    print(
-        "Commission #{} has been {} by {} in channel {}".format(
-            commission_id,
-            action_name,
-            user_name,
-            channel_name
-        )
-    )
+def update_commissions_loop():
+    print("Starting update thread")
+    while True:
+        update_commissions_information()
+        sleep(10)
 
 
 def update_commissions_information(randomize=False):
+    print("")
+    print(ctime())
     rows = get_standard_commissions()
     if randomize:
         shuffle(rows)
@@ -45,6 +36,7 @@ def add_commission(db: Db, row: list) -> Optional[dict]:
     if commission is None:
         # Commission was already added to the table, so skip it
         return
+    print(f"Added commission... {commission}")
     # Assign the commission to someone based on artist_choice
     assigned_to = -1
     if not commission["artist_choice"].startswith("Any artist"):
@@ -77,10 +69,10 @@ def get_special_commissions():
 
 def get_commissions_info_from_spreadsheet(sheet_range) -> List:
     print("Loading Google Sheet of commission info...")
-    service = build('sheets', 'v4', developerKey=GOOGLE_SHEETS_DEVELOPER_KEY)
+    service = build('sheets', 'v4', developerKey=os.environ["GOOGLE_SHEETS_DEVELOPER_KEY"])
     # Call the Sheets API
     sheet = service.spreadsheets()
-    thing = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=sheet_range)
+    thing = sheet.values().get(spreadsheetId=os.environ["SPREADSHEET_ID"], range=sheet_range)
     result = thing.execute()["values"]
     print(f"Got {len(result)} results")
     return result
