@@ -1,6 +1,7 @@
 import sqlite3
+from collections import defaultdict
 from time import ctime
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 import bcrypt
 from bottle_websocket import websocket
@@ -28,6 +29,12 @@ def load_wsgi_endpoints(app: Bottle):
             current_user = _get_user(db, username)
             if current_user["role"] in ["god", "admin"]:
                 users = list(db.get_users())
+                # Count the number of commissions assigned to each user and add the total to the user dicts
+                user_commission_count = defaultdict(int)
+                for commission in db.get_all_commissions():
+                    user_commission_count[commission["assigned_to"]] += 1
+                for user in users:
+                    user["commission_count"] = user_commission_count[user["id"]]
             else:
                 users = []
             commissions = _fetch_commissions(db, current_user, [])
@@ -264,7 +271,7 @@ def _delete_from_password_cache(username):
         del password_hash_cache[username]
 
 
-def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]):
+def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]) -> Dict[str, List[dict]]:
     my_commissions = []
     available_commissions = []
     other_commissions = []

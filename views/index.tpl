@@ -38,13 +38,14 @@
         <th>Full Name</th>
         <th>Role</th>
         <th>Controls</th>
+        <th># of commissions assigned</th>
       </tr>
       % for user in users:
       <tr>
-        <td class="user_id" user_id="{{user['id']}}">{{user["id"]}}</td>
-        <td class="username" user_id="{{user['id']}}">{{user["username"]}}</td>
-        <td class="full_name" user_id="{{user['id']}}">{{user["full_name"]}}</td>
-        <td class="role" user_id="{{user['id']}}">{{user["role"].title()}}</td>
+        <td user_id="{{user['id']}}">{{user["id"]}}</td>
+        <td user_id="{{user['id']}}">{{user["username"]}}</td>
+        <td user_id="{{user['id']}}">{{user["full_name"]}}</td>
+        <td user_id="{{user['id']}}">{{user["role"].title()}}</td>
         <td>
           % if not user["disable_user_buttons"]:
           <button class="change_user_username" title="Change Username" user_id="{{user['id']}}">🇺</button>
@@ -53,6 +54,7 @@
           <button class="delete_user" title="Delete User" user_id="{{user['id']}}">❌</button>
           % end
         </td>
+        <td>{{user["commission_count"]}}</td>
       </tr>
       % end
     </table>
