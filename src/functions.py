@@ -12,7 +12,10 @@ from src.db.db import Db
 def update_commissions_loop():
     print("Starting update thread")
     while True:
-        update_commissions_information()
+        try:
+            update_commissions_information()
+        except Exception as e:
+            print(e)
         sleep(10)
 
 
@@ -78,6 +81,12 @@ def get_commissions_info_from_spreadsheet(sheet_range) -> List:
     result = thing.execute()["values"]
     print(f"Got {len(result)} results")
     return result
+
+
+def assign_commission(db: Db, commission_id: int, user_id: int) -> Optional[dict]:
+    db.finish_commission(commission_id, False)
+    db.accept_commission(commission_id, False)
+    return db.assign_commission(commission_id, user_id)
 
 
 def claim_commission(db: Db, user_id: int, commission_id: int) -> Optional[dict]:

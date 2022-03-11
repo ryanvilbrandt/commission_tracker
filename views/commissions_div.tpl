@@ -42,21 +42,35 @@
         % if commission["notes"]:
         <p><b>Additional notes</b><br>{{ commission["notes"] }}</p>
         % end
-            <b>Assigned to:</b> {{ commission["full_name"] }}<br>
-            <b>Artist choice:</b> {{ commission["artist_choice"] }}<br>
-            % if commission["if_queue_is_full"]:
-            <b>If queue is full:</b> {{ commission["if_queue_is_full"] }}<br>
+        <b>Assigned to:</b> {{ commission["full_name"] }}<br>
+        <b>Artist choice:</b> {{ commission["artist_choice"] }}<br>
+        % if commission["if_queue_is_full"]:
+        <b>If queue is full:</b> {{ commission["if_queue_is_full"] }}<br>
+        % end
+        % if commission["twitch"]:
+        <b>Twitch:</b> {{ commission["twitch"] }}<br>
+        % end
+        % if commission["twitter"]:
+        <b>Twitter:</b> {{ commission["twitter"] }}<br>
+        % end
+        % if commission["discord"]:
+        <b>Discord:</b> {{ commission["discord"] }}<br>
+        % end
+        <b>Email:</b> {{ commission['email'] }}
+        % if current_user_role != "user":
+        <p>
+            <label for="assign_users_dropdown_{{ commission['id'] }}">Assign to a user:</label>
+            <select name="assign_users" id="assign_users_dropdown_{{ commission['id'] }}">
+                <option value="-1">Unassigned</option>
+            % for user in users:
+                % if user["role"] == "user":
+                <option value="{{ user["id"] }}">{{ user["full_name"] }}</option>
+                % end
             % end
-            % if commission["twitch"]:
-            <b>Twitch:</b> {{ commission["twitch"] }}<br>
-            % end
-            % if commission["twitter"]:
-            <b>Twitter:</b> {{ commission["twitter"] }}<br>
-            % end
-            % if commission["discord"]:
-            <b>Discord:</b> {{ commission["discord"] }}<br>
-            % end
-            <b>Email:</b> {{ commission['email'] }}
+            </select>
+            <button class="assign_to_user_button" commission_id="{{ commission['id'] }}">Assign</button>
+        </p>
+        % end
     </details>
 </td>
 </tr>

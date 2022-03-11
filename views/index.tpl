@@ -19,7 +19,7 @@
     <!-- <button id="refresh_button">🔄 Refresh commissions</button> -->
 
     <div id="commissions">
-        % include("commissions.tpl", commissions=commissions, current_user=current_user)
+        % include("commissions.tpl", commissions=commissions, current_user=current_user, users=users)
     </div>
 
     % if current_user["role"] != "user":

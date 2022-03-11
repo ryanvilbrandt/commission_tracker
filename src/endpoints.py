@@ -65,11 +65,12 @@ def load_wsgi_endpoints(app: Bottle):
     @auth_basic(_auth_check)
     def fetch_commissions(opened_details):
         with Db() as db:
+            users = list(db.get_users())
             current_user = db.get_user_from_username(request.auth[0])
             commissions = _fetch_commissions(
                 db, current_user, [] if opened_details == "_" else opened_details.split(",")
             )
-        return {"current_user": current_user, "commissions": commissions}
+        return {"users": users, "current_user": current_user, "commissions": commissions}
 
     @app.get('/commissions_websocket', apply=[websocket])
     @auth_basic(_auth_check)
@@ -102,6 +103,14 @@ def load_wsgi_endpoints(app: Bottle):
                 functions.finish_commission(db, commission_id)
             else:
                 abort(400, f"Unknown action: {action}")
+            utils.send_to_websockets("refresh")
+
+    @app.get("/assign_commission/<commission_id>/<user_id>")
+    @auth_basic(_auth_check)
+    def assign_commission(commission_id: int, user_id: int):
+        with Db() as db:
+            _permissions_check(db, request.auth[0])
+            functions.assign_commission(db, commission_id, user_id)
             utils.send_to_websockets("refresh")
 
     @app.post("/add_new_user")

@@ -38,6 +38,7 @@ function apply_commission_hooks() {
     document.querySelectorAll(".invoiced_button").forEach(e => e.onclick = invoiced);
     document.querySelectorAll(".paid_button").forEach(e => e.onclick = paid);
     document.querySelectorAll(".finished_button").forEach(e => e.onclick = finished);
+    document.querySelectorAll(".assign_to_user_button").forEach(e => e.onclick = click_assign);
 }
 
 function fetch_commissions_callback(xhttp) {
@@ -66,7 +67,6 @@ function open_details(e) {
             opened_details.splice(index, 1);
         }
     }
-    console.log(opened_details);
 }
 
 function force_update() {
@@ -126,6 +126,12 @@ function paid(event) {
 
 function finished(event) {
     ajax_call(`/commission_action/finished/${event.target.attributes["commission_id"].value}`, callback);
+}
+
+function click_assign(event) {
+    let commission_id = event.target.attributes["commission_id"].value;
+    let user_id = document.querySelector(`#assign_users_dropdown_${commission_id}`).value;
+    ajax_call(`/assign_commission/${commission_id}/${user_id}`, callback);
 }
 
 function callback(xhttp) {
