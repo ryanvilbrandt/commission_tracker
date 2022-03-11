@@ -129,13 +129,13 @@ def get_status(commission: dict) -> Tuple[str, str]:
     if commission["finished"]:
         return "E6E7E8", r"Finished! \o/"
     elif commission["paid"]:
-        return "78B159", "Paid"
+        return "78B159", f"{commission['full_name']} / Paid"
     elif commission["invoiced"]:
-        return "FDCB58", "Invoiced"
+        return "FDCB58", f"{commission['full_name']} / Invoiced"
     elif commission["accepted"]:
-        return "F4900C", "Claimed"
+        return "F4900C", f"{commission['full_name']} / Accepted"
     elif commission["assigned_to"] != -1:
-        return "FFC0CB", "Not yet accepted"
+        return "FFC0CB", f"{commission['full_name']} / Not yet accepted"
     elif commission["allow_any_artist"]:
         return "55ACEE", "Claimable by Anyone"
     else:

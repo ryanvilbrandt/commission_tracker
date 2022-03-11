@@ -62,7 +62,7 @@ def load_wsgi_endpoints(app: Bottle):
             commissions = _fetch_commissions(
                 db, current_user, [] if opened_details == "_" else opened_details.split(",")
             )
-        return {"commissions": commissions}
+        return {"current_user": current_user, "commissions": commissions}
 
     @app.get('/commissions_websocket', apply=[websocket])
     @auth_basic(_auth_check)
@@ -281,16 +281,12 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
         commission["background_color"], commission["status"] = utils.get_status(commission)
         # Assign to queue
         if commission["finished"]:
-            commission["claimable"] = False
             finished_commissions.append(commission)
         elif commission["assigned_to"] == current_user["id"]:
-            commission["claimable"] = False
             my_commissions.append(commission)
         elif commission["assigned_to"] == -1 and commission["allow_any_artist"]:  # Unassigned and claimable
-            commission["claimable"] = True
             available_commissions.append(commission)
         else:
-            commission["claimable"] = True
             other_commissions.append(commission)
     return {
         "my_commissions": my_commissions,
