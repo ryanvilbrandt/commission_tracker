@@ -1,19 +1,13 @@
-<div id="commissions">
-    <div id="my-commissions">
-        <h2>Commissions assigned to me:</h2>
-        % include("commissions_div.tpl", commissions=commissions["my_commissions"], claimable=False)
-    </div>
+<table>
+    <tr><th colspan="2">Commissions assigned to me:</th></tr>
+    % include("commissions_div.tpl", commissions=commissions["my_commissions"], claimable=False)
 
-    <div id="available-commissions">
-        <h2>Available commissions:</h2>
-        % include("commissions_div.tpl", commissions=commissions["available_commissions"], claimable=True)
-    </div>
+    <tr><th colspan="2">Available commissions:</th></tr>
+    % include("commissions_div.tpl", commissions=commissions["available_commissions"], claimable=True)
 
-    <div id="other-commissions">
-        <h2>Commissions assigned to others:</h2>
-        % include("commissions_div.tpl", commissions=commissions["other_commissions"], claimable=True)
+    <tr><th colspan="2">Commissions assigned to others:</th></tr>
+    % include("commissions_div.tpl", commissions=commissions["other_commissions"], claimable=True)
 
-        <h2>Finished commissions:</h2>
-        % include("commissions_div.tpl", commissions=commissions["finished_commissions"], claimable=False)
-    </div>
-</div>
+    <tr><th colspan="2">Finished commissions:</th></tr>
+    % include("commissions_div.tpl", commissions=commissions["finished_commissions"], claimable=False)
+</table>

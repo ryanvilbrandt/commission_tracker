@@ -5,16 +5,17 @@ let refresh_button = null;
 let opened_details = [];
 
 export function init() {
-    refresh_button = document.querySelector("#refresh_button");
-    refresh_button.onclick = function() {
-        refresh_button.disabled = true;
-        // document.querySelector("#commissions_container").innerHTML = "";
-        let arg = opened_details.length === 0 ? "_" : opened_details.join(",");
-        ajax_call(`/fetch_commissions/${arg}`, fetch_commissions_callback)
-    }
+    // refresh_button = document.querySelector("#refresh_button");
+    // refresh_button.onclick = function() {
+    //     refresh_button.disabled = true;
+    //     // document.querySelector("#commissions_container").innerHTML = "";
+    //     let arg = opened_details.length === 0 ? "_" : opened_details.join(",");
+    //     ajax_call(`/fetch_commissions/${arg}`, fetch_commissions_callback)
+    // }
 
     apply_commission_hooks();
 
+    document.querySelectorAll("#force_update_button").forEach(e => e.onclick = force_update)
     document.querySelectorAll(".change_user_username").forEach(e => e.onclick = click_change_username);
     document.querySelectorAll(".change_user_full_name").forEach(e => e.onclick = click_change_full_name);
     document.querySelectorAll(".change_user_password").forEach(e => e.onclick = click_change_password);
@@ -40,13 +41,13 @@ function apply_commission_hooks() {
 }
 
 function fetch_commissions_callback(xhttp) {
-    document.querySelector("#commissions_container").innerHTML = xhttp.responseText;
+    document.querySelector("#commissions").innerHTML = xhttp.responseText;
     apply_commission_hooks();
-    refresh_button.disabled = false;
+    // refresh_button.disabled = false;
 }
 
 function handle_websocket(msg) {
-    refresh_button.disabled = true;
+    // refresh_button.disabled = true;
     console.log(msg);
     let arg = opened_details.length === 0 ? "_" : opened_details.join(",");
     ajax_call(`/fetch_commissions/${arg}`, fetch_commissions_callback);
@@ -55,20 +56,21 @@ function handle_websocket(msg) {
 function open_details(e) {
     let details = e.target;
     let commission_id = details.attributes["commission_id"].value;
-    console.log(details);
     if (details.open) {
         if (!opened_details.includes(commission_id)) {
-            console.log("Push");
             opened_details.push(commission_id);
         }
     } else {
         if (opened_details.includes(commission_id)) {
-            console.log("Pop");
             let index = opened_details.indexOf(commission_id);
             opened_details.splice(index, 1);
         }
     }
     console.log(opened_details);
+}
+
+function force_update() {
+    ajax_call(`/send_to_websockets`, callback);
 }
 
 function change_user_property(event, property) {

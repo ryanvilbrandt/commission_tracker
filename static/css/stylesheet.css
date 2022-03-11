@@ -43,6 +43,7 @@ body {
 
 #commissions {
   /*padding: 2rem;*/
+  margin-top: 1em;
   width: 100%;
 }
 
@@ -50,33 +51,38 @@ body {
   width: 100%;
 }
 
+#commissions table th {
+  text-align: left;
+  font-size: 1.25rem;
+}
+
 #commissions table td:first-child {
-  width: 20%;
+  width: 12rem;
 }
 
 #commissions table td:last-child {
-  width: 80%;
+  width: auto;
 }
 
-#my-commissions {
-  width: 100%;
-}
+/*#my-commissions {*/
+/*  width: 100%;*/
+/*}*/
 
-#my-commissions details {
-  width: 100%;
-}
+/*#my-commissions details {*/
+/*  width: 100%;*/
+/*}*/
 
-#available-commissions {
-  width: 100%;
-}
+/*#available-commissions {*/
+/*  width: 100%;*/
+/*}*/
 
-#available-commissions details {
-    width: 100%;
-}
+/*#available-commissions details {*/
+/*    width: 100%;*/
+/*}*/
 
-#other-commissions {
-  width: 100%;
-}
+/*#other-commissions {*/
+/*  width: 100%;*/
+/*}*/
 
 details {
   padding: 5px;
@@ -89,7 +95,7 @@ summary {
   cursor: pointer;
 }
 
-#refresh_button {
+#refresh_button, #force_update_button {
   font-size: 1rem;
 }
 

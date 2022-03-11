@@ -139,4 +139,4 @@ def get_status(commission: dict) -> Tuple[str, str]:
     elif commission["allow_any_artist"]:
         return "55ACEE", "Claimable by Anyone"
     else:
-        return "AA8ED6", f"Claimable Only by {commission['artist_choice']}"
+        return "AA8ED6", f"Exclusive Request for {commission['artist_choice']}"

@@ -11,21 +11,23 @@
             </h2>
             % if current_user["role"] != "god":
             <button class="change_user_username" title="Change Username" user_id="{{current_user['id']}}">🇺 Change Username</button>
-            <button class="change_user_full_name" title="Change Full Name" user_id="{{current_user['id']}}">🇫 Change Display Name</button>
             <button class="change_user_password" title="Change Password" user_id="{{current_user['id']}}">🔒 Change Password</button>
             % end
         </div>
     </div>
 
-    <button id="refresh_button">🔄 Refresh commissions</button>
+    <!-- <button id="refresh_button">🔄 Refresh commissions</button> -->
 
-    <div id="commissions_container">
+    <div id="commissions">
         % include("commissions.tpl", commissions=commissions)
     </div>
 
     % if current_user["role"] != "user":
     <br>
     <hr>
+    <br>
+
+    <button id="force_update_button">⬆️ Force update all users</button>
 
     <h2>Users:</h2>
 
