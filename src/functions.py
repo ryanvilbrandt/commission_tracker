@@ -32,11 +32,13 @@ def add_commission(db: Db, row: list) -> Optional[dict]:
     del row[1]  # Delete TOS agreement
     if len(row) < 13:
         row.append("")
+    if db.get_commission_by_email(row[0], row[2]):
+        return
+    print(f"Adding commission... {row}")
     commission = db.add_commission(row)
     if commission is None:
         # Commission was already added to the table, so skip it
         return
-    print(f"Added commission... {commission}")
     # Assign the commission to someone based on artist_choice
     assigned_to = -1
     if not commission["artist_choice"].startswith("Any artist"):
