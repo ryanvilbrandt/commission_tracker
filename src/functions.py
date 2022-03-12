@@ -128,12 +128,12 @@ def reject_commission(db: Db, commission_id: int) -> bool:
     return db.accept_commission(commission_id, accepted=False)
 
 
-def invoice_commission(db: Db, commission_id: int) -> Optional[dict]:
-    return db.invoice_commission(commission_id)
+def invoice_commission(db: Db, commission_id: int, invoiced: bool=True) -> Optional[dict]:
+    return db.invoice_commission(commission_id, invoiced=invoiced)
 
 
-def pay_commission(db: Db, commission_id: int) -> Optional[dict]:
-    return db.pay_commission(commission_id)
+def pay_commission(db: Db, commission_id: int, paid: bool=True) -> Optional[dict]:
+    return db.pay_commission(commission_id, paid=paid)
 
 
 def finish_commission(db: Db, commission_id: int) -> Optional[dict]:

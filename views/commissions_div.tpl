@@ -60,6 +60,7 @@
         % end
         <b>Email:</b> {{ commission['email'] }}
         % if current_user_role != "user":
+        <hr>
         <p>
             <label for="assign_users_dropdown_{{ commission['id'] }}">Assign to a user:</label>
             <select name="assign_users" id="assign_users_dropdown_{{ commission['id'] }}">
@@ -71,6 +72,12 @@
             % end
             </select>
             <button class="assign_to_user_button" commission_id="{{ commission['id'] }}">Assign</button>
+        </p>
+        <p>
+            % disabled = " disabled" if not commission["invoiced"] else ""
+            <button class="undo_invoiced_button" commission_id="{{ commission['id'] }}"{{ disabled }}>Undo "Mark as Invoiced"</button>
+            % disabled = " disabled" if not commission["paid"] else ""
+            <button class="undo_paid_button" commission_id="{{ commission['id'] }}"{{ disabled }}>Undo "Mark as Paid"</button>
         </p>
         % end
     </details>

@@ -100,7 +100,7 @@ def create_tables(cur):
 def add_unassigned_user(cur):
     sql = """
         INSERT INTO users(id, username, full_name, password_hash, role) 
-        VALUES (-1, 'unassigned', 'Unassigned', '?', 'system');
+        VALUES (-1, 'unassigned', 'Unassigned', ?, 'system');
     """
     pw = bcrypt.hashpw(os.environ["SERVICE_ACCOUNT_PASSWORD"].encode(), bcrypt.gensalt()) \
         if "SERVICE_ACCOUNT_PASSWORD" in os.environ else b""

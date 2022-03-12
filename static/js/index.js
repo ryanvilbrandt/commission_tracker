@@ -37,6 +37,8 @@ function apply_commission_hooks() {
     document.querySelectorAll(".paid_button").forEach(e => e.onclick = paid);
     document.querySelectorAll(".finished_button").forEach(e => e.onclick = finished);
     document.querySelectorAll(".assign_to_user_button").forEach(e => e.onclick = click_assign);
+    document.querySelectorAll(".undo_invoiced_button").forEach(e => e.onclick = click_undo_invoiced);
+    document.querySelectorAll(".undo_paid_button").forEach(e => e.onclick = click_undo_paid);
 }
 
 function apply_user_hooks() {
@@ -148,6 +150,14 @@ function click_assign(event) {
     let commission_id = event.target.attributes["commission_id"].value;
     let user_id = document.querySelector(`#assign_users_dropdown_${commission_id}`).value;
     ajax_call(`/assign_commission/${commission_id}/${user_id}`, callback);
+}
+
+function click_undo_invoiced(event) {
+    ajax_call(`/commission_action/undo_invoiced/${event.target.attributes["commission_id"].value}`, callback);
+}
+
+function click_undo_paid(event) {
+    ajax_call(`/commission_action/undo_paid/${event.target.attributes["commission_id"].value}`, callback);
 }
 
 function callback(xhttp) {

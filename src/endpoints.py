@@ -90,6 +90,10 @@ def load_wsgi_endpoints(app: Bottle):
                 functions.pay_commission(db, commission_id)
             elif action == "finished":
                 functions.finish_commission(db, commission_id)
+            elif action == "undo_invoiced":
+                functions.invoice_commission(db, commission_id, invoiced=False)
+            elif action == "undo_paid":
+                functions.pay_commission(db, commission_id, paid=False)
             else:
                 abort(400, f"Unknown action: {action}")
             utils.send_to_websockets("refresh")
