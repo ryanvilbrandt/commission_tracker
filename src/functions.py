@@ -1,22 +1,12 @@
 import os
 import sys
 from random import shuffle
-from time import sleep, ctime
+from time import ctime
 from typing import Optional, List
 
 from googleapiclient.discovery import build
 
 from src.db.db import Db
-
-
-def update_commissions_loop():
-    print("Starting update thread")
-    while True:
-        try:
-            update_commissions_information()
-        except Exception as e:
-            print(e)
-        sleep(10)
 
 
 def update_commissions_information(randomize=False):
@@ -25,10 +15,13 @@ def update_commissions_information(randomize=False):
     rows = get_standard_commissions()
     if randomize:
         shuffle(rows)
+    needs_update = False
     with Db() as db:
         for row in rows:
-            add_commission(db, row)
+            if add_commission(db, row):
+                needs_update = True
     print("Done processing new commissions")
+    return needs_update
 
 
 def add_commission(db: Db, row: list) -> Optional[dict]:
@@ -36,12 +29,12 @@ def add_commission(db: Db, row: list) -> Optional[dict]:
     if len(row) < 13:
         row.append("")
     if db.get_commission_by_email(row[0], row[2]):
-        return
+        return None
     print(f"Adding commission... {row}")
     commission = db.add_commission(row)
     if commission is None:
         # Commission was already added to the table, so skip it
-        return
+        return None
     # Assign the commission to someone based on artist_choice
     assigned_to = -1
     if not commission["artist_choice"].startswith("Any artist"):
@@ -56,8 +49,9 @@ def add_commission(db: Db, row: list) -> Optional[dict]:
         not commission.get("if_queue_is_full") or
         "any artist" in (commission.get("if_queue_is_full") or "").lower()
     )
-    db.set_allow_any_artist(commission["id"], allow_any_artist)
+    commission = db.set_allow_any_artist(commission["id"], allow_any_artist)
     db.conn.commit()
+    return commission
 
 
 def get_standard_commissions():
@@ -86,6 +80,7 @@ def get_commissions_info_from_spreadsheet(sheet_range) -> List:
 def assign_commission(db: Db, commission_id: int, user_id: int) -> Optional[dict]:
     db.finish_commission(commission_id, False)
     db.accept_commission(commission_id, False)
+    db.assign_commission(commission_id, -1)
     return db.assign_commission(commission_id, user_id)
 
 

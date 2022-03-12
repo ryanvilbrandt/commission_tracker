@@ -46,6 +46,7 @@ function on_websocket_error(error) {
     console.error(error);
     quiet_close();
     websocket_errors += 1;
+    console.debug(`Websocket errors: ${websocket_errors}`);
     if (websocket_errors >= max_websocket_errors) {
         let error_msg = document.getElementById("error-message");
         if (error_msg !== null) {

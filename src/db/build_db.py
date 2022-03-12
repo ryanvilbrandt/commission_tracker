@@ -1,6 +1,8 @@
 import os
 import sqlite3
 
+import bcrypt
+
 
 def open_db():
     os.makedirs("database_files", exist_ok=True)
@@ -98,9 +100,11 @@ def create_tables(cur):
 def add_unassigned_user(cur):
     sql = """
         INSERT INTO users(id, username, full_name, password_hash, role) 
-        VALUES (-1, 'unassigned', 'Unassigned', '', 'system');
+        VALUES (-1, 'unassigned', 'Unassigned', '?', 'system');
     """
-    cur.execute(sql)
+    pw = bcrypt.hashpw(os.environ["SERVICE_ACCOUNT_PASSWORD"].encode(), bcrypt.gensalt()) \
+        if "SERVICE_ACCOUNT_PASSWORD" in os.environ else b""
+    cur.execute(sql, [pw])
 
 
 def show_tables(cur):

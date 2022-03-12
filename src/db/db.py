@@ -137,13 +137,13 @@ class Db:
 
     def get_password_hash_for_username(self, username: str) -> Optional[str]:
         sql = """
-            SELECT password_hash FROM users WHERE username=? AND NOT role='system';
+            SELECT password_hash FROM users WHERE username=?;
         """
         return self._scalar(sql, [username])
 
     def get_user_from_username(self, username: str) -> Optional[dict]:
         sql = """
-            SELECT id, username, full_name, role FROM users WHERE username=? AND NOT role='system';
+            SELECT id, username, full_name, role FROM users WHERE username=?;
         """
         return self._fetch_one(sql, [username])
 
