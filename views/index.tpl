@@ -56,6 +56,8 @@
 </div>
 % end
 
+<div id="error-message" hidden></div>
+
 <script type="module">
     import { init } from "/static/js/index.js";
     init("{{ current_user["role"] }}");

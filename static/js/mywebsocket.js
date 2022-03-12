@@ -50,7 +50,7 @@ function on_websocket_error(error) {
         console.error("Hit max websocket connection attempts. Giving up.");
         let error_msg = document.getElementById("error-message");
         if (error_msg !== null) {
-            error_msg.innerText = `Failed to connect to WebSocket after ${websocket_errors} attempts. ` +
+            error_msg.innerText = `Failed to connect to WebSocket after ${websocket_errors} attempts.\n` +
                 `Please reload page to try again.`;
             error_msg.hidden = false;
         }

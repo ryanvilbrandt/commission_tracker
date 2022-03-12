@@ -102,3 +102,16 @@ summary {
 .claim_button, .accept_button, .reject_button, .invoiced_button, .paid_button, .finished_button {
   font-size: 1.2rem;
 }
+
+#error-message {
+    color: black;
+    font-size: 200%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    background-color: white;
+    border: 3px solid red;
+    box-shadow: 10px 10px 0 red;
+}
