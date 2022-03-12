@@ -3,8 +3,10 @@ import {ws_init, ws_load, ws_close} from "./mywebsocket.js";
 
 let refresh_button = null;
 let opened_details = [];
+let current_user_role = null;
 
-export function init() {
+export function init(v_current_user_role) {
+    current_user_role = v_current_user_role;
     // refresh_button = document.querySelector("#refresh_button");
     // refresh_button.onclick = function() {
     //     refresh_button.disabled = true;
@@ -14,12 +16,8 @@ export function init() {
     // }
 
     apply_commission_hooks();
-
-    document.querySelectorAll("#force_update_button").forEach(e => e.onclick = force_update)
-    document.querySelectorAll(".change_user_username").forEach(e => e.onclick = click_change_username);
-    document.querySelectorAll(".change_user_full_name").forEach(e => e.onclick = click_change_full_name);
-    document.querySelectorAll(".change_user_password").forEach(e => e.onclick = click_change_password);
-    document.querySelectorAll(".delete_user").forEach(e => e.onclick = click_delete_user);
+    document.querySelectorAll("#force_update_button").forEach(e => e.onclick = force_update);
+    apply_user_hooks();
 
     ws_init("/commissions_websocket", handle_websocket);
     ws_load();
@@ -41,6 +39,13 @@ function apply_commission_hooks() {
     document.querySelectorAll(".assign_to_user_button").forEach(e => e.onclick = click_assign);
 }
 
+function apply_user_hooks() {
+    document.querySelectorAll(".change_user_username").forEach(e => e.onclick = click_change_username);
+    document.querySelectorAll(".change_user_full_name").forEach(e => e.onclick = click_change_full_name);
+    document.querySelectorAll(".change_user_password").forEach(e => e.onclick = click_change_password);
+    document.querySelectorAll(".delete_user").forEach(e => e.onclick = click_delete_user);
+}
+
 function fetch_commissions_callback(xhttp) {
     document.querySelector("#commissions").innerHTML = xhttp.responseText;
     apply_commission_hooks();
@@ -55,6 +60,14 @@ function handle_websocket(msg) {
     }
     let arg = opened_details.length === 0 ? "_" : opened_details.join(",");
     ajax_call(`/fetch_commissions/${arg}`, fetch_commissions_callback);
+    if (current_user_role !== "user") {
+        ajax_call(`/fetch_users`, fetch_users_callback);
+    }
+}
+
+function fetch_users_callback(xhttp) {
+    document.querySelector("#users").innerHTML = xhttp.responseText;
+    apply_user_hooks();
 }
 
 function open_details(e) {

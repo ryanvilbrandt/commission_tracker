@@ -27,29 +27,8 @@ def load_wsgi_endpoints(app: Bottle):
         username = request.auth[0]
         with Db(auto_commit=False) as db:
             current_user = _get_user(db, username)
-            if current_user["role"] in ["god", "admin"]:
-                users = list(db.get_users())
-                # Count the number of commissions assigned to each user and add the total to the user dicts
-                user_commission_count = defaultdict(int)
-                for commission in db.get_all_commissions():
-                    user_commission_count[commission["assigned_to"]] += 1
-                for user in users:
-                    user["commission_count"] = user_commission_count[user["id"]]
-            else:
-                users = []
+            users = _get_users(db, current_user)
             commissions = _fetch_commissions(db, current_user, [])
-        if users:
-            # Sort users by role
-            users = sorted(users, key=lambda u: ({"god": 0, "admin": 1, "user": 2}[u["role"]], u["id"]))
-            # Determine if user buttons should be enabled or disabled for each user
-            for user in users:
-                if user["role"] == "god":
-                    disable_user_buttons = True
-                elif user["role"] == "admin":
-                    disable_user_buttons = current_user["role"] != "god"
-                else:
-                    disable_user_buttons = False
-                user["disable_user_buttons"] = disable_user_buttons
         return {"title": "Home page!", "users": users, "current_user": current_user, "commissions": commissions}
 
     @app.get("/static/<path:path>", name="static")
@@ -65,12 +44,21 @@ def load_wsgi_endpoints(app: Bottle):
     @auth_basic(_auth_check)
     def fetch_commissions(opened_details):
         with Db() as db:
-            users = list(db.get_users())
             current_user = db.get_user_from_username(request.auth[0])
+            users = _get_users(db, current_user)
             commissions = _fetch_commissions(
                 db, current_user, [] if opened_details == "_" else opened_details.split(",")
             )
         return {"users": users, "current_user": current_user, "commissions": commissions}
+
+    @app.get("/fetch_users")
+    @view("users.tpl")
+    @auth_basic(_auth_check)
+    def fetch_users():
+        with Db() as db:
+            current_user = db.get_user_from_username(request.auth[0])
+            users = _get_users(db, current_user)
+        return {"users": users}
 
     @app.get('/commissions_websocket', apply=[websocket])
     @auth_basic(_auth_check)
@@ -279,6 +267,32 @@ def _auth_check(username, password):
 def _delete_from_password_cache(username):
     if username in password_hash_cache:
         del password_hash_cache[username]
+
+
+def _get_users(db: Db, current_user: dict) -> List[dict]:
+    if current_user["role"] in ["god", "admin"]:
+        users = list(db.get_users())
+        # Count the number of commissions assigned to each user and add the total to the user dicts
+        user_commission_count = defaultdict(int)
+        for commission in db.get_all_commissions():
+            user_commission_count[commission["assigned_to"]] += 1
+        for user in users:
+            user["commission_count"] = user_commission_count[user["id"]]
+    else:
+        users = []
+    if users:
+        # Sort users by role
+        users = sorted(users, key=lambda u: ({"god": 0, "admin": 1, "user": 2}[u["role"]], u["id"]))
+        # Determine if user buttons should be enabled or disabled for each user
+        for user in users:
+            if user["role"] == "god":
+                disable_user_buttons = True
+            elif user["role"] == "admin":
+                disable_user_buttons = current_user["role"] != "god"
+            else:
+                disable_user_buttons = False
+            user["disable_user_buttons"] = disable_user_buttons
+    return users
 
 
 def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]) -> Dict[str, List[dict]]:
