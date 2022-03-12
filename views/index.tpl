@@ -18,6 +18,10 @@
 
     <!-- <button id="refresh_button">🔄 Refresh commissions</button> -->
 
+    <br>
+    <a href="https://docs.google.com/document/d/1_sIwTkwdsqiDOvPOZrfyQfun3is4GXSKKzli3N1mRis/view">Stream Reference Doc</a><br>
+    <a href="https://docs.google.com/document/d/1_sIwTkwdsqiDOvPOZrfyQfun3is4GXSKKzli3N1mRis/view#heading=h.k65jijr8gif7">Stream Commission Tracker Quick Guide</a>
+
     <div id="commissions">
         % include("commissions.tpl", commissions=commissions, current_user=current_user, users=users)
     </div>
