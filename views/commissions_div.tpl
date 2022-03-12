@@ -5,27 +5,27 @@
 <tr>
 <td style="vertical-align: top;">
     % if queue_name != "my_commissions":
-        <button class="claim_button" title="Claim" commission_id="{{ commission['id'] }}">✋</button>
+        <button class="claim_button" title="Claim commission" commission_id="{{ commission['id'] }}">✋</button>
     % end
     % if not queue_name == "finished_commissions":
         % if queue_name == "my_commissions":
             % if not commission["accepted"]:
-                <button class="accept_button" title="Accept" commission_id="{{ commission['id'] }}">✅</button>
+                <button class="accept_button" title="Accept commission" commission_id="{{ commission['id'] }}">✅</button>
             % end
-            <button class="reject_button" title="Reject" commission_id="{{ commission['id'] }}">❌</button>
+            <button class="reject_button" title="Reject commission" commission_id="{{ commission['id'] }}">❌</button>
         % end
         % if queue_name == "other_commissions" and not commission["accepted"] and current_user_role != "user":
-            <button class="accept_button" title="Accept" commission_id="{{ commission['id'] }}">✅</button>
+            <button class="accept_button" title="Accept commission" commission_id="{{ commission['id'] }}">✅</button>
         % end
     % end
     % if queue_name == "my_commissions" or current_user_role != "user":
         % if not commission["invoiced"]:
-            <button class="invoiced_button" title="Invoiced" commission_id="{{ commission['id'] }}">📮</button>
+            <button class="invoiced_button" title="Mark as Invoiced" commission_id="{{ commission['id'] }}">📮</button>
         % elif not commission["paid"]:
-            <button class="paid_button" title="Paid" commission_id="{{ commission['id'] }}">💸</button>
+            <button class="paid_button" title="Mark as Paid" commission_id="{{ commission['id'] }}">💸</button>
         % end
         % if not commission["finished"]:
-            <button class="finished_button" title="Finished" commission_id="{{ commission['id'] }}">🎉</button>
+            <button class="finished_button" title="Mark as Finished" commission_id="{{ commission['id'] }}">🎉</button>
         % end
     % end
 </td>
