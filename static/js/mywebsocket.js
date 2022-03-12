@@ -28,7 +28,7 @@ function set_hooks() {
         ws.onclose = () => on_websocket_close();
     }
     ws.onmessage = (msg) => {
-        let error_msg = document.getElementById("error-message");
+        let error_msg = document.getElementById("websocket_error_overlay");
         if (error_msg !== null)
             error_msg.hidden = true;
         websocket_errors = 0;
@@ -48,7 +48,7 @@ function on_websocket_error(error) {
     quiet_close();
     if (websocket_errors >= max_websocket_errors) {
         console.error("Hit max websocket connection attempts. Giving up.");
-        let error_msg = document.getElementById("error-message");
+        let error_msg = document.getElementById("websocket_error_overlay");
         if (error_msg !== null) {
             error_msg.innerText = `Failed to connect to WebSocket after ${websocket_errors} attempts.\n` +
                 `Please reload page to try again.`;

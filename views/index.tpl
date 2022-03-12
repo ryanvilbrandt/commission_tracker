@@ -56,7 +56,9 @@
 </div>
 % end
 
-<div id="error-message" hidden></div>
+<div id="websocket_error_overlay" hidden></div>
+
+<div id="top_error_overlay"></div>
 
 <script type="module">
     import { init } from "/static/js/index.js";

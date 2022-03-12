@@ -103,7 +103,7 @@ summary {
   font-size: 1.2rem;
 }
 
-#error-message {
+#websocket_error_overlay {
     color: black;
     font-size: 200%;
     position: fixed;
@@ -114,4 +114,25 @@ summary {
     background-color: white;
     border: 3px solid red;
     box-shadow: 10px 10px 0 red;
+}
+
+#top_error_overlay {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    padding: 10px;
+}
+
+.top_error_message {
+    margin-bottom: 0.5rem;
+    background-color: red;
+    border: 2px solid black;
+    width: fit-content;
+    padding: 0.3rem 0.5rem 0.3rem 0.5rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.top_error_close {
+    cursor: pointer;
 }

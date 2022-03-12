@@ -151,5 +151,26 @@ function click_assign(event) {
 }
 
 function callback(xhttp) {
-    console.log(xhttp);
+    console.log(xhttp.status);
+    if (xhttp.status < 400) {
+        console.log(xhttp);
+    } else {
+        console.error(xhttp);
+        let msg = `(${xhttp.status}) ${xhttp.statusText} &lt;${xhttp.responseURL}&gt; `
+        document.querySelector("#top_error_overlay").appendChild(build_top_error(msg));
+        document.querySelectorAll(".top_error_close").forEach(e => e.onclick = close_error);
+    }
+}
+
+function build_top_error(msg) {
+    let error_bar = document.createElement("div");
+    error_bar.className = "top_error_message";
+    error_bar.innerHTML = `${msg} <span class="top_error_close">✖️</span>`;
+    return error_bar;
+}
+
+function close_error(e) {
+    let message = e.target.parentElement;
+    let overlay = message.parentElement;
+    overlay.removeChild(message);
 }

@@ -14,11 +14,12 @@ export function ajax_call(url, func, params=null) {
                 console.debug("Ajax loading response text");
                 break;
             case 4:
-                if (this.status === 200) {
-                    func(this);
-                } else {
-                    console.error("Ajax error: " + this.status + " / " + this.error);
-                }
+                func(this);
+                // if (this.status === 200) {
+                //     func(this);
+                // } else {
+                //     console.error("Ajax error: " + this.status + " / " + this.error);
+                // }
                 break;
             default:
         }
