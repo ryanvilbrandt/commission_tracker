@@ -18,7 +18,6 @@ body {
   display: flex;
   border-bottom: solid 5px;
   width: 100%;
-  margin-bottom: 2rem;
 }
 
 #header h1 {
@@ -42,8 +41,6 @@ body {
 }
 
 #commissions {
-  /*padding: 2rem;*/
-  margin-top: 1em;
   width: 100%;
 }
 
@@ -52,6 +49,7 @@ body {
 }
 
 #commissions table th {
+  padding-top: 1.5rem;
   text-align: left;
   font-size: 1.25rem;
 }
