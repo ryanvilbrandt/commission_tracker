@@ -126,12 +126,15 @@ def link_images(s: str) -> List[str]:
 
 
 def get_status(commission: dict) -> Tuple[str, str]:
-    if commission["finished"]:
-        return "E6E7E8", r"Finished! \o/"
+    if commission["invoiced"] and not commission["paid"]:
+        return "FDCB58", f"{commission['full_name']} / Invoiced"
+    elif commission["finished"]:
+        if not commission["invoiced"]:
+            return "FF0000", r"Not invoiced"
+        else:
+            return "E6E7E8", r"Finished! \o/"
     elif commission["paid"]:
         return "78B159", f"{commission['full_name']} / Paid"
-    elif commission["invoiced"]:
-        return "FDCB58", f"{commission['full_name']} / Invoiced"
     elif commission["accepted"]:
         return "F4900C", f"{commission['full_name']} / Accepted"
     elif commission["assigned_to"] != -1:

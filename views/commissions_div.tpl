@@ -4,10 +4,10 @@
 % for commission in commissions:
 <tr>
 <td style="vertical-align: top;">
+    % if queue_name != "my_commissions":
+        <button class="claim_button" title="Claim" commission_id="{{ commission['id'] }}">✋</button>
+    % end
     % if not queue_name == "finished_commissions":
-        % if queue_name != "my_commissions":
-            <button class="claim_button" title="Claim" commission_id="{{ commission['id'] }}">✋</button>
-        % end
         % if queue_name == "my_commissions":
             % if not commission["accepted"]:
                 <button class="accept_button" title="Accept" commission_id="{{ commission['id'] }}">✅</button>
