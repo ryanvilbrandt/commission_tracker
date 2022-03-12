@@ -75,6 +75,7 @@ def load_wsgi_endpoints(app: Bottle):
     @app.get('/commissions_websocket', apply=[websocket])
     @auth_basic(_auth_check)
     def commissions_websocket(ws):
+        ws.send("ping")
         utils.websocket_loop(ws)
 
     @app.get("/send_to_websockets")

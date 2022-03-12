@@ -15,7 +15,7 @@ export function ws_load() {
     let loc = window.location;
     let ws_uri = (loc.protocol === "https:") ? "wss:" : "ws:";
     ws_uri += `//${loc.host}${websocket_uri}`;
-    console.log(ws_uri);
+    console.debug(ws_uri);
     ws = new WebSocket(ws_uri);
     set_hooks();
     ws_loaded = true;
@@ -35,19 +35,19 @@ function set_hooks() {
         handle_websocket(msg);
     };
     ws.onerror = function (error) {
-        console.log("Triggering from onerror");
+        console.debug("Triggering from onerror");
         on_websocket_error(error);
     }
 }
 
 function on_websocket_error(error) {
     if (!ws_loaded) return;
-    console.error("WebSocket error:");
+    websocket_errors += 1;
+    console.error(`WebSocket error (${websocket_errors} / ${max_websocket_errors}):`);
     console.error(error);
     quiet_close();
-    websocket_errors += 1;
-    console.debug(`Websocket errors: ${websocket_errors}`);
     if (websocket_errors >= max_websocket_errors) {
+        console.error("Hit max websocket connection attempts. Giving up.");
         let error_msg = document.getElementById("error-message");
         if (error_msg !== null) {
             error_msg.innerText = `Failed to connect to WebSocket after ${websocket_errors} attempts. ` +

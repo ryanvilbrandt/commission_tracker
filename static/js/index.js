@@ -49,7 +49,10 @@ function fetch_commissions_callback(xhttp) {
 
 function handle_websocket(msg) {
     // refresh_button.disabled = true;
-    console.log(msg);
+    console.debug(msg);
+    if (msg.data === "ping") {
+        return;
+    }
     let arg = opened_details.length === 0 ? "_" : opened_details.join(",");
     ajax_call(`/fetch_commissions/${arg}`, fetch_commissions_callback);
 }
