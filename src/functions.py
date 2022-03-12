@@ -137,6 +137,7 @@ def pay_commission(db: Db, commission_id: int, paid: bool=True) -> Optional[dict
 
 
 def finish_commission(db: Db, commission_id: int) -> Optional[dict]:
+    db.assign_commission(commission_id, -1)
     return db.finish_commission(commission_id)
 
 
