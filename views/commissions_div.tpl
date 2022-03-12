@@ -20,7 +20,7 @@
     % end
     % if queue_name == "my_commissions" or current_user_role != "user":
         % if not commission["invoiced"]:
-            <button class="invoiced_button" title="Mark as Invoiced" commission_id="{{ commission['id'] }}">📮</button>
+            <button class="invoiced_button" title="Mark as Emailed" commission_id="{{ commission['id'] }}">📮</button>
         % elif not commission["paid"]:
             <button class="paid_button" title="Mark as Paid" commission_id="{{ commission['id'] }}">💸</button>
         % end
@@ -76,7 +76,7 @@
         </p>
         <p>
             % disabled = " disabled" if not commission["invoiced"] else ""
-            <button class="undo_invoiced_button" commission_id="{{ commission['id'] }}"{{ disabled }}>Undo "Mark as Invoiced"</button>
+            <button class="undo_invoiced_button" commission_id="{{ commission['id'] }}"{{ disabled }}>Undo "Mark as Emailed"</button>
             % disabled = " disabled" if not commission["paid"] else ""
             <button class="undo_paid_button" commission_id="{{ commission['id'] }}"{{ disabled }}>Undo "Mark as Paid"</button>
         </p>
