@@ -24,3 +24,4 @@ while True:
 # * Editable text fields
 # * Make newlines work in commission text fields somehow
 # * Figure out way to make multiple actions in a row bog things down less. Threading of sending websockets?
+# * Allow upload/drag-and-drop of finished images onto commissions
