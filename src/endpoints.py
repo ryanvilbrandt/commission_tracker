@@ -289,36 +289,31 @@ def _delete_from_password_cache(username):
 
 
 def _get_users(db: Db, current_user: dict) -> List[dict]:
-    if current_user["role"] in ["god", "admin"]:
-        users = list(db.get_users())
-        # Count the number of commissions assigned to each user and add the total to the user dicts
-        user_commission_count = defaultdict(int)
-        for commission in db.get_all_commissions():
-            user_commission_count[commission["assigned_to"]] += 1
-        for user in users:
-            user["commission_count"] = user_commission_count[user["id"]]
-    else:
-        users = []
-    if users:
-        # Sort users by role
-        users = sorted(users, key=lambda u: ({"god": 0, "admin": 1, "user": 2}[u["role"]], u["id"]))
-        # Determine if user buttons should be enabled or disabled for each user
-        for user in users:
-            if user["role"] == "god":
-                disable_user_buttons = True
-            elif user["role"] == "admin":
-                disable_user_buttons = current_user["role"] != "god"
-            else:
-                disable_user_buttons = False
-            user["disable_user_buttons"] = disable_user_buttons
+    if not current_user["role"] in ["god", "admin"]:
+        return []
+    # Sort users by role
+    users = sorted(list(db.get_users()), key=lambda u: ({"god": 0, "admin": 1, "user": 2}[u["role"]], u["id"]))
+    # Determine if user buttons should be enabled or disabled for each user
+    for user in users:
+        if user["role"] == "god":
+            user["disable_user_buttons"] = True
+        elif user["role"] == "admin":
+            user["disable_user_buttons"] = current_user["role"] != "god"
+        else:
+            user["disable_user_buttons"] = False
     return users
 
 
 def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]) -> Dict[str, List[dict]]:
     my_commissions = []
     available_commissions = []
-    other_commissions = []
+    other_commissions = {}
     finished_commissions = []
+    for user in db.get_all_artist_full_names():
+        other_commissions[user["full_name"]] = {
+            "meta": {"assigned": 0, "paid": 0, "invoiced": 0, "not_accepted": 0},
+            "commissions": []
+        }
     for commission in db.get_all_commissions_with_users():
         # Modify data
         if str(commission["id"]) in opened_commissions:
@@ -334,10 +329,20 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
             finished_commissions.append(commission)
         elif commission["assigned_to"] == current_user["id"]:
             my_commissions.append(commission)
-        elif commission["assigned_to"] == -1 and commission["allow_any_artist"]:  # Unassigned and claimable
+        elif commission["assigned_to"] == -1:  # Unassigned and claimable
             available_commissions.append(commission)
         else:
-            other_commissions.append(commission)
+            other_commissions[commission["full_name"]]["commissions"].append(commission)
+    # Fill out metadata for each "other" commission
+    for d in other_commissions.values():
+        for commission in d["commissions"]:
+            d["meta"]["assigned"] += 1
+            if commission["paid"]:
+                d["meta"]["paid"] += 1
+            elif commission["invoiced"]:
+                d["meta"]["invoiced"] += 1
+            if not commission["accepted"]:
+                d["meta"]["not_accepted"] += 1
     return {
         "my_commissions": my_commissions,
         "available_commissions": available_commissions,

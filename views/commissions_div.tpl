@@ -1,5 +1,5 @@
 % if not commissions:
-<tr><td colspan="2"><em>None</em></td></tr>
+<tr><td colspan="3"><em>None</em></td></tr>
 % else:
 % for commission in commissions:
 <tr>
@@ -29,7 +29,7 @@
         % end
     % end
 </td>
-<td>
+<td colspan="2">
     <details commission_id="{{ commission['id'] }}"{{ " open" if commission.get('open') else "" }}>
         % star = " ⭐" if not commission["allow_any_artist"] else ""
         <summary style="background-color: #{{ commission['background_color'] }};">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }} ({{ commission["status"] }})</summary>

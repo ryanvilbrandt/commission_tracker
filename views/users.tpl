@@ -6,7 +6,6 @@
         <th>Role</th>
         <th>Artist?</th>
         <th>Controls</th>
-        <th># of commissions assigned</th>
       </tr>
       % for user in users:
       <tr>
@@ -23,7 +22,6 @@
           <button class="delete_user" title="Delete User" user_id="{{user['id']}}">❌</button>
           % end
         </td>
-        <td>{{user["commission_count"]}}</td>
       </tr>
       % end
     </table>

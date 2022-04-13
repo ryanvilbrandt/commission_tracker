@@ -54,7 +54,7 @@ class Db:
             return None
         return self._row_to_dict(result)
 
-    def _yield_dicts(self, sql, params=None) -> Iterator[dict]:
+    def _fetch_all(self, sql, params=None) -> Iterator[dict]:
         if params is None:
             ex = self.cur.execute(sql)
         else:
@@ -139,7 +139,7 @@ class Db:
         sql = """
             SELECT id, username, full_name, role, is_artist FROM users WHERE NOT role='system'; 
         """
-        return self._yield_dicts(sql)
+        return self._fetch_all(sql)
 
     def get_password_hash_for_username(self, username: str) -> Optional[str]:
         sql = """
@@ -177,13 +177,19 @@ class Db:
         """
         return self._scalar(sql, [user_id])
 
+    def get_all_artist_full_names(self):
+        sql = """
+            SELECT full_name FROM users WHERE is_artist;
+        """
+        return self._fetch_all(sql)
+
     # COMMISSIONS
 
     def get_all_commissions(self) -> Iterator[dict]:
         sql = """
             SELECT * FROM commissions;
         """
-        return self._yield_dicts(sql)
+        return self._fetch_all(sql)
 
     def get_all_commissions_with_users(self) -> Iterator[dict]:
         sql = """
@@ -194,13 +200,13 @@ class Db:
             FROM commissions c
             INNER JOIN users u ON c.assigned_to = u.id;
         """
-        return self._yield_dicts(sql)
+        return self._fetch_all(sql)
 
     def get_all_commissions_for_user(self, user_id: str) -> Iterator[dict]:
         sql = """
             SELECT * FROM commissions WHERE assigned_to=?;
         """
-        return self._yield_dicts(sql, [user_id])
+        return self._fetch_all(sql, [user_id])
 
     def add_commission(self, row) -> dict:
         sql = """

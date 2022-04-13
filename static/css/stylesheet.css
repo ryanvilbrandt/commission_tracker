@@ -82,6 +82,10 @@ body {
 /*  width: 100%;*/
 /*}*/
 
+.user_meta_header {
+    cursor: help;
+}
+
 details {
   padding: 5px;
   border: 2px solid black;
