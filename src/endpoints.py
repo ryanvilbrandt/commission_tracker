@@ -227,6 +227,21 @@ def load_wsgi_endpoints(app: Bottle):
                            f"The user will need to restart their web browser to log back into the website.",
             })
 
+    @app.get("/change_is_artist/<user_id>/<is_artist>")
+    @view("redirect_to_main.tpl")
+    @auth_basic(_auth_check)
+    def change_is_artist(user_id, is_artist):
+        is_artist = is_artist.lower() == "true"
+        with Db() as db:
+            _permissions_check(db, request.auth[0], user_id, allow_change_self=False)
+            response = db.change_is_artist(user_id, is_artist)
+            if response is None:
+                abort(400, f"No user found with id={user_id}")
+        return {
+            "title": f"Changed user id={user_id} is_artist property to '{is_artist}'",
+            "message": f"User with id='{user_id}' has had their is_artist property changed to '{is_artist}'."
+        }
+
     @app.error(401)
     @view("error_401.tpl")
     def invalid_user(*args):

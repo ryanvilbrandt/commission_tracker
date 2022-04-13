@@ -42,6 +42,7 @@ function apply_commission_hooks() {
 }
 
 function apply_user_hooks() {
+    document.querySelectorAll(".is_artist_checkbox").forEach(e => e.onclick = change_is_artist);
     document.querySelectorAll(".change_user_username").forEach(e => e.onclick = click_change_username);
     document.querySelectorAll(".change_user_full_name").forEach(e => e.onclick = click_change_full_name);
     document.querySelectorAll(".change_user_password").forEach(e => e.onclick = click_change_password);
@@ -89,6 +90,12 @@ function open_details(e) {
 
 function force_update() {
     ajax_call(`/send_to_websockets`, callback);
+}
+
+function change_is_artist(event) {
+    let user_id = event.target.attributes.user_id.value;
+    let is_artist = event.target.checked;
+    window.location.href = `/change_is_artist/${user_id}/${is_artist}`;
 }
 
 function change_user_property(event, property) {

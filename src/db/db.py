@@ -89,13 +89,13 @@ class Db:
             raise ValueError(f"{len(god_users)} god users found. "
                              f"Something fucky is going on, please audit users in DB.")
 
-    def add_user(self, username: str, full_name: str, password_hash: bytes, role="user"):
+    def add_user(self, username: str, full_name: str, password_hash: bytes, role: str="user", is_artist: bool=True):
         if role not in ["admin", "user"]:
             raise ValueError("role must be either 'admin' or 'user'")
         sql = """
-            INSERT INTO users(username, full_name, password_hash, role) VALUES (?, ?, ?, ?);
+            INSERT INTO users(username, full_name, password_hash, role, is_artist) VALUES (?, ?, ?, ?, ?);
         """
-        self.cur.execute(sql, [username, full_name, password_hash, role])
+        self.cur.execute(sql, [username, full_name, password_hash, role, is_artist])
 
     def delete_user(self, user_id: int):
         sql = """
@@ -127,11 +127,17 @@ class Db:
         sql = """
             UPDATE users SET role=? WHERE id=? AND NOT role='god' AND NOT role='system' RETURNING id;
         """
-        self.cur.execute(sql, [role, user_id])
+        return self._scalar(sql, [role, user_id])
+
+    def change_is_artist(self, user_id: int, is_artist: bool):
+        sql = """
+            UPDATE users SET is_artist=? WHERE id=? AND NOT role='god' AND NOT role='system' RETURNING id;
+        """
+        return self._scalar(sql, [is_artist, user_id])
 
     def get_users(self) -> Iterator[dict]:
         sql = """
-            SELECT id, username, full_name, role FROM users WHERE NOT role='system'; 
+            SELECT id, username, full_name, role, is_artist FROM users WHERE NOT role='system'; 
         """
         return self._yield_dicts(sql)
 
@@ -143,7 +149,7 @@ class Db:
 
     def get_user_from_username(self, username: str) -> Optional[dict]:
         sql = """
-            SELECT id, username, full_name, role FROM users WHERE username=?;
+            SELECT id, username, full_name, role, is_artist FROM users WHERE username=?;
         """
         return self._fetch_one(sql, [username])
 

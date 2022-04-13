@@ -39,24 +39,29 @@
         % include("users.tpl", users=users)
     </div>
 
-    <h3>Add new user</h3>
+    <div id="add_new_user_section">
+        <h3>Add new user</h3>
 
-    <form action="/add_new_user" method="POST">
-      <label for="add_new_user_username">Username:</label><br>
-      <input type="text" id="add_new_user_username" name="username" required><br>
-      <label for="add_new_user_full_name">Full name:</label><br>
-      <input type="text" id="add_new_user_full_name" name="full_name"><br>
-      <label for="add_new_user_password">Password:</label><br>
-      <input type="text" id="add_new_user_password" name="password" required><br>
-      <p>
-        Role<br>
-        <input type="radio" id="add_new_user_admin" name="role" value="admin" required>
-        <label for="add_new_user_admin">Admin</label><br>
-        <input type="radio" id="add_new_user_user" name="role" value="user" required>
-        <label for="add_new_user_user">User</label><br>
-      </p>
-      <input type="submit" value="Add New User">
-    </form>
+        <form action="/add_new_user" method="POST">
+            <label for="add_new_user_username">Username:</label><br>
+            <input type="text" id="add_new_user_username" name="username" required><br>
+            <label for="add_new_user_full_name">Full name:</label><br>
+            <input type="text" id="add_new_user_full_name" name="full_name"><br>
+            <label for="add_new_user_password">Password:</label><br>
+            <input type="text" id="add_new_user_password" name="password" required><br>
+            <p>
+                Role<br>
+                <input type="radio" id="add_new_user_admin" name="role" value="admin" required>
+                <label for="add_new_user_admin">Admin</label><br>
+                <input type="radio" id="add_new_user_user" name="role" value="user" required>
+                <label for="add_new_user_user">User</label><br>
+            </p>
+            <label for="is_artist">Is an artist?</label>
+            <input type="checkbox" id="add_new_user_is_artist" name="is_artist" checked required><br>
+            <br>
+            <input type="submit" value="Add New User">
+        </form>
+    </div>
 </div>
 % end
 

@@ -65,7 +65,8 @@ def create_tables(cur):
         username TEXT UNIQUE,
         full_name TEXT DEFAULT '',
         password_hash TEXT,
-        role TEXT DEFAULT 'user'
+        role TEXT DEFAULT 'user',
+        is_artist BOOLEAN DEFAULT FALSE
     );
     CREATE TABLE IF NOT EXISTS commissions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
