@@ -100,7 +100,7 @@ summary {
   cursor: pointer;
 }
 
-.accepted {
+.accepted, .claimed {
     background-color: #F4900C;
 }
 
@@ -136,8 +136,13 @@ summary {
   font-size: 1rem;
 }
 
-.claim_button, .accept_button, .reject_button, .invoiced_button, .paid_button, .finished_button {
+.action_button {
   font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.action_button:hover {
+    background-color: white;
 }
 
 .is_artist_checkbox {
