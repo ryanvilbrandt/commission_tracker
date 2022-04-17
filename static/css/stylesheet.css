@@ -50,6 +50,7 @@ body {
 
 #commissions table th {
   padding-top: 1.5rem;
+  padding-bottom: 0.5rem;
   text-align: left;
   font-size: 1.25rem;
 }
@@ -84,6 +85,8 @@ body {
 
 .user_meta_header {
     cursor: help;
+    padding: 5px;
+    border-radius: 5px;
 }
 
 details {
@@ -95,6 +98,38 @@ summary {
   padding: 5px;
   margin: -5px;
   cursor: pointer;
+}
+
+.accepted {
+    background-color: #F4900C;
+}
+
+.not_accepted {
+    background-color: #FFC0CB;
+}
+
+.claimable {
+    background-color: #55ACEE;
+}
+
+.exclusive {
+    background-color: #AA8ED6;
+}
+
+.invoiced {
+    background-color: #FDCB58;
+}
+
+.paid {
+    background-color: #78B159;
+}
+
+.finished_not_emailed {
+    background-color: #FF0000;
+}
+
+.finished {
+    background-color: #E6E7E8;
 }
 
 #refresh_button, #force_update_button {

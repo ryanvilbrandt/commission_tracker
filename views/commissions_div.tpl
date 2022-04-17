@@ -32,7 +32,7 @@
 <td colspan="2">
     <details commission_id="{{ commission['id'] }}"{{ " open" if commission.get('open') else "" }}>
         % star = " ⭐" if not commission["allow_any_artist"] else ""
-        <summary style="background-color: #{{ commission['background_color'] }};">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }} ({{ commission["status"] }})</summary>
+        <summary class="{{ commission['status'] }}">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }} ({{ commission["status_text"] }})</summary>
         <p><b>Number of characters:</b> {{ commission["num_characters"] }}</p>
         <p><b>Description</b><br>{{ commission["description"] }}</p>
         <p><b>Reference images</b></p>

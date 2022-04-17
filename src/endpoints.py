@@ -323,7 +323,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
         else:
             commission["assigned_string"] = "Assigned to {}".format(commission["full_name"])
         commission["reference_images"] = commission["reference_images"].split(", ")
-        commission["background_color"], commission["status"] = utils.get_status(commission)
+        commission["status"], commission["status_text"] = utils.get_status(commission)
         # Assign to queue
         if commission["finished"]:
             finished_commissions.append(commission)

@@ -11,12 +11,12 @@
         % if current_user["full_name"] != user:
         <tr>
             <th colspan="2">{{ user }}'s commissions:</th>
-            <th>(
-                <span class="user_meta_header" title="Assigned">✋: {{ d["meta"]["assigned"] }}</span>&nbsp;&nbsp;
-                <span class="user_meta_header" title="Emailed/Invoiced">📮: {{ d["meta"]["invoiced"] }}</span>&nbsp;&nbsp;
-                <span class="user_meta_header" title="Paid">💸: {{ d["meta"]["paid"] }}</span>&nbsp;&nbsp;
-                <span class="user_meta_header" title="Not Yet Accepted">❌: {{ d["meta"]["not_accepted"] }}</span>
-            )</th>
+            <th>
+                <span class="user_meta_header accepted" title="Assigned">✋: {{ d["meta"]["assigned"] }}</span>&nbsp;&nbsp;&nbsp;
+                <span class="user_meta_header invoiced" title="Emailed/Invoiced">📮: {{ d["meta"]["invoiced"] }}</span>&nbsp;&nbsp;&nbsp;
+                <span class="user_meta_header paid" title="Paid">💸: {{ d["meta"]["paid"] }}</span>&nbsp;&nbsp;&nbsp;
+                <span class="user_meta_header not_accepted" title="Not Yet Accepted">❌: {{ d["meta"]["not_accepted"] }}</span>
+            </th>
         </tr>
         % include("commissions_div.tpl", commissions=d["commissions"], queue_name="other_commissions", current_user_role=current_user["role"], users=users)
         % end
