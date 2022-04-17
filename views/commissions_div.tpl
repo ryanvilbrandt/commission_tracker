@@ -1,9 +1,8 @@
 % if not commissions:
-<tr><td colspan="3"><em>None</em></td></tr>
+<div class="commission_container"><em>None</em></div>
 % else:
 % for commission in commissions:
-<tr>
-<td style="vertical-align: top;">
+<div class="commission_buttons">
     % if queue_name != "my_commissions":
         <button class="claimed action_button" title="Claim commission" commission_id="{{ commission['id'] }}">✋</button>
     % end
@@ -28,62 +27,59 @@
             <button class="finished action_button" title="Mark as Finished" commission_id="{{ commission['id'] }}">🎉</button>
         % end
     % end
-</td>
-<td colspan="2">
-    <details commission_id="{{ commission['id'] }}"{{ " open" if commission.get('open') else "" }}>
-        % star = " ⭐" if not commission["allow_any_artist"] else ""
-        <summary class="{{ commission['status'] }}">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }}</summary>
-        <p><b>Status:</b> {{ commission["status_text"] }}</p>
-        <p><b>Number of characters:</b> {{ commission["num_characters"] }}</p>
-        <p><b>Description</b><br>{{ commission["description"] }}</p>
-        <p><b>Reference images</b></p>
-        <ul>
-        % for image in commission["reference_images"]:
-            <li><a href="{{ image }}">{{ image }}</a></li>
-        % end
-        </ul>
-        <p><b>Expression</b><br>{{ commission["expression"] }}</p>
-        % if commission["notes"]:
-        <p><b>Additional notes</b><br>{{ commission["notes"] }}</p>
-        % end
-        <b>Assigned to:</b> {{ commission["full_name"] }}<br>
-        <b>Artist choice:</b> {{ commission["artist_choice"] }}<br>
-        % if commission["if_queue_is_full"]:
-        <b>If queue is full:</b> {{ commission["if_queue_is_full"] }}<br>
-        % end
-        % if commission["twitch"]:
-        <b>Twitch:</b> {{ commission["twitch"] }}<br>
-        % end
-        % if commission["twitter"]:
-        <b>Twitter:</b> {{ commission["twitter"] }}<br>
-        % end
-        % if commission["discord"]:
-        <b>Discord:</b> {{ commission["discord"] }}<br>
-        % end
-        <b>Email:</b> {{ commission['email'] }}
-        % if current_user_role != "user":
-        <hr>
-        <p>
-            <label for="assign_users_dropdown_{{ commission['id'] }}">Assign to a user:</label>
-            <select name="assign_users" id="assign_users_dropdown_{{ commission['id'] }}">
-                <option value="-1">Unassigned</option>
-            % for user in users:
-                % if user["role"] == "user":
-                <option value="{{ user["id"] }}">{{ user["full_name"] }}</option>
-                % end
+</div>
+<details class="commission_description" commission_id="{{ commission['id'] }}"{{ " open" if commission.get('open') else "" }}>
+    % star = " ⭐" if not commission["allow_any_artist"] else ""
+    <summary class="{{ commission['status'] }}">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }}</summary>
+    <p><b>Status:</b> {{ commission["status_text"] }}</p>
+    <p><b>Number of characters:</b> {{ commission["num_characters"] }}</p>
+    <p><b>Description</b><br>{{ commission["description"] }}</p>
+    <p><b>Reference images</b></p>
+    <ul>
+    % for image in commission["reference_images"]:
+        <li><a href="{{ image }}">{{ image }}</a></li>
+    % end
+    </ul>
+    <p><b>Expression</b><br>{{ commission["expression"] }}</p>
+    % if commission["notes"]:
+    <p><b>Additional notes</b><br>{{ commission["notes"] }}</p>
+    % end
+    <b>Assigned to:</b> {{ commission["full_name"] }}<br>
+    <b>Artist choice:</b> {{ commission["artist_choice"] }}<br>
+    % if commission["if_queue_is_full"]:
+    <b>If queue is full:</b> {{ commission["if_queue_is_full"] }}<br>
+    % end
+    % if commission["twitch"]:
+    <b>Twitch:</b> {{ commission["twitch"] }}<br>
+    % end
+    % if commission["twitter"]:
+    <b>Twitter:</b> {{ commission["twitter"] }}<br>
+    % end
+    % if commission["discord"]:
+    <b>Discord:</b> {{ commission["discord"] }}<br>
+    % end
+    <b>Email:</b> {{ commission['email'] }}
+    % if current_user_role != "user":
+    <hr>
+    <p>
+        <label for="assign_users_dropdown_{{ commission['id'] }}">Assign to a user:</label>
+        <select name="assign_users" id="assign_users_dropdown_{{ commission['id'] }}">
+            <option value="-1">Unassigned</option>
+        % for user in users:
+            % if user["role"] == "user":
+            <option value="{{ user["id"] }}">{{ user["full_name"] }}</option>
             % end
-            </select>
-            <button class="assign_to_user_button" commission_id="{{ commission['id'] }}">Assign</button>
-        </p>
-        <p>
-            % disabled = " disabled" if not commission["invoiced"] else ""
-            <button class="undo_invoiced_button" commission_id="{{ commission['id'] }}"{{ disabled }}>Undo "Mark as Emailed"</button>
-            % disabled = " disabled" if not commission["paid"] else ""
-            <button class="undo_paid_button" commission_id="{{ commission['id'] }}"{{ disabled }}>Undo "Mark as Paid"</button>
-        </p>
         % end
-    </details>
-</td>
-</tr>
+        </select>
+        <button class="assign_to_user_button" commission_id="{{ commission['id'] }}">Assign</button>
+    </p>
+    <p>
+        % disabled = " disabled" if not commission["invoiced"] else ""
+        <button class="undo_invoiced_button" commission_id="{{ commission['id'] }}"{{ disabled }}>Undo "Mark as Emailed"</button>
+        % disabled = " disabled" if not commission["paid"] else ""
+        <button class="undo_paid_button" commission_id="{{ commission['id'] }}"{{ disabled }}>Undo "Mark as Paid"</button>
+    </p>
+    % end
+</details>
 % end
 % end

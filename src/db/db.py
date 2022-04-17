@@ -177,9 +177,9 @@ class Db:
         """
         return self._scalar(sql, [user_id])
 
-    def get_all_artist_full_names(self):
+    def get_all_artists(self) -> Iterator[dict]:
         sql = """
-            SELECT full_name FROM users WHERE is_artist;
+            SELECT username, full_name FROM users WHERE is_artist;
         """
         return self._fetch_all(sql)
 

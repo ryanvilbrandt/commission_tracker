@@ -309,8 +309,9 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
     available_commissions = []
     other_commissions = {}
     finished_commissions = []
-    for user in db.get_all_artist_full_names():
-        other_commissions[user["full_name"]] = {
+    for user in db.get_all_artists():
+        other_commissions[user["username"]] = {
+            "full_name": user["full_name"],
             "meta": {"assigned": 0, "paid": 0, "invoiced": 0, "not_accepted": 0},
             "commissions": []
         }
@@ -332,7 +333,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
         elif commission["assigned_to"] == -1:  # Unassigned and claimable
             available_commissions.append(commission)
         else:
-            other_commissions[commission["full_name"]]["commissions"].append(commission)
+            other_commissions[commission["username"]]["commissions"].append(commission)
     # Fill out metadata for each "other" commission
     for d in other_commissions.values():
         for commission in d["commissions"]:
