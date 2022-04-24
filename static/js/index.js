@@ -30,6 +30,7 @@ export function init(v_current_user_role) {
 
 function apply_commission_hooks() {
     document.querySelectorAll("details").forEach(e => e.ontoggle = open_details);
+    document.querySelectorAll(".show_hide_commissions_checkbox").forEach(e => e.onclick = show_hide_commissions);
     document.querySelectorAll(".claim_button").forEach(e => e.onclick = claim);
     document.querySelectorAll(".accept_button").forEach(e => e.onclick = accept);
     document.querySelectorAll(".reject_button").forEach(e => e.onclick = reject);
@@ -61,8 +62,15 @@ function handle_websocket(msg) {
     if (msg.data === "ping") {
         return;
     }
-    let arg = opened_details.length === 0 ? "_" : opened_details.join(",");
-    ajax_call(`/fetch_commissions/${arg}`, fetch_commissions_callback);
+    let arg1 = opened_details.length === 0 ? "_" : opened_details.join(",");
+    let hidden_queues = [];
+    document.querySelectorAll(".show_hide_commissions_checkbox").forEach(function (e) {
+        if (!e.checked) {
+            hidden_queues.push(e.attributes["queue_owner"].value);
+        }
+    })
+    let arg2 = hidden_queues.length === 0 ? "_" : hidden_queues.join(",");
+    ajax_call(`/fetch_commissions/${arg1}/${arg2}`, fetch_commissions_callback);
     if (current_user_role !== "user") {
         ajax_call(`/fetch_users`, fetch_users_callback);
     }
@@ -86,6 +94,14 @@ function open_details(e) {
             opened_details.splice(index, 1);
         }
     }
+}
+
+function show_hide_commissions(e) {
+    let checkbox = e.target;
+    let queue_name = checkbox.attributes["queue_owner"].value;
+    let hidden = !checkbox.checked;
+    document.querySelectorAll(`[queue_name="${queue_name}"]`).forEach(e => e.hidden = hidden);
+    document.querySelectorAll(`[queue_name="${queue_name}_inverted"]`).forEach(e => e.hidden = !hidden);
 }
 
 function force_update() {

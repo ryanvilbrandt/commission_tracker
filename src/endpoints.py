@@ -1,5 +1,4 @@
 import sqlite3
-from collections import defaultdict
 from time import ctime
 from typing import Optional, List, Dict
 
@@ -28,7 +27,7 @@ def load_wsgi_endpoints(app: Bottle):
         with Db(auto_commit=False) as db:
             current_user = _get_user(db, username)
             users = _get_users(db, current_user)
-            commissions = _fetch_commissions(db, current_user, [])
+            commissions = _fetch_commissions(db, current_user, [], [])
         return {"title": "Home page!", "users": users, "current_user": current_user, "commissions": commissions}
 
     @app.get("/static/<path:path>", name="static")
@@ -39,15 +38,18 @@ def load_wsgi_endpoints(app: Bottle):
     def favicon():
         return static_file("favicon.ico", root="static")
 
-    @app.get("/fetch_commissions/<opened_details>")
+    @app.get("/fetch_commissions/<opened_details>/<hidden_queues>")
     @view("commissions.tpl")
     @auth_basic(_auth_check)
-    def fetch_commissions(opened_details):
+    def fetch_commissions(opened_details, hidden_queues):
         with Db() as db:
             current_user = db.get_user_from_username(request.auth[0])
             users = _get_users(db, current_user)
             commissions = _fetch_commissions(
-                db, current_user, [] if opened_details == "_" else opened_details.split(",")
+                db,
+                current_user,
+                [] if opened_details == "_" else opened_details.split(","),
+                [] if hidden_queues == "_" else hidden_queues.split(",")
             )
         return {"users": users, "current_user": current_user, "commissions": commissions}
 
@@ -304,14 +306,15 @@ def _get_users(db: Db, current_user: dict) -> List[dict]:
     return users
 
 
-def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]) -> Dict[str, List[dict]]:
-    my_commissions = []
-    available_commissions = []
+def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str], hidden_queues: List[str]) -> Dict[str, dict]:
+    my_commissions = {"hidden": "my_commissions" in hidden_queues, "commissions": []}
+    available_commissions = {"hidden": "available_commissions" in hidden_queues, "commissions": []}
     other_commissions = {}
-    finished_commissions = []
+    finished_commissions = {"hidden": "finished_commissions" in hidden_queues, "commissions": []}
     for user in db.get_all_artists():
         other_commissions[user["username"]] = {
             "full_name": user["full_name"],
+            "hidden": user["username"] in hidden_queues,
             "meta": {"assigned": 0, "paid": 0, "invoiced": 0, "not_accepted": 0},
             "commissions": []
         }
@@ -327,11 +330,11 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
         commission["status"], commission["status_text"] = utils.get_status(commission)
         # Assign to queue
         if commission["finished"]:
-            finished_commissions.append(commission)
+            finished_commissions["commissions"].append(commission)
         elif commission["assigned_to"] == current_user["id"]:
-            my_commissions.append(commission)
+            my_commissions["commissions"].append(commission)
         elif commission["assigned_to"] == -1:  # Unassigned and claimable
-            available_commissions.append(commission)
+            available_commissions["commissions"].append(commission)
         else:
             other_commissions[commission["username"]]["commissions"].append(commission)
     # Fill out metadata for each "other" commission

@@ -1,23 +1,25 @@
+% hidden_text = " hidden" if hidden else ""
+<div class="commission_container queue_hidden" queue_name="{{ queue_name }}_inverted"{{ " hidden" if not hidden else "" }}><em>Hidden</em></div>
 % if not commissions:
-<div class="commission_container"><em>None</em></div>
+<div class="commission_container" queue_name="{{ queue_name }}"{{ hidden_text }}><em>None</em></div>
 % else:
 % for commission in commissions:
-<div class="commission_buttons">
-    % if queue_name != "my_commissions":
+<div class="commission_buttons" queue_name="{{ queue_name }}"{{ hidden_text }}>
+    % if queue_type != "my_commissions":
         <button class="claimed action_button" title="Claim commission" commission_id="{{ commission['id'] }}">✋</button>
     % end
-    % if not queue_name == "finished_commissions":
-        % if queue_name == "my_commissions":
+    % if not queue_type == "finished_commissions":
+        % if queue_type == "my_commissions":
             % if not commission["accepted"]:
                 <button class="accepted action_button" title="Accept commission" commission_id="{{ commission['id'] }}">✅</button>
             % end
             <button class="rejected action_button" title="Reject commission" commission_id="{{ commission['id'] }}">❌</button>
         % end
-        % if queue_name == "other_commissions" and not commission["accepted"] and current_user_role != "user":
+        % if queue_type == "other_commissions" and not commission["accepted"] and current_user_role != "user":
             <button class="accepted action_button" title="Accept commission" commission_id="{{ commission['id'] }}">✅</button>
         % end
     % end
-    % if queue_name == "my_commissions" or current_user_role != "user":
+    % if queue_type == "my_commissions" or current_user_role != "user":
         % if not commission["invoiced"]:
             <button class="invoiced action_button" title="Mark as Emailed" commission_id="{{ commission['id'] }}">📮</button>
         % elif not commission["paid"]:
@@ -28,7 +30,8 @@
         % end
     % end
 </div>
-<details class="commission_description" commission_id="{{ commission['id'] }}"{{ " open" if commission.get('open') else "" }}>
+% open = " open" if commission.get('open') else ""
+<details class="commission_description" commission_id="{{ commission['id'] }}" queue_name="{{ queue_name }}"{{ open }}{{ hidden_text }}>
     % star = " ⭐" if not commission["allow_any_artist"] else ""
     <summary class="{{ commission['status'] }}">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }}</summary>
     <p><b>Status:</b> {{ commission["status_text"] }}</p>
