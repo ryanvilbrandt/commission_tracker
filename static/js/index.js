@@ -16,6 +16,11 @@ export function init(v_current_user_role) {
     // }
 
     apply_commission_hooks();
+    // Handle bug where page can be reloaded with checkboxes unchecked
+    document.querySelectorAll(".show_hide_commissions_checkbox").forEach(function (e) {
+        e.target = e;
+        show_hide_commissions(e);
+    });
     document.querySelectorAll("#force_update_button").forEach(e => e.onclick = force_update);
     apply_user_hooks();
 
@@ -102,6 +107,11 @@ function show_hide_commissions(e) {
     let hidden = !checkbox.checked;
     document.querySelectorAll(`[queue_name="${queue_name}"]`).forEach(e => e.hidden = hidden);
     document.querySelectorAll(`[queue_name="${queue_name}_inverted"]`).forEach(e => e.hidden = !hidden);
+    if (hidden) {
+        checkbox.parentElement.classList.add("queue_hidden");
+    } else {
+        checkbox.parentElement.classList.remove("queue_hidden");
+    }
 }
 
 function force_update() {

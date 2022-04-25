@@ -19,10 +19,6 @@ while True:
 
 # TODO:
 # Artists' sections:
-# * Add flag for "is artist" to users
-# * Automatically make collapsible sections for each artist
-# * Don't show "my commissions" for non-artist users
-# * Artists' sections should have a header that lists statistics (Total commissions assigned, number of commissions of each status in that queue)
 # * Button for artists to open/close their queue (just cosmetic, don't block assignments)
 #
 #
