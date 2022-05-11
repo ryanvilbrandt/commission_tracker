@@ -43,7 +43,7 @@ def drop_tables(cur):
         raise Exception(f"Some tables were not deleted: {tables}")
 
 
-def create_tables(cur):
+def create_google_sheets_tables(cur):
     if get_version(cur) >= 1:
         print("Skipping creating tables...")
         return
@@ -95,10 +95,7 @@ def create_tables(cur):
     """
     cur.executescript(sql)
 
-    set_version(cur, 1)
-
-
-def add_unassigned_user(cur):
+    # Add unassigned user
     sql = """
         INSERT INTO users(id, username, full_name, password_hash, role) 
         VALUES (-1, 'unassigned', 'Unassigned', ?, 'system');
@@ -106,6 +103,8 @@ def add_unassigned_user(cur):
     pw = bcrypt.hashpw(os.environ["SERVICE_ACCOUNT_PASSWORD"].encode(), bcrypt.gensalt()) \
         if "SERVICE_ACCOUNT_PASSWORD" in os.environ else b""
     cur.execute(sql, [pw])
+
+    set_version(cur, 1)
 
 
 def show_tables(cur):
@@ -118,8 +117,7 @@ def main():
     db, cur = open_db()
 
     drop_tables(cur)
-    create_tables(cur)
-    add_unassigned_user(cur)
+    create_google_sheets_tables(cur)
     db.commit()
 
     show_tables(cur)

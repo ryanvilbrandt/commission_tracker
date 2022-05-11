@@ -1,8 +1,12 @@
+import os
 import sqlite3
+import sys
+from json import loads
 from time import ctime
 from typing import Optional, List, Dict
 
 import bcrypt
+import requests
 from bottle_websocket import websocket
 
 from bottle import static_file, Bottle, view, auth_basic, request, abort, template
@@ -249,6 +253,36 @@ def load_wsgi_endpoints(app: Bottle):
     def invalid_user(*args):
         if request.auth is not None:
             _delete_from_password_cache(request.auth[0])
+
+    @app.post("/kofi_webhook")
+    def kofi_webhook():
+        if not request.params or "data" not in request.params:
+            print(f"Invalid request: {request.params}", file=sys.stderr)
+            return
+        try:
+            data = loads(request.params["data"])
+        except Exception:
+            print(f"Not valid JSON: {request.params['data']}", file=sys.stderr)
+            return
+        if data.get("verification_token") != os.environ["KOFI_VERIFICATION_TOKEN"]:
+            print(f"Incorrect verification token: {data}", file=sys.stderr)
+            return
+        print(f"New Ko-fi commission! {data}")
+        return
+
+    @app.get("/kofi_test")
+    def kofi_test():
+        d = {'message_id': '7d970405-34df-4886-9ad4-6d015d2edbf7', 'timestamp': '2022-05-08T21:54:11Z',
+             'type': 'Commission', 'is_public': True, 'from_name': 'RizerStake', 'message': '', 'amount': '75.00',
+             'url': 'https://ko-fi.com/Home/CoffeeShop?txid=369a1bb1-d21c-4f29-815c-4b4059925e11&readToken=34c4fd72-0c32-48da-b1f2-d5ffcc4df6af',
+             'shrunken_url': 'https://ko-fi.com/Home/CoffeeShop?txid=369a1bb1-d21c-4f29-815c-4b4059925e11&mode=g&img=ogbuymeacoffee',
+             'email': 'RizerStake@gmail.com', 'currency': 'USD', 'is_subscription_payment': False,
+             'is_first_subscription_payment': False, 'kofi_transaction_id': '369a1bb1-d21c-4f29-815c-4b4059925e11',
+             'verification_token': 'd072b692-02d0-4175-b0eb-0ddd78964ea0', 'shop_items': None, 'tier_name': None}
+        print(d["url"])
+        r = requests.get(d["url"])
+        print(r.status_code)
+        print(r.content)
 
 
 def _get_user(db: Db, username: str):
