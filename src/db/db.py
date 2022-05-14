@@ -163,6 +163,12 @@ class Db:
         """
         return self._scalar(sql, [user_id])
 
+    def get_full_name_from_id(self, user_id: int) -> Optional[str]:
+        sql = """
+            SELECT full_name FROM users WHERE id=? AND NOT role='system';
+        """
+        return self._scalar(sql, [user_id])
+
     def get_user_role_from_id(self, user_id: int) -> Optional[str]:
         sql = """
             SELECT role FROM users WHERE id=? AND NOT role='system';
@@ -200,20 +206,17 @@ class Db:
         """
         return self._fetch_all(sql, [user_id])
 
-    def add_commission(self, row) -> dict:
+    def add_commission(self, created_ts, name, email, price, message, url) -> dict:
         sql = """
-        INSERT INTO commissions(timestamp, name, email, twitch, twitter, discord, num_characters,
-            reference_images, description, expression, notes, artist_choice, if_queue_is_full)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO commissions(created_ts, name, email, price, message, url)
+        VALUES (?, ?, ?, ?, ?, ?)
         RETURNING *;
         """
-        values = row.copy()
-        # print(f"Adding to DB: {values}")
-        return self._fetch_one(sql, values)
+        return self._fetch_one(sql, [created_ts, name, email, price, message, url])
 
     def get_commission_by_email(self, timestamp: str, email: str) -> Optional[dict]:
         sql = """
-            SELECT * FROM commissions WHERE timestamp=? AND email=?;
+            SELECT * FROM commissions WHERE created_ts=? AND email=?;
         """
         return self._fetch_one(sql, [timestamp, email])
 
@@ -223,26 +226,34 @@ class Db:
         """
         return self._fetch_one(sql, [commission_id])
 
-    def assign_commission(self, commission_id: int, assigned_to: int) -> dict:
-        sql = "UPDATE commissions SET assigned_to=? WHERE id=? RETURNING *;"
-        return self._fetch_one(sql, [assigned_to, commission_id])
+    def update_ts(self, commission_id: int) -> dict:
+        sql = "UPDATE commissions SET updated_ts=CURRENT_TIMESTAMP WHERE id=? RETURNING *;"
+        return self._fetch_one(sql, [commission_id])
 
-    def set_allow_any_artist(self, commission_id: int, allow_any_artist: bool) -> dict:
-        sql = "UPDATE commissions SET allow_any_artist=? WHERE id=? RETURNING *;"
-        return self._fetch_one(sql, [allow_any_artist, commission_id])
+    def set_preferred_artist(self, commission_id: int, preferred_artist: str, is_exclusive: bool):
+        sql = "UPDATE commissions SET preferred_artist=?, is_exclusive=? WHERE id=?;"
+        self.cur.execute(sql, [preferred_artist, is_exclusive, commission_id])
+
+    def set_is_exclusive(self, commission_id: int, is_exclusive: bool):
+        sql = "UPDATE commissions SET is_exclusive=? WHERE id=?;"
+        self.cur.execute(sql, [is_exclusive, commission_id])
+
+    def assign_commission(self, commission_id: int, assigned_to: int):
+        sql = "UPDATE commissions SET assigned_to=? WHERE id=?;"
+        self.cur.execute(sql, [assigned_to, commission_id])
 
     def accept_commission(self, commission_id: int, accepted=True):
-        sql = "UPDATE commissions SET accepted=? WHERE id=? RETURNING *;"
-        return self._fetch_one(sql, [accepted, commission_id])
+        sql = "UPDATE commissions SET accepted=? WHERE id=?;"
+        self.cur.execute(sql, [accepted, commission_id])
 
     def invoice_commission(self, commission_id: int, invoiced=True):
-        sql = "UPDATE commissions SET invoiced=? WHERE id=? RETURNING *;"
-        return self._fetch_one(sql, [invoiced, commission_id])
+        sql = "UPDATE commissions SET invoiced=? WHERE id=?;"
+        self.cur.execute(sql, [invoiced, commission_id])
 
     def pay_commission(self, commission_id: int, paid=True):
-        sql = "UPDATE commissions SET paid=? WHERE id=? RETURNING *;"
-        return self._fetch_one(sql, [paid, commission_id])
+        sql = "UPDATE commissions SET paid=? WHERE id=?;"
+        self.cur.execute(sql, [paid, commission_id])
 
     def finish_commission(self, commission_id: int, finished=True):
-        sql = "UPDATE commissions SET finished=? WHERE id=? RETURNING *;"
-        return self._fetch_one(sql, [finished, commission_id])
+        sql = "UPDATE commissions SET finished=? WHERE id=?;"
+        self.cur.execute(sql, [finished, commission_id])

@@ -36,15 +36,10 @@ export function init(v_current_user_role) {
 function apply_commission_hooks() {
     document.querySelectorAll("details").forEach(e => e.ontoggle = open_details);
     document.querySelectorAll(".show_hide_commissions_checkbox").forEach(e => e.onclick = show_hide_commissions);
-    document.querySelectorAll(".claim_button").forEach(e => e.onclick = claim);
-    document.querySelectorAll(".accept_button").forEach(e => e.onclick = accept);
-    document.querySelectorAll(".reject_button").forEach(e => e.onclick = reject);
-    document.querySelectorAll(".invoiced_button").forEach(e => e.onclick = invoiced);
-    document.querySelectorAll(".paid_button").forEach(e => e.onclick = paid);
-    document.querySelectorAll(".finished_button").forEach(e => e.onclick = finished);
+    document.querySelectorAll(".action_button").forEach(button => set_action_button(button));
     document.querySelectorAll(".assign_to_user_button").forEach(e => e.onclick = click_assign);
-    document.querySelectorAll(".undo_invoiced_button").forEach(e => e.onclick = click_undo_invoiced);
-    document.querySelectorAll(".undo_paid_button").forEach(e => e.onclick = click_undo_paid);
+    // document.querySelectorAll(".undo_invoiced_button").forEach(e => e.onclick = click_undo_invoiced);
+    // document.querySelectorAll(".undo_paid_button").forEach(e => e.onclick = click_undo_paid);
 }
 
 function apply_user_hooks() {
@@ -153,6 +148,24 @@ function click_delete_user(event) {
     if (!confirmation) return;
     let user_id = event.target.attributes.user_id.value;
     window.location.href = `/delete_user/${user_id}`;
+}
+
+function set_action_button(button) {
+    if (button.classList.contains("claim")) {
+        button.onclick = claim;
+    } else if (button.classList.contains("accept")) {
+        button.onclick = accept;
+    } else if (button.classList.contains("reject")) {
+        button.onclick = reject;
+    } else if (button.classList.contains("invoiced")) {
+        button.onclick = invoiced;
+    } else if (button.classList.contains("paid")) {
+        button.onclick = paid;
+    } else if (button.classList.contains("finished")) {
+        button.onclick = finished;
+    } else {
+        console.error(`Unknown button class: ${button.classList}`);
+    }
 }
 
 function claim(event) {

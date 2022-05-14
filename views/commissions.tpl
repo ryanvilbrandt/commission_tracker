@@ -1,32 +1,53 @@
-% if current_user["is_artist"] and not commissions["my_commissions"]:
-    % hidden = commissions["available_commissions"]["hidden"]
-    <h2 class="commission_header{{ " queue_hidden" if hidden else "" }}" id="my_commissions">
+% if current_user["is_artist"]:
+    % queue_name = "my_commissions"
+    % hidden = commissions[queue_name]["hidden"]
+    <h2 class="commission_header{{ " queue_hidden" if hidden else "" }}" id="{{ queue_name }}">
         % checked = " checked" if not hidden else ""
-        <input type="checkbox" class="show_hide_commissions_checkbox" queue_owner="my_commissions" title="Show/Hide Commissions"{{ checked }}>
+        <input type="checkbox" class="show_hide_commissions_checkbox" queue_owner="{{ queue_name }}" title="Show/Hide Commissions"{{ checked }}>
         Commissions assigned to me{{ " (Why do you have any???)" if not current_user["is_artist"] else "" }}:
     </h2>
     <% include(
         "commissions_div.tpl",
-        commissions=commissions["my_commissions"]["commissions"],
-        queue_type="my_commissions",
-        queue_name="my_commissions",
+        commissions=commissions[queue_name]["commissions"],
+        queue_type=queue_name,
+        queue_name=queue_name,
         current_user_role=current_user["role"],
         users=users,
         hidden=hidden
     ) %>
 % end
 
-% hidden = commissions["available_commissions"]["hidden"]
-<h2 class="commission_header{{ " queue_hidden" if hidden else "" }}" id="available_commissions">
+% if not current_user["is_artist"]:
+    % queue_name = "new_commissions"
+    % hidden = commissions[queue_name]["hidden"]
+    <h2 class="commission_header{{ " queue_hidden" if hidden else "" }}" id="{{ queue_name }}">
+        % checked = " checked" if not hidden else ""
+        <input type="checkbox" class="show_hide_commissions_checkbox" queue_owner="{{ queue_name }}" title="Show/Hide Commissions"{{ checked }}>
+        New commissions (needs assignment):
+    </h2>
+    <% include(
+        "commissions_div.tpl",
+        commissions=commissions[queue_name]["commissions"],
+        queue_type=queue_name,
+        queue_name=queue_name,
+        current_user_role=current_user["role"],
+        users=users,
+        hidden=hidden
+    ) %>
+% end
+
+% queue_name = "available_commissions"
+% hidden = commissions[queue_name]["hidden"]
+<h2 class="commission_header{{ " queue_hidden" if hidden else "" }}" id="{{ queue_name }}">
     % checked = " checked" if not hidden else ""
-    <input type="checkbox" class="show_hide_commissions_checkbox" queue_owner="available_commissions" title="Show/Hide Commissions"{{ checked }}>
+    <input type="checkbox" class="show_hide_commissions_checkbox" queue_owner="{{ queue_name }}" title="Show/Hide Commissions"{{ checked }}>
     Available commissions:
 </h2>
 <% include(
     "commissions_div.tpl",
-    commissions=commissions["available_commissions"]["commissions"],
-    queue_type="available_commissions",
-    queue_name="available_commissions",
+    commissions=commissions[queue_name]["commissions"],
+    queue_type=queue_name,
+    queue_name=queue_name,
     current_user_role=current_user["role"],
     users=users,
     hidden=hidden
@@ -57,17 +78,18 @@
     % end
 % end
 
-% hidden = commissions["finished_commissions"]["hidden"]
-<h2 class="commission_header{{ " queue_hidden" if hidden else "" }}" id="finished_commissions">
+% queue_name = "finished_commissions"
+% hidden = commissions[queue_name]["hidden"]
+<h2 class="commission_header{{ " queue_hidden" if hidden else "" }}" id="{{ queue_name }}">
     % checked = " checked" if not hidden else ""
-    <input type="checkbox" class="show_hide_commissions_checkbox" queue_owner="finished_commissions" title="Show/Hide Commissions"{{ checked }}>
+    <input type="checkbox" class="show_hide_commissions_checkbox" queue_owner="{{ queue_name }}" title="Show/Hide Commissions"{{ checked }}>
     Finished commissions:
 </h2>
 <% include(
     "commissions_div.tpl",
-    commissions=commissions["finished_commissions"]["commissions"],
-    queue_type="finished_commissions",
-    queue_name="finished_commissions",
+    commissions=commissions[queue_name]["commissions"],
+    queue_type=queue_name,
+    queue_name=queue_name,
     current_user_role=current_user["role"],
     users=users,
     hidden=hidden

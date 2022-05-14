@@ -6,7 +6,6 @@ from time import ctime
 from typing import Optional, List, Dict
 
 import bcrypt
-import requests
 from bottle_websocket import websocket
 
 from bottle import static_file, Bottle, view, auth_basic, request, abort, template
@@ -109,6 +108,13 @@ def load_wsgi_endpoints(app: Bottle):
     def assign_commission(commission_id: int, user_id: int):
         with Db() as db:
             _permissions_check(db, request.auth[0])
+            commission = db.get_commission_by_id(commission_id)
+            if commission["preferred_artist"] is None:
+                if user_id == "-1":
+                    db.set_preferred_artist(commission_id, "Any", False)
+                else:
+                    artist_name = db.get_full_name_from_id(user_id)
+                    db.set_preferred_artist(commission_id, artist_name, True)
             functions.assign_commission(db, commission_id, user_id)
             utils.send_to_websockets("refresh")
 
@@ -257,35 +263,24 @@ def load_wsgi_endpoints(app: Bottle):
     @app.post("/kofi_webhook")
     def kofi_webhook():
         if not request.params or "data" not in request.params:
-            print(f"Invalid request: {request.params}", file=sys.stderr)
+            print(f"Invalid request: {dict(request.params)}", file=sys.stderr)
+            abort(400)
             return
         try:
             data = loads(request.params["data"])
         except Exception:
             print(f"Not valid JSON: {request.params['data']}", file=sys.stderr)
+            abort(400)
             return
         if data.get("verification_token") != os.environ["KOFI_VERIFICATION_TOKEN"]:
             print(f"Incorrect verification token: {data}", file=sys.stderr)
+            abort(403)
             return
         if data.get("type") != "Commission":
             print(f"Received non-commission data. Skipping. {data}")
             return
         print(f"New Ko-fi commission! {data}")
-        return
-
-    @app.get("/kofi_test")
-    def kofi_test():
-        d = {'message_id': '7d970405-34df-4886-9ad4-6d015d2edbf7', 'timestamp': '2022-05-08T21:54:11Z',
-             'type': 'Commission', 'is_public': True, 'from_name': 'RizerStake', 'message': '', 'amount': '75.00',
-             'url': 'https://ko-fi.com/Home/CoffeeShop?txid=369a1bb1-d21c-4f29-815c-4b4059925e11&readToken=34c4fd72-0c32-48da-b1f2-d5ffcc4df6af',
-             'shrunken_url': 'https://ko-fi.com/Home/CoffeeShop?txid=369a1bb1-d21c-4f29-815c-4b4059925e11&mode=g&img=ogbuymeacoffee',
-             'email': 'RizerStake@gmail.com', 'currency': 'USD', 'is_subscription_payment': False,
-             'is_first_subscription_payment': False, 'kofi_transaction_id': '369a1bb1-d21c-4f29-815c-4b4059925e11',
-             'verification_token': 'd072b692-02d0-4175-b0eb-0ddd78964ea0', 'shop_items': None, 'tier_name': None}
-        print(d["url"])
-        r = requests.get(d["url"])
-        print(r.status_code)
-        print(r.content)
+        functions.add_commission(data)
 
 
 def _get_user(db: Db, username: str):
@@ -345,9 +340,11 @@ def _get_users(db: Db, current_user: dict) -> List[dict]:
 
 def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str], hidden_queues: List[str]) -> Dict[str, dict]:
     my_commissions = {"hidden": "my_commissions" in hidden_queues, "commissions": []}
+    new_commissions = {"hidden": "new_commissions" in hidden_queues, "commissions": []}
     available_commissions = {"hidden": "available_commissions" in hidden_queues, "commissions": []}
     other_commissions = {}
     finished_commissions = {"hidden": "finished_commissions" in hidden_queues, "commissions": []}
+    # Build user-specific commission queues
     for user in db.get_all_artists():
         other_commissions[user["username"]] = {
             "full_name": user["full_name"],
@@ -355,6 +352,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
             "meta": {"assigned": 0, "paid": 0, "invoiced": 0, "not_accepted": 0},
             "commissions": []
         }
+    # Organize commissions into queues
     for commission in db.get_all_commissions_with_users():
         # Modify data
         if str(commission["id"]) in opened_commissions:
@@ -363,10 +361,11 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
             commission["assigned_string"] = "Unassigned"
         else:
             commission["assigned_string"] = "Assigned to {}".format(commission["full_name"])
-        commission["reference_images"] = commission["reference_images"].split(", ")
         commission["status"], commission["status_text"] = utils.get_status(commission)
         # Assign to queue
-        if commission["finished"]:
+        if commission["preferred_artist"] is None:
+            new_commissions["commissions"].append(commission)
+        elif commission["finished"]:
             finished_commissions["commissions"].append(commission)
         elif commission["assigned_to"] == current_user["id"]:
             my_commissions["commissions"].append(commission)
@@ -386,6 +385,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
                 d["meta"]["not_accepted"] += 1
     return {
         "my_commissions": my_commissions,
+        "new_commissions": new_commissions,
         "available_commissions": available_commissions,
         "other_commissions": other_commissions,
         "finished_commissions": finished_commissions,

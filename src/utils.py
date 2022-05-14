@@ -126,20 +126,15 @@ def link_images(s: str) -> List[str]:
 
 
 def get_status(commission: dict) -> Tuple[str, str]:
-    if commission["invoiced"] and not commission["paid"]:
-        return "invoiced", f"Emailed"
+    if commission["preferred_artist"] is None:
+        return "new", "New"
     elif commission["finished"]:
-        if not commission["invoiced"]:
-            return "finished_not_emailed", r"Not Emailed"
-        else:
-            return "finished", r"Finished! \o/"
-    elif commission["paid"]:
-        return "paid", f"Paid"
+        return "finished", r"Finished! \o/"
     elif commission["accepted"]:
-        return "accepted", f"Accepted"
+        return "accepted", "Accepted"
     elif commission["assigned_to"] != -1:
-        return "not_accepted", f"Not yet accepted"
-    elif commission["allow_any_artist"]:
-        return "claimable", "Claimable by Anyone"
+        return "not_accepted", "Not yet accepted"
+    elif commission["is_exclusive"]:
+        return "exclusive", f"Exclusive Request for {commission['preferred_artist']}"
     else:
-        return "exclusive", f"Exclusive Request for {commission['artist_choice']}"
+        return "claimable", "Claimable by Anyone"

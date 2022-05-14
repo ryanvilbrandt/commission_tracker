@@ -150,7 +150,7 @@ summary {
     background-color: #AA8ED6;
 }
 
-.invoiced {
+.invoiced, .new {
     background-color: #FDCB58;
 }
 
@@ -176,9 +176,9 @@ summary {
   cursor: pointer;
 }
 
-.action_button:hover {
-    background-color: white;
-}
+/*.action_button:hover {*/
+/*    background-color: white;*/
+/*}*/
 
 .is_artist_checkbox {
     margin: auto;
