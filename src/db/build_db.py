@@ -47,7 +47,7 @@ def show_tables(cur):
 
 
 def main():
-    ddl_filepath = "src/db/build_db_google_sheets.ddl"
+    ddl_filepath = "src/db/build_db_kofi.ddl"
 
     db, cur = open_db()
 

@@ -267,6 +267,9 @@ def load_wsgi_endpoints(app: Bottle):
         if data.get("verification_token") != os.environ["KOFI_VERIFICATION_TOKEN"]:
             print(f"Incorrect verification token: {data}", file=sys.stderr)
             return
+        if data.get("type") != "Commission":
+            print(f"Received non-commission data. Skipping. {data}")
+            return
         print(f"New Ko-fi commission! {data}")
         return
 
