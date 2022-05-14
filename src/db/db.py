@@ -4,7 +4,6 @@ from collections import OrderedDict
 from typing import Optional, Iterator, Union
 
 DB_CONN = None
-VERSION_NEEDED = 1
 
 
 class Db:
@@ -14,7 +13,6 @@ class Db:
             raise FileNotFoundError(f"No DB found at {os.path.join(os.getcwd(), filename)}")
         self.conn = sqlite3.connect(filename)
         self.cur = self.conn.cursor()
-        self.check_version()
         self.auto_commit = auto_commit
         self.auto_close = auto_close
 
@@ -61,12 +59,6 @@ class Db:
             ex = self.cur.execute(sql, params)
         for row in ex.fetchall():
             yield self._row_to_dict(row)
-
-    def check_version(self):
-        sql = "SELECT version FROM version;"
-        version = self.cur.execute(sql).fetchone()[0]
-        if not version == VERSION_NEEDED:
-            raise ValueError(f"Incorrect DB version: {version} != {VERSION_NEEDED}")
 
     # USER MANAGEMENT
 

@@ -1,5 +1,6 @@
 import os
 import sqlite3
+from sqlite3 import Cursor
 
 import bcrypt
 
@@ -11,27 +12,10 @@ def open_db():
     return db, cur
 
 
-def get_version(cur):
-    sql = "SELECT version FROM version"
-    try:
-        version = cur.execute(sql).fetchone()[0]
-    except sqlite3.OperationalError:
-        return 0
-    else:
-        return version
-
-
-def set_version(cur, v):
-    sql = "UPDATE version SET version = ?"
-    cur.execute(sql, [v])
-    print(f"Set version to {v}")
-
-
-def drop_tables(cur):
+def drop_tables(cur: Cursor):
     print("Dropping all tables in database...")
 
     sql = """
-        DROP TABLE IF EXISTS version;
         DROP TABLE IF EXISTS users;
         DROP TABLE IF EXISTS commissions;
     """
@@ -43,68 +27,17 @@ def drop_tables(cur):
         raise Exception(f"Some tables were not deleted: {tables}")
 
 
-def create_google_sheets_tables(cur):
-    if get_version(cur) >= 1:
-        print("Skipping creating tables...")
-        return
+def run_ddl(cur: Cursor, ddl_filepath: str):
+    with open(ddl_filepath) as f:
+        cur.executescript(f.read())
 
-    print("Creating tables...")
 
-    # Create version table and initialize with 0
+def set_system_user_password(cur: Cursor, password: str):
     sql = """
-    CREATE TABLE IF NOT EXISTS version (
-        version INTEGER PRIMARY KEY
-    );
-    INSERT INTO version (version) VALUES (0);
+        UPDATE users SET password_hash=? WHERE id=-1;
     """
-    cur.executescript(sql)
-
-    sql = """
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE,
-        full_name TEXT DEFAULT '',
-        password_hash TEXT,
-        role TEXT DEFAULT 'user',
-        is_artist BOOLEAN DEFAULT FALSE
-    );
-    CREATE TABLE IF NOT EXISTS commissions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        timestamp TIMESTAMP,
-        name TEXT DEFAULT '',
-        email TEXT DEFAULT '',
-        twitch TEXT DEFAULT '',
-        twitter TEXT DEFAULT '',
-        discord TEXT DEFAULT '',
-        num_characters TEXT DEFAULT '',
-        reference_images TEXT DEFAULT '',
-        description TEXT DEFAULT '',
-        expression TEXT DEFAULT '',
-        notes TEXT DEFAULT '',
-        artist_choice TEXT DEFAULT '',
-        if_queue_is_full TEXT DEFAULT '',
-        assigned_to INTEGER DEFAULT -1,
-        allow_any_artist BOOLEAN DEFAULT FALSE,
-        accepted BOOLEAN DEFAULT FALSE,
-        invoiced BOOLEAN DEFAULT FALSE,
-        paid BOOLEAN DEFAULT FALSE,
-        finished BOOLEAN DEFAULT FALSE,
-        UNIQUE (timestamp, email) ON CONFLICT IGNORE
-    );
-    PRAGMA case_sensitive_like=ON;
-    """
-    cur.executescript(sql)
-
-    # Add unassigned user
-    sql = """
-        INSERT INTO users(id, username, full_name, password_hash, role) 
-        VALUES (-1, 'unassigned', 'Unassigned', ?, 'system');
-    """
-    pw = bcrypt.hashpw(os.environ["SERVICE_ACCOUNT_PASSWORD"].encode(), bcrypt.gensalt()) \
-        if "SERVICE_ACCOUNT_PASSWORD" in os.environ else b""
+    pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
     cur.execute(sql, [pw])
-
-    set_version(cur, 1)
 
 
 def show_tables(cur):
@@ -114,10 +47,13 @@ def show_tables(cur):
 
 
 def main():
+    ddl_filepath = "src/db/build_db_google_sheets.ddl"
+
     db, cur = open_db()
 
-    drop_tables(cur)
-    create_google_sheets_tables(cur)
+    # drop_tables(cur)
+    run_ddl(cur, ddl_filepath)
+    set_system_user_password(cur, os.getenv("SERVICE_ACCOUNT_PASSWORD", default=""))
     db.commit()
 
     show_tables(cur)
