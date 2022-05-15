@@ -81,13 +81,15 @@ class Db:
             raise ValueError(f"{len(god_users)} god users found. "
                              f"Something fucky is going on, please audit users in DB.")
 
-    def add_user(self, username: str, full_name: str, password_hash: bytes, role: str="user", is_artist: bool=True):
+    def add_user(self, username: str, full_name: str, password_hash: bytes, role: str="user", is_artist: bool=True,
+                 queue_open: bool=True):
         if role not in ["admin", "user"]:
             raise ValueError("role must be either 'admin' or 'user'")
         sql = """
-            INSERT INTO users(username, full_name, password_hash, role, is_artist) VALUES (?, ?, ?, ?, ?);
+            INSERT INTO users(username, full_name, password_hash, role, is_artist, queue_open) 
+            VALUES (?, ?, ?, ?, ?, ?);
         """
-        self.cur.execute(sql, [username, full_name, password_hash, role, is_artist])
+        self.cur.execute(sql, [username, full_name, password_hash, role, is_artist, queue_open])
 
     def delete_user(self, user_id: int):
         sql = """
@@ -127,9 +129,15 @@ class Db:
         """
         return self._scalar(sql, [is_artist, user_id])
 
+    def change_queue_open(self, user_id: int, queue_open: bool):
+        sql = """
+            UPDATE users SET queue_open=? WHERE id=? AND NOT role='god' AND NOT role='system' RETURNING id;
+        """
+        return self._scalar(sql, [queue_open, user_id])
+
     def get_users(self) -> Iterator[dict]:
         sql = """
-            SELECT id, username, full_name, role, is_artist FROM users WHERE NOT role='system'; 
+            SELECT id, username, full_name, role, is_artist, queue_open FROM users WHERE NOT role='system'; 
         """
         return self._fetch_all(sql)
 
@@ -141,7 +149,7 @@ class Db:
 
     def get_user_from_username(self, username: str) -> Optional[dict]:
         sql = """
-            SELECT id, username, full_name, role, is_artist FROM users WHERE username=?;
+            SELECT id, username, full_name, role, is_artist, queue_open FROM users WHERE username=?;
         """
         return self._fetch_one(sql, [username])
 
@@ -177,7 +185,7 @@ class Db:
 
     def get_all_artists(self) -> Iterator[dict]:
         sql = """
-            SELECT username, full_name FROM users WHERE is_artist;
+            SELECT username, full_name, queue_open FROM users WHERE is_artist=TRUE;
         """
         return self._fetch_all(sql)
 

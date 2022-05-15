@@ -43,7 +43,7 @@ body {
 #commissions {
   width: 100%;
   display: grid;
-  grid-template-columns: 11em auto 1fr;
+  grid-template-columns: 9em auto 1fr;
 }
 
 #my_commissions, #other_commissions, #finished_commissions, .commission_container {
@@ -65,6 +65,10 @@ body {
 
 .commission_description {
     grid-column: 2 / span 2;
+}
+
+.commission_description_span_all {
+    grid-column: 1 / span 3;
 }
 
 .show_hide_commissions_checkbox {
@@ -121,6 +125,10 @@ body {
 
 .queue_hidden {
     color: gray;
+}
+
+.queue_closed {
+    text-decoration: line-through;
 }
 
 details {
@@ -180,7 +188,7 @@ summary {
 /*    background-color: white;*/
 /*}*/
 
-.is_artist_checkbox {
+.admin_checkbox {
     margin: auto;
     width: 100%;
 }

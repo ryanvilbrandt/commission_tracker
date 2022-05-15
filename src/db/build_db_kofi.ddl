@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS users (
     full_name TEXT DEFAULT '',
     password_hash TEXT,
     role TEXT DEFAULT 'user',
-    is_artist BOOLEAN DEFAULT FALSE
+    is_artist BOOLEAN DEFAULT FALSE,
+    queue_open BOOLEAN DEFAULT FALSE
 );
 CREATE TABLE IF NOT EXISTS commissions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

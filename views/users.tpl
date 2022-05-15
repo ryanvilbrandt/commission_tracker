@@ -5,6 +5,7 @@
         <th>Full Name</th>
         <th>Role</th>
         <th>Artist?</th>
+        <th>Queue?</th>
         <th>Controls</th>
       </tr>
       % for user in users:
@@ -13,7 +14,8 @@
         <td>{{user["username"]}}</td>
         <td>{{user["full_name"]}}</td>
         <td>{{user["role"].title()}}</td>
-        <td><input class="is_artist_checkbox" type="checkbox" user_id="{{user['id']}}" {{ "checked" if user["is_artist"] else "" }}></td>
+        <td><input class="admin_checkbox is_artist_checkbox" type="checkbox" user_id="{{user['id']}}" {{ "checked" if user["is_artist"] else "" }}></td>
+        <td><input class="admin_checkbox queue_open_checkbox" type="checkbox" user_id="{{user['id']}}" {{ "checked" if user["queue_open"] else "" }}></td>
         <td>
           % if not user["disable_user_buttons"]:
           <button class="change_user_username" title="Change Username" user_id="{{user['id']}}">🇺</button>

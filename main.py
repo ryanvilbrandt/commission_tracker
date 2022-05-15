@@ -18,12 +18,9 @@ while True:
         sleep(10)
 
 # TODO:
-# Artists' sections:
-# * Button for artists to open/close their queue (just cosmetic, don't block assignments)
-#
-#
+# * Add file upload prompt when a user clicks to finish a commission
 # * Order commissions by when an artist accepts them
-# * Make newlines work in commission text fields somehow
+# * Make is_artist and queue_open checkboxes work without redirect page
 # * Notes field for each commission? Editable on the web page
 # * Can view the history of each commissions
 # * Add tracking for which users have websockets open

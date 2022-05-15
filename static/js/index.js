@@ -4,9 +4,11 @@ import {ws_init, ws_load, ws_close} from "./mywebsocket.js";
 let refresh_button = null;
 let opened_details = [];
 let current_user_role = null;
+let current_user_is_artist = null;
 
-export function init(v_current_user_role) {
+export function init(v_current_user_role, v_current_user_is_artist) {
     current_user_role = v_current_user_role;
+    current_user_is_artist = v_current_user_is_artist;
     // refresh_button = document.querySelector("#refresh_button");
     // refresh_button.onclick = function() {
     //     refresh_button.disabled = true;
@@ -44,6 +46,7 @@ function apply_commission_hooks() {
 
 function apply_user_hooks() {
     document.querySelectorAll(".is_artist_checkbox").forEach(e => e.onclick = change_is_artist);
+    document.querySelectorAll(".queue_open_checkbox").forEach(e => e.onclick = change_queue_open);
     document.querySelectorAll(".change_user_username").forEach(e => e.onclick = click_change_username);
     document.querySelectorAll(".change_user_full_name").forEach(e => e.onclick = click_change_full_name);
     document.querySelectorAll(".change_user_password").forEach(e => e.onclick = click_change_password);
@@ -74,10 +77,19 @@ function handle_websocket(msg) {
     if (current_user_role !== "user") {
         ajax_call(`/fetch_users`, fetch_users_callback);
     }
+    if (current_user_is_artist) {
+        ajax_call(`/fetch_queue_open`, fetch_queue_open_callback);
+    }
 }
 
 function fetch_users_callback(xhttp) {
     document.querySelector("#users").innerHTML = xhttp.responseText;
+    apply_user_hooks();
+}
+
+function fetch_queue_open_callback(xhttp) {
+    let checked = xhttp.responseText === "true";
+    document.querySelector("#current_user_queue_open_checkbox").checked = checked;
     apply_user_hooks();
 }
 
@@ -117,6 +129,12 @@ function change_is_artist(event) {
     let user_id = event.target.attributes.user_id.value;
     let is_artist = event.target.checked;
     window.location.href = `/change_is_artist/${user_id}/${is_artist}`;
+}
+
+function change_queue_open(event) {
+    let user_id = event.target.attributes.user_id.value;
+    let queue_open = event.target.checked;
+    window.location.href = `/change_queue_open/${user_id}/${queue_open}`;
 }
 
 function change_user_property(event, property) {
@@ -161,7 +179,7 @@ function set_action_button(button) {
         button.onclick = invoiced;
     } else if (button.classList.contains("paid")) {
         button.onclick = paid;
-    } else if (button.classList.contains("finished")) {
+    } else if (button.classList.contains("finished_button")) {
         button.onclick = finished;
     } else {
         console.error(`Unknown button class: ${button.classList}`);

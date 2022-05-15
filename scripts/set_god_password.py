@@ -43,6 +43,7 @@ def main():
                                 bcrypt.hashpw(row["Password"].encode(), bcrypt.gensalt()),
                                 row["Role"],
                                 row["Is Artist"].lower().startswith("t"),
+                                row["Queue Open"].lower().startswith("t"),
                             )
                             print(f"Added '{row['Username']}' to the database.")
                         except sqlite3.IntegrityError as e:

@@ -10,8 +10,11 @@
                 % end
             </h2>
             % if current_user["role"] != "god":
-            <button class="change_user_username" title="Change Username" user_id="{{current_user['id']}}">🇺 Change Username</button>
-            <button class="change_user_password" title="Change Password" user_id="{{current_user['id']}}">🔒 Change Password</button>
+            <button class="change_user_button change_user_username" title="Change Username" user_id="{{current_user['id']}}">🇺 Change Username</button>
+            <button class="change_user_button change_user_password" title="Change Password" user_id="{{current_user['id']}}">🔒 Change Password</button>
+            % end
+            % if current_user["is_artist"]:
+            <input class="queue_open_checkbox" id="current_user_queue_open_checkbox" type="checkbox" user_id="{{current_user['id']}}"{{ " checked" if current_user["queue_open"] else "" }}> Queue Open?
             % end
         </div>
     </div>
@@ -58,6 +61,8 @@
             </p>
             <label for="is_artist">Is an artist?</label>
             <input type="checkbox" id="add_new_user_is_artist" name="is_artist" checked required><br>
+            <label for="queue_open">Queue open?</label>
+            <input type="checkbox" id="add_new_user_queue_open" name="queue_open" checked required><br>
             <br>
             <input type="submit" value="Add New User">
         </form>
@@ -71,5 +76,5 @@
 
 <script type="module">
     import { init } from "/static/js/index.js";
-    init("{{ current_user["role"] }}");
+    init("{{ current_user["role"] }}", "{{ current_user["is_artist"] }}");
 </script>

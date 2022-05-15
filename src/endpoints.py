@@ -65,6 +65,13 @@ def load_wsgi_endpoints(app: Bottle):
             users = _get_users(db, current_user)
         return {"users": users}
 
+    @app.get("/fetch_queue_open")
+    @auth_basic(_auth_check)
+    def fetch_users():
+        with Db() as db:
+            current_user = db.get_user_from_username(request.auth[0])
+        return "true" if current_user["queue_open"] else "false"
+
     @app.get('/commissions_websocket', apply=[websocket])
     @auth_basic(_auth_check)
     def commissions_websocket(ws):
@@ -139,7 +146,9 @@ def load_wsgi_endpoints(app: Bottle):
                     new_username,
                     request.forms["full_name"],
                     bcrypt.hashpw(request.forms["password"].encode(), bcrypt.gensalt()),
-                    new_user_role
+                    new_user_role,
+                    request.forms["is_artist"],
+                    request.forms["queue_open"],
                 )
             except sqlite3.IntegrityError as e:
                 if str(e) == "UNIQUE constraint failed: users.username":
@@ -225,6 +234,7 @@ def load_wsgi_endpoints(app: Bottle):
             response = db.change_password(user_id, bcrypt.hashpw(password.encode(), bcrypt.gensalt()))
             if response is None:
                 abort(400, f"No user found with id={user_id}")
+                return
             username = db.get_username_from_id(user_id)
         _delete_from_password_cache(username)
         if change_self:
@@ -249,10 +259,36 @@ def load_wsgi_endpoints(app: Bottle):
             response = db.change_is_artist(user_id, is_artist)
             if response is None:
                 abort(400, f"No user found with id={user_id}")
+                return
+        utils.send_to_websockets("refresh")
         return {
             "title": f"Changed user id={user_id} is_artist property to '{is_artist}'",
             "message": f"User with id='{user_id}' has had their is_artist property changed to '{is_artist}'."
         }
+
+    @app.get("/change_queue_open/<user_id>/<queue_open>")
+    @view("redirect_to_main.tpl")
+    @auth_basic(_auth_check)
+    def change_queue_open(user_id, queue_open):
+        queue_open = queue_open.lower() == "true"
+        with Db() as db:
+            change_self = _permissions_check(db, request.auth[0], user_id)
+            response = db.change_queue_open(user_id, queue_open)
+            if response is None:
+                abort(400, f"No user found with id={user_id}")
+                return
+        utils.send_to_websockets("refresh")
+        if change_self:
+            queue_opened_text = "opened" if queue_open else "closed"
+            return {
+                "title": f"Queue {queue_opened_text}",
+                "message": f"Your queue has been {queue_opened_text}.",
+            }
+        else:
+            return {
+                "title": f"Changed user id={user_id} queue_open property to '{queue_open}'",
+                "message": f"User with id='{user_id}' has had their queue_open property changed to '{queue_open}'."
+            }
 
     @app.error(401)
     @view("error_401.tpl")
@@ -281,6 +317,7 @@ def load_wsgi_endpoints(app: Bottle):
             return
         print(f"New Ko-fi commission! {data}")
         functions.add_commission(data)
+        utils.send_to_websockets("refresh")
 
 
 def _get_user(db: Db, username: str):
@@ -347,7 +384,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
     # Build user-specific commission queues
     for user in db.get_all_artists():
         other_commissions[user["username"]] = {
-            "full_name": user["full_name"],
+            "user": user,
             "hidden": user["username"] in hidden_queues,
             "meta": {"assigned": 0, "paid": 0, "invoiced": 0, "not_accepted": 0},
             "commissions": []
