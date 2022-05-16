@@ -27,7 +27,7 @@
             % elif not commission["paid"]:
                 <button class="paid action_button" title="Mark as Paid" commission_id="{{ commission['id'] }}">💸</button>
             % end
-            % if not commission["finished"]:
+            % if not commission["finished"] and (queue_type == "my_commissions" or queue_type == "other_commissions"):
                 <button class="finished_button action_button disabled_button" title="You must upload a file to this commission before marking it as Finished." commission_id="{{ commission['id'] }}" disabled>🎉</button>
             % end
         % end
@@ -38,26 +38,30 @@
 <details class="commission_description{{ span_all }}" commission_id="{{ commission['id'] }}" queue_name="{{ queue_name }}"{{ open }}{{ hidden_text }}>
     % star = " ⭐" if commission["is_exclusive"] else ""
     <summary class="{{ commission['status'] }}">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }}</summary>
-    <p>
-        <b>Email:</b> {{ commission['email'] }}<br>
-        <b>Status:</b> {{ commission["status_text"] }}<br>
-        <b>Assigned to:</b> {{ commission["full_name"] }}
-    </p>
-    <p><a href="{{ commission["url"] }}" target="_blank"><b>Link to commission details</b></a></p>
-    % if commission["message"]:
-    <p><b>Message:</b> {{ commission["message"] }}</p>
-    % end
-    % if queue_type == "other_commissions":
+    <p><a href="{{ commission["url"] }}" target="_blank">Link to commission details</a></p>
+    % if queue_type == "other_commissions" or queue_type == "my_commissions":
     <p><b>Upload File:</b> <input type="file" class="commission-upload" commission_id="{{ commission['id'] }}"></p>
     % elif queue_type == "finished_commissions":
-    <p><b>Uploaded File:</b> {{ commission["uploaded_filename"] }}</p>
+    <p><a href="/get_finished_commission_image/{{ commission["uploaded_filename"] }}" target="_blank">Uploaded File</a></p>
     % end
     % if current_user["role"] != "user":
     <hr>
     <p>
-        <label for="assign_users_dropdown_{{ commission['id'] }}">Assign to a user:</label>
+        <b>Status:</b> {{ commission["status_text"] }}<br>
+        <b>Assigned to:</b> {{ commission["full_name"] }}<br>
+        <b>Email:</b> {{ commission['email'] }}
+        % if commission["message"]:
+        <br><b>Message:</b> {{ commission["message"] }}
+        % end
+    </p>
+    <p>
+        <label for="assign_users_dropdown_{{ commission['id'] }}">Assign to an artist:</label>
         <select name="assign_users" id="assign_users_dropdown_{{ commission['id'] }}">
+        % if queue_type == "new_commissions":
+            <option value="-1">Any Artist</option>
+        % else:
             <option value="-1">Unassigned</option>
+        % end
         % for user in users:
             % if user["is_artist"] and user["queue_open"]:
             <option value="{{ user["id"] }}">{{ user["full_name"] }}</option>

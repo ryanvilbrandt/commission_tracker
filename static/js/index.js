@@ -96,6 +96,7 @@ function fetch_queue_open_callback(xhttp) {
 
 function open_details(e) {
     let details = e.target;
+    if (!details.attributes["commission_id"]) return;
     let commission_id = details.attributes["commission_id"].value;
     if (details.open) {
         if (!opened_details.includes(commission_id)) {

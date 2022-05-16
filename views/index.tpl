@@ -10,7 +10,7 @@
                 % end
             </h2>
             % if current_user["role"] != "god":
-            <button class="change_user_button change_user_username" title="Change Username" user_id="{{current_user['id']}}">🇺 Change Username</button>
+            <button class="change_user_button change_user_full_name" title="Change Full Name" user_id="{{current_user['id']}}">🇫 Change Full Name</button>
             <button class="change_user_button change_user_password" title="Change Password" user_id="{{current_user['id']}}">🔒 Change Password</button>
             % end
             % if current_user["is_artist"]:
@@ -22,8 +22,17 @@
     <!-- <button id="refresh_button">🔄 Refresh commissions</button> -->
 
     <br>
-    <a href="https://docs.google.com/document/d/1_sIwTkwdsqiDOvPOZrfyQfun3is4GXSKKzli3N1mRis/view">Stream Reference Doc</a><br>
-    <a href="https://docs.google.com/document/d/1_sIwTkwdsqiDOvPOZrfyQfun3is4GXSKKzli3N1mRis/view#heading=h.k65jijr8gif7">Stream Commission Tracker Quick Guide</a>
+    <details>
+        <summary>How To Use The Commission Tracker</summary>
+        <p>This is a quick summary of how to user the Commission Tracker.<br>
+            If this is your first time logging in here, please click the <code>🔒 Change Password</code> button above to change your password.<br>
+            You can also change your displayed name by clicking the <code>🇫 Change Full Name</code> button.</p>
+        % if current_user["role"] != "user":
+        {{ !host_quick_guide }}
+        % else:
+        {{ !user_quick_guide }}
+        % end
+    </details>
 
     <div id="commissions">
         % include("commissions.tpl", commissions=commissions, current_user=current_user, users=users)

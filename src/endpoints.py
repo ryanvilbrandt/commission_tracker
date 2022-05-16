@@ -9,20 +9,35 @@ import bcrypt
 from bottle_websocket import websocket
 
 from bottle import static_file, Bottle, view, auth_basic, request, abort, template
+from markdown2 import Markdown
 from src import utils, functions
 from src.db.db import Db
 
 START_TIME = None
+MD: Optional[Markdown] = None
+HOST_QUICK_GUIDE_MD = None
+USER_QUICK_GUIDE_MD = None
+HOST_HELP_MD = None
+USER_HELP_MD = None
 password_hash_cache = {}
 
 
 def init(cfg):
-    global START_TIME
+    global START_TIME, MD, HOST_QUICK_GUIDE_MD, USER_QUICK_GUIDE_MD, HOST_HELP_MD, USER_HELP_MD
     START_TIME = ctime()
+    MD = Markdown()
+    with open("src/host_quick_guide.md", "rb") as f:
+        HOST_QUICK_GUIDE_MD = MD.convert(f.read())
+    with open("src/user_quick_guide.md", "rb") as f:
+        USER_QUICK_GUIDE_MD = MD.convert(f.read())
+    with open("src/host_help.md", "rb") as f:
+        HOST_HELP_MD = MD.convert(f.read())
+    with open("src/user_help.md", "rb") as f:
+        USER_HELP_MD = MD.convert(f.read())
 
 
 def load_wsgi_endpoints(app: Bottle):
-    @app.get('/')
+    @app.get("/")
     @view("index.tpl")
     @auth_basic(_auth_check)
     def index():
@@ -31,11 +46,28 @@ def load_wsgi_endpoints(app: Bottle):
             current_user = _get_user(db, username)
             users = _get_users(db, current_user)
             commissions = _fetch_commissions(db, current_user, [], [])
-        return {"title": "Home page!", "users": users, "current_user": current_user, "commissions": commissions}
+        return {"title": "Commission Tracker", "users": users, "current_user": current_user, "commissions": commissions,
+                "host_quick_guide": HOST_QUICK_GUIDE_MD, "user_quick_guide": USER_QUICK_GUIDE_MD}
+
+    @app.get("/host_help")
+    @view("md_page.tpl")
+    @auth_basic(_auth_check)
+    def host_help():
+        return {"title": "Commission Tracker Help for Hosts", "md": HOST_HELP_MD}
+
+    @app.get("/user_help")
+    @view("md_page.tpl")
+    @auth_basic(_auth_check)
+    def host_help():
+        return {"title": "Commission Tracker Help for Artists", "md": USER_HELP_MD}
 
     @app.get("/static/<path:path>", name="static")
     def static(path):
         return static_file(path, root="static")
+
+    @app.get("/get_finished_commission_image/<path:path>")
+    def static(path):
+        return static_file(path, root="finished_commissions")
 
     @app.get("/favicon.ico", name="favicon")
     def favicon():

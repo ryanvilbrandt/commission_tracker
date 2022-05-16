@@ -20,7 +20,8 @@ def create_fake_commission():
             "from_name": fake.name(),
             "message": fake.text(20),
             "amount": "{:.2f}".format(fake.pyfloat(min_value=1, max_value=99.99)),
-            "url": f"https://ko-fi.com/Home/CoffeeShop?txid={uuid4()}&readToken={uuid4()}",
+            # "url": f"https://ko-fi.com/Home/CoffeeShop?txid={uuid4()}&readToken={uuid4()}",
+            "url": "https://youtu.be/dQw4w9WgXcQ?autoplay=1",
             "email": fake.email(),
             "currency": "USD",
             "is_subscription_payment": False,
@@ -34,5 +35,5 @@ def create_fake_commission():
 
 
 if __name__ == "__main__":
-    for _ in range(3):
+    for _ in range(11):
         create_fake_commission()

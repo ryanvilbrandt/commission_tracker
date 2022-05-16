@@ -18,7 +18,6 @@ while True:
         sleep(10)
 
 # TODO:
-# * Add file upload prompt when a user clicks to finish a commission
 # * Order commissions by when an artist accepts them
 # * Make is_artist and queue_open checkboxes work without redirect page
 # * Notes field for each commission? Editable on the web page
@@ -28,3 +27,4 @@ while True:
 # * Time counter of how long something has been in its current status
 # * Allow upload/drag-and-drop of finished images onto commissions
 # * Change buttons to progress bar?
+# * Change "User" role to "Artist" and get rid of "Is Artist"
