@@ -100,15 +100,22 @@ def load_wsgi_endpoints(app: Bottle):
                 functions.invoice_commission(db, commission_id)
             elif action == "paid":
                 functions.pay_commission(db, commission_id)
-            elif action == "finished":
-                functions.finish_commission(db, commission_id)
             elif action == "undo_invoiced":
                 functions.invoice_commission(db, commission_id, invoiced=False)
             elif action == "undo_paid":
                 functions.pay_commission(db, commission_id, paid=False)
             else:
                 abort(400, f"Unknown action: {action}")
-            utils.send_to_websockets("refresh")
+        utils.send_to_websockets("refresh")
+
+    @app.post("/finish_commission")
+    @auth_basic(_auth_check)
+    def finish_commission():
+        commission_id = request.forms.commission_id
+        image_file = request.files.image_file
+        with Db() as db:
+            functions.finish_commission(db, commission_id, image_file)
+        utils.send_to_websockets("refresh")
 
     @app.get("/assign_commission/<commission_id>/<user_id>")
     @auth_basic(_auth_check)

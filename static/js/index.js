@@ -8,7 +8,7 @@ let current_user_is_artist = null;
 
 export function init(v_current_user_role, v_current_user_is_artist) {
     current_user_role = v_current_user_role;
-    current_user_is_artist = v_current_user_is_artist;
+    current_user_is_artist = v_current_user_is_artist === "1";
     // refresh_button = document.querySelector("#refresh_button");
     // refresh_button.onclick = function() {
     //     refresh_button.disabled = true;
@@ -42,6 +42,7 @@ function apply_commission_hooks() {
     document.querySelectorAll(".assign_to_user_button").forEach(e => e.onclick = click_assign);
     // document.querySelectorAll(".undo_invoiced_button").forEach(e => e.onclick = click_undo_invoiced);
     // document.querySelectorAll(".undo_paid_button").forEach(e => e.onclick = click_undo_paid);
+    document.querySelectorAll(".commission-upload").forEach(e => init_commission_upload(e));
 }
 
 function apply_user_hooks() {
@@ -207,7 +208,20 @@ function paid(event) {
 }
 
 function finished(event) {
-    ajax_call(`/commission_action/finished/${event.target.attributes["commission_id"].value}`, callback);
+    const commission_id = event.target.getAttribute("commission_id");
+    const uploaded_files = document.querySelector(`.commission-upload[commission_id="${commission_id}"]`).files;
+    console.log(uploaded_files);
+    // if (uploaded_files.length === 0) {
+    //     let confirmation = window.confirm(
+    //         "Are you sure you want mark this commission as finished without uploading a file?"
+    //     );
+    //     if (!confirmation) return;
+    // }
+    let form_data = new FormData();
+    form_data.append("image_file", uploaded_files[0]);
+    form_data.append("commission_id", event.target.attributes["commission_id"].value);
+    console.log(form_data);
+    ajax_call(`/finish_commission`, callback, null, form_data);
 }
 
 function click_assign(event) {
@@ -234,6 +248,29 @@ function callback(xhttp) {
         document.querySelector("#top_error_overlay").appendChild(build_top_error(msg));
         document.querySelectorAll(".top_error_close").forEach(e => e.onclick = close_error);
     }
+}
+
+function init_commission_upload(element) {
+    element.addEventListener("change", on_commission_upload, false);
+    // Check if the file_list is already filled on load (can happen on refresh) and undisable button immediately
+    const file_list = element.files;
+    if (file_list.length > 0) {
+        on_commission_upload(null, element);
+    }
+}
+
+function on_commission_upload(event, v_element=null) {
+    let element;
+    if (v_element !== null) {
+        element = v_element;
+    } else {
+        element = event.target;
+    }
+    const commission_id = element.getAttribute("commission_id");
+    const finished_button = document.querySelector(`.finished_button[commission_id="${commission_id}"]`);
+    finished_button.disabled = false;
+    finished_button.classList.remove("disabled_button");
+    finished_button.title = "Mark as Finished";
 }
 
 function build_top_error(msg) {

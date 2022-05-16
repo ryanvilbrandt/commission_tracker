@@ -262,6 +262,10 @@ class Db:
         sql = "UPDATE commissions SET paid=? WHERE id=?;"
         self.cur.execute(sql, [paid, commission_id])
 
-    def finish_commission(self, commission_id: int, finished=True):
-        sql = "UPDATE commissions SET finished=? WHERE id=?;"
-        self.cur.execute(sql, [finished, commission_id])
+    def finish_commission(self, commission_id: int, filename: str):
+        sql = "UPDATE commissions SET finished=TRUE, uploaded_filename=? WHERE id=?;"
+        self.cur.execute(sql, [filename, commission_id])
+
+    def unfinish_commission(self, commission_id: int):
+        sql = "UPDATE commissions SET finished=FALSE WHERE id=?;"
+        self.cur.execute(sql, [commission_id])

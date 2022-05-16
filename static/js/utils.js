@@ -1,4 +1,4 @@
-export function ajax_call(url, func, params=null) {
+export function ajax_call(url, func, params=null, form_data=null) {
     const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         switch (this.readyState) {
@@ -24,11 +24,10 @@ export function ajax_call(url, func, params=null) {
             default:
         }
     };
-    xhttp.open(params === null ? "GET" : "POST", url, true);
+    const call_type = params === null && form_data === null ? "GET" : "POST";
+    xhttp.open(call_type, url, true);
     xhttp.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-    if (params === null) {
-        xhttp.send();
-    } else {
+    if (params !== null) {
         let post_params;
         if (typeof params === "string") {
             post_params = params;
@@ -39,5 +38,9 @@ export function ajax_call(url, func, params=null) {
         }
         xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhttp.send(post_params);
+    } else if (form_data !== null) {
+        xhttp.send(form_data);
+    } else {
+        xhttp.send();
     }
 }

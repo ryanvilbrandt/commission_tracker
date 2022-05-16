@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS commissions (
     invoiced BOOLEAN DEFAULT TRUE,
     paid BOOLEAN DEFAULT TRUE,
     finished BOOLEAN DEFAULT FALSE,
+    uploaded_filename TEXT DEFAULT NULL,
     UNIQUE (created_ts, email) ON CONFLICT IGNORE
 );
 PRAGMA case_sensitive_like=ON;

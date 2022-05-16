@@ -184,6 +184,11 @@ summary {
   cursor: pointer;
 }
 
+.disabled_button {
+    filter: grayscale(100%);
+    cursor: default;
+}
+
 /*.action_button:hover {*/
 /*    background-color: white;*/
 /*}*/

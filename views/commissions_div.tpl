@@ -28,7 +28,7 @@
                 <button class="paid action_button" title="Mark as Paid" commission_id="{{ commission['id'] }}">💸</button>
             % end
             % if not commission["finished"]:
-                <button class="finished_button action_button" title="Mark as Finished" commission_id="{{ commission['id'] }}">🎉</button>
+                <button class="finished_button action_button disabled_button" title="You must upload a file to this commission before marking it as Finished." commission_id="{{ commission['id'] }}" disabled>🎉</button>
             % end
         % end
     % end
@@ -46,6 +46,11 @@
     <p><a href="{{ commission["url"] }}" target="_blank"><b>Link to commission details</b></a></p>
     % if commission["message"]:
     <p><b>Message:</b> {{ commission["message"] }}</p>
+    % end
+    % if queue_type == "other_commissions":
+    <p><b>Upload File:</b> <input type="file" class="commission-upload" commission_id="{{ commission['id'] }}"></p>
+    % elif queue_type == "finished_commissions":
+    <p><b>Uploaded File:</b> {{ commission["uploaded_filename"] }}</p>
     % end
     % if current_user["role"] != "user":
     <hr>

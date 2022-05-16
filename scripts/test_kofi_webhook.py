@@ -6,7 +6,8 @@ from uuid import uuid4
 from faker import Faker
 from requests import post
 
-if __name__ == "__main__":
+
+def create_fake_commission():
     fake = Faker()
     # print(dir(fake))
     # help(fake.pyfloat)
@@ -30,3 +31,8 @@ if __name__ == "__main__":
             "tier_name": None,
         })
     })
+
+
+if __name__ == "__main__":
+    for _ in range(3):
+        create_fake_commission()

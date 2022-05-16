@@ -1,6 +1,8 @@
 import os
+import re
 from typing import Optional, Dict, Union
 
+import bottle
 from src.db.db import Db
 
 
@@ -92,7 +94,7 @@ def add_commission(data: Dict[str, Union[str, bool, None]]) -> Optional[dict]:
 
 
 def assign_commission(db: Db, commission_id: int, user_id: int) -> Optional[dict]:
-    db.finish_commission(commission_id, False)
+    db.unfinish_commission(commission_id)
     db.accept_commission(commission_id, False)
     db.assign_commission(commission_id, user_id)
     return db.update_ts(commission_id)
@@ -155,8 +157,21 @@ def pay_commission(db: Db, commission_id: int, paid: bool=True) -> Optional[dict
     return db.update_ts(commission_id)
 
 
-def finish_commission(db: Db, commission_id: int) -> Optional[dict]:
-    db.finish_commission(commission_id)
+def finish_commission(db: Db, commission_id: int, image_file: bottle.FileUpload) -> Optional[dict]:
+    commission = db.get_commission_by_id(commission_id)
+    commissioner_name = re.sub(r"\W", "_", commission["name"].lower())
+    assigned_artist = db.get_username_from_id(commission["assigned_to"])
+    _, ext = os.path.splitext(image_file.filename)
+    os.makedirs("finished_commissions", exist_ok=True)
+    filename = f"{commission['id']:>02}_{commissioner_name}_by_{assigned_artist}{ext}"
+    filepath = f"finished_commissions/{filename}"
+    i = 0
+    while os.path.isfile(filepath):
+        i += 1
+        filename = f"{commission['id']:>02}_{commissioner_name}_by_{assigned_artist}_{i}{ext}"
+        filepath = f"finished_commissions/{filename}"
+    image_file.save(filepath)
+    db.finish_commission(commission_id, filename)
     db.assign_commission(commission_id, -1)
     return db.update_ts(commission_id)
 
