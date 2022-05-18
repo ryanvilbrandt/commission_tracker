@@ -69,9 +69,9 @@
                 <label for="add_new_user_user">User</label><br>
             </p>
             <label for="is_artist">Is an artist?</label>
-            <input type="checkbox" id="add_new_user_is_artist" name="is_artist" checked required><br>
+            <input type="checkbox" id="add_new_user_is_artist" name="is_artist" checked><br>
             <label for="queue_open">Queue open?</label>
-            <input type="checkbox" id="add_new_user_queue_open" name="queue_open" checked required><br>
+            <input type="checkbox" id="add_new_user_queue_open" name="queue_open" checked><br>
             <br>
             <input type="submit" value="Add New User">
         </form>
