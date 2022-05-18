@@ -81,45 +81,6 @@ code {
     margin: auto;
 }
 
-/*#commissions table {*/
-/*  width: 100%;*/
-/*}*/
-
-/*#commissions table th {*/
-/*  padding-top: 1.5rem;*/
-/*  padding-bottom: 0.5rem;*/
-/*  text-align: left;*/
-/*  font-size: 1.25rem;*/
-/*}*/
-
-/*#commissions table td:first-child {*/
-/*  width: 12rem;*/
-/*}*/
-
-/*#commissions table td:last-child {*/
-/*  width: auto;*/
-/*}*/
-
-/*#my-commissions {*/
-/*  width: 100%;*/
-/*}*/
-
-/*#my-commissions details {*/
-/*  width: 100%;*/
-/*}*/
-
-/*#available-commissions {*/
-/*  width: 100%;*/
-/*}*/
-
-/*#available-commissions details {*/
-/*    width: 100%;*/
-/*}*/
-
-/*#other-commissions {*/
-/*  width: 100%;*/
-/*}*/
-
 .user_meta_header {
     cursor: help;
     padding: 5px;
