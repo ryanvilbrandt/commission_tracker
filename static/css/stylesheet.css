@@ -210,3 +210,8 @@ summary {
     background-color: white;
     padding: 0 1rem;
 }
+
+.upload_preview {
+    max-height: 100px;
+    max-width: 100px;
+}

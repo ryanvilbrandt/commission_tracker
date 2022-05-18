@@ -18,7 +18,6 @@ while True:
         sleep(10)
 
 # TODO:
-# * Thumbnails when uploading images
 # * Finish commission confirmation
 # * Order commissions by when an artist accepts them
 # * Make is_artist and queue_open checkboxes work without redirect page

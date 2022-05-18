@@ -307,9 +307,20 @@ function on_commission_upload(event, v_element=null) {
     } else {
         element = event.target;
     }
+    const file = element.files[0];
     const commission_id = element.getAttribute("commission_id");
     const finished_button = document.querySelector(`.finished_button[commission_id="${commission_id}"]`);
     finished_button.disabled = false;
     finished_button.classList.remove("disabled_button");
     finished_button.title = "Mark as Finished";
+
+    const reader = new FileReader();
+    const upload_preview = document.querySelector(`.upload_preview[commission_id="${commission_id}"]`);
+    reader.onload = (function(aImg) {
+        return function(e) {
+            aImg.src = e.target.result;
+            aImg.hidden = false;
+        };
+    })(upload_preview);
+    reader.readAsDataURL(file);
 }
