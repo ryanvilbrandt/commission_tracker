@@ -64,22 +64,32 @@ function handle_websocket(msg) {
     // refresh_button.disabled = true;
     console.debug(msg);
     if (msg.data === "ping") {
-        return;
-    }
-    let arg1 = opened_details.length === 0 ? "_" : opened_details.join(",");
-    let hidden_queues = [];
-    document.querySelectorAll(".show_hide_commissions_checkbox").forEach(function (e) {
-        if (!e.checked) {
-            hidden_queues.push(e.attributes["queue_owner"].value);
-        }
-    })
-    let arg2 = hidden_queues.length === 0 ? "_" : hidden_queues.join(",");
-    ajax_call(`/fetch_commissions/${arg1}/${arg2}`, fetch_commissions_callback);
-    if (current_user_role !== "user") {
+        // do nothing
+    } else if (msg.data === "users" && current_user_role !== "user") {
         ajax_call(`/fetch_users`, fetch_users_callback);
-    }
-    if (current_user_is_artist) {
-        ajax_call(`/fetch_queue_open`, fetch_queue_open_callback);
+    } else if (msg.data === "queue_open") {
+        if (current_user_role !== "user") {
+            ajax_call(`/fetch_users`, fetch_users_callback);
+        }
+        if (current_user_is_artist) {
+            ajax_call(`/fetch_queue_open`, fetch_queue_open_callback);
+        }
+    } else {
+        let arg1 = opened_details.length === 0 ? "_" : opened_details.join(",");
+        let hidden_queues = [];
+        document.querySelectorAll(".show_hide_commissions_checkbox").forEach(function (e) {
+            if (!e.checked) {
+                hidden_queues.push(e.attributes["queue_owner"].value);
+            }
+        })
+        let arg2 = hidden_queues.length === 0 ? "_" : hidden_queues.join(",");
+        ajax_call(`/fetch_commissions/${arg1}/${arg2}`, fetch_commissions_callback);
+        if (current_user_role !== "user") {
+            ajax_call(`/fetch_users`, fetch_users_callback);
+        }
+        if (current_user_is_artist) {
+            ajax_call(`/fetch_queue_open`, fetch_queue_open_callback);
+        }
     }
 }
 
@@ -127,18 +137,6 @@ function force_update() {
     ajax_call(`/send_to_websockets`, callback);
 }
 
-function change_is_artist(event) {
-    let user_id = event.target.attributes.user_id.value;
-    let is_artist = event.target.checked;
-    window.location.href = `/change_is_artist/${user_id}/${is_artist}`;
-}
-
-function change_queue_open(event) {
-    let user_id = event.target.attributes.user_id.value;
-    let queue_open = event.target.checked;
-    window.location.href = `/change_queue_open/${user_id}/${queue_open}`;
-}
-
 function change_user_property(event, property) {
     let human_property = property.replace("_", " ");
     let new_value = window.prompt(`What do you want to change that user's ${human_property} to?`);
@@ -148,7 +146,11 @@ function change_user_property(event, property) {
         return;
     }
     let user_id = event.target.attributes.user_id.value;
-    window.location.href = `/change_${property}/${user_id}/${new_value}`;
+    const params = {
+        "user_id": user_id,
+        "new_value": new_value
+    }
+    ajax_call(`/change_${property}`, callback, params);
 }
 
 function click_change_username(event) {
@@ -167,7 +169,30 @@ function click_delete_user(event) {
     let confirmation = window.confirm("Are you sure you want to delete that user?");
     if (!confirmation) return;
     let user_id = event.target.attributes.user_id.value;
-    window.location.href = `/delete_user/${user_id}`;
+    const params = {
+        "user_id": user_id
+    }
+    ajax_call(`/delete_user`, callback, params);
+}
+
+function change_is_artist(event) {
+    let user_id = event.target.attributes.user_id.value;
+    let is_artist = event.target.checked;
+    const params = {
+        "user_id": user_id,
+        "is_artist": is_artist
+    }
+    ajax_call(`/change_is_artist`, callback, params);
+}
+
+function change_queue_open(event) {
+    let user_id = event.target.attributes.user_id.value;
+    let queue_open = event.target.checked;
+    const params = {
+        "user_id": user_id,
+        "queue_open": queue_open
+    }
+    ajax_call(`/change_queue_open`, callback, params);
 }
 
 function set_action_button(button) {
@@ -242,13 +267,28 @@ function click_undo_paid(event) {
 function callback(xhttp) {
     console.log(xhttp.status);
     if (xhttp.status < 400) {
-        console.log(xhttp);
+        if (xhttp.response) {
+            window.alert(xhttp.response);
+        }
     } else {
         console.error(xhttp);
         let msg = `(${xhttp.status}) ${xhttp.statusText} &lt;${xhttp.responseURL}&gt; `
         document.querySelector("#top_error_overlay").appendChild(build_top_error(msg));
         document.querySelectorAll(".top_error_close").forEach(e => e.onclick = close_error);
     }
+}
+
+function build_top_error(msg) {
+    let error_bar = document.createElement("div");
+    error_bar.className = "top_error_message";
+    error_bar.innerHTML = `${msg} <span class="top_error_close">✖️</span>`;
+    return error_bar;
+}
+
+function close_error(e) {
+    let message = e.target.parentElement;
+    let overlay = message.parentElement;
+    overlay.removeChild(message);
 }
 
 function init_commission_upload(element) {
@@ -272,17 +312,4 @@ function on_commission_upload(event, v_element=null) {
     finished_button.disabled = false;
     finished_button.classList.remove("disabled_button");
     finished_button.title = "Mark as Finished";
-}
-
-function build_top_error(msg) {
-    let error_bar = document.createElement("div");
-    error_bar.className = "top_error_message";
-    error_bar.innerHTML = `${msg} <span class="top_error_close">✖️</span>`;
-    return error_bar;
-}
-
-function close_error(e) {
-    let message = e.target.parentElement;
-    let overlay = message.parentElement;
-    overlay.removeChild(message);
 }

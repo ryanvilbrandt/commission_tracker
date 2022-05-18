@@ -186,35 +186,36 @@ def load_wsgi_endpoints(app: Bottle):
                     request.forms["full_name"],
                     bcrypt.hashpw(request.forms["password"].encode(), bcrypt.gensalt()),
                     new_user_role,
-                    request.forms["is_artist"],
-                    request.forms["queue_open"],
+                    request.forms.get("is_artist", False),
+                    request.forms.get("queue_open", False),
                 )
             except sqlite3.IntegrityError as e:
                 if str(e) == "UNIQUE constraint failed: users.username":
                     abort(400, f"A user with the username '{new_username}' already exists.")
                 raise
+        utils.send_to_websockets("users")
         return {
             "title": f"Added user '{new_username}'",
             "message": f"'{new_username}' has been added to the database."
         }
 
-    @app.get("/delete_user/<user_id>")
-    @view("redirect_to_main.tpl")
+    @app.post("/delete_user")
     @auth_basic(_auth_check)
-    def delete_user(user_id):
+    def delete_user():
+        user_id = request.params["user_id"]
         with Db() as db:
             _permissions_check(db, request.auth[0], user_id, allow_change_self=False)
             response = db.delete_user(user_id)
             if response is None:
                 abort(400, f"No user found with id={user_id}")
-        return {
-            "title": f"Deleted user id={user_id}",
-            "message": f"User with id='{user_id}' has been deleted."
-        }
+        utils.send_to_websockets("users")
+        return f"User with id='{user_id}' has been deleted."
 
-    @app.get("/change_username/<user_id>/<username>")
+    @app.post("/change_username")
     @auth_basic(_auth_check)
-    def change_username(user_id, username):
+    def change_username():
+        user_id = request.params["user_id"]
+        username = request.params["new_value"]
         with Db() as db:
             change_self = _permissions_check(db, request.auth[0], user_id)
             if not username:
@@ -229,22 +230,19 @@ def load_wsgi_endpoints(app: Bottle):
                     abort(400, f"A user with the username '{username}' already exists.")
                 raise
         _delete_from_password_cache(old_username)
+        utils.send_to_websockets("users")
         if change_self:
-            return template("logout.tpl", {
-                "title": "Username successfully changed",
-                "message": f"Your username has been changed to '{username}'!"
-            })
+            return f"Your username has been changed to '{username}'. " \
+                   f"You will need to restart your web browser before you can log back in with your new credentials."
         else:
-            return template("redirect_to_main.tpl", {
-                "title": f"Changed user id={user_id} username to '{username}'",
-                "message": f"User with id='{user_id}' has had their username changed to '{username}'. "
-                           f"The user will need to restart their web browser to log back into the website.",
-            })
+            return f"User with id='{user_id}' has had their username changed to '{username}'. " \
+                   f"The user will need to restart their web browser to log back into the website."
 
-    @app.get("/change_full_name/<user_id>/<full_name>")
-    @view("redirect_to_main.tpl")
+    @app.post("/change_full_name")
     @auth_basic(_auth_check)
-    def change_full_name(user_id, full_name):
+    def change_full_name():
+        user_id = request.params["user_id"]
+        full_name = request.params["new_value"]
         with Db() as db:
             change_self = _permissions_check(db, request.auth[0], user_id)
             if not full_name:
@@ -252,20 +250,17 @@ def load_wsgi_endpoints(app: Bottle):
             response = db.change_full_name(user_id, full_name)
             if response is None:
                 abort(400, f"No user found with id={user_id}")
+        utils.send_to_websockets("users")
         if change_self:
-            return {
-                "title": "Full name successfully changed",
-                "message": f"Your name has been changed to '{full_name}'!",
-            }
+            return f"Your name has been changed to '{full_name}'."
         else:
-            return {
-                "title": f"Changed user id={user_id} full name to '{full_name}'",
-                "message": f"User with id='{user_id}' has had their full name changed to '{full_name}'.",
-            }
+            return f"User with id='{user_id}' has had their full name changed to '{full_name}'."
 
-    @app.get("/change_password/<user_id>/<password>")
+    @app.post("/change_password")
     @auth_basic(_auth_check)
-    def change_password(user_id, password):
+    def change_password():
+        user_id = request.params["user_id"]
+        password = request.params["new_value"]
         with Db() as db:
             change_self = _permissions_check(db, request.auth[0], user_id)
             if not password:
@@ -277,21 +272,17 @@ def load_wsgi_endpoints(app: Bottle):
             username = db.get_username_from_id(user_id)
         _delete_from_password_cache(username)
         if change_self:
-            return template("logout.tpl", {
-                "title": "Password successfully changed",
-                "message": "Your password has been changed!",
-            })
+            return "Your password has been changed. " \
+                   "You will need to restart your web browser before you can log back in with your new credentials."
         else:
-            return template("redirect_to_main.tpl", {
-                "title": f"Changed user id={user_id} password",
-                "message": f"User with id='{user_id}' has had their password changed. "
-                           f"The user will need to restart their web browser to log back into the website.",
-            })
+            return f"User with id='{user_id}' has had their password changed. " \
+                   f"The user will need to restart their web browser to log back into the website."
 
-    @app.get("/change_is_artist/<user_id>/<is_artist>")
-    @view("redirect_to_main.tpl")
+    @app.post("/change_is_artist")
     @auth_basic(_auth_check)
-    def change_is_artist(user_id, is_artist):
+    def change_is_artist():
+        user_id = request.params["user_id"]
+        is_artist = request.params["is_artist"]
         is_artist = is_artist.lower() == "true"
         with Db() as db:
             _permissions_check(db, request.auth[0], user_id, allow_change_self=False)
@@ -299,35 +290,21 @@ def load_wsgi_endpoints(app: Bottle):
             if response is None:
                 abort(400, f"No user found with id={user_id}")
                 return
-        utils.send_to_websockets("refresh")
-        return {
-            "title": f"Changed user id={user_id} is_artist property to '{is_artist}'",
-            "message": f"User with id='{user_id}' has had their is_artist property changed to '{is_artist}'."
-        }
+        utils.send_to_websockets("users")
 
-    @app.get("/change_queue_open/<user_id>/<queue_open>")
-    @view("redirect_to_main.tpl")
+    @app.post("/change_queue_open")
     @auth_basic(_auth_check)
-    def change_queue_open(user_id, queue_open):
+    def change_queue_open():
+        user_id = request.params["user_id"]
+        queue_open = request.params["queue_open"]
         queue_open = queue_open.lower() == "true"
         with Db() as db:
-            change_self = _permissions_check(db, request.auth[0], user_id)
+            _permissions_check(db, request.auth[0], user_id)
             response = db.change_queue_open(user_id, queue_open)
             if response is None:
                 abort(400, f"No user found with id={user_id}")
                 return
-        utils.send_to_websockets("refresh")
-        if change_self:
-            queue_opened_text = "opened" if queue_open else "closed"
-            return {
-                "title": f"Queue {queue_opened_text}",
-                "message": f"Your queue has been {queue_opened_text}.",
-            }
-        else:
-            return {
-                "title": f"Changed user id={user_id} queue_open property to '{queue_open}'",
-                "message": f"User with id='{user_id}' has had their queue_open property changed to '{queue_open}'."
-            }
+        utils.send_to_websockets("queue_open")
 
     @app.error(401)
     @view("error_401.tpl")
