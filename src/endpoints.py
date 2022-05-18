@@ -138,7 +138,7 @@ def load_wsgi_endpoints(app: Bottle):
                 functions.pay_commission(db, commission_id, paid=False)
             else:
                 abort(400, f"Unknown action: {action}")
-        utils.send_to_websockets("refresh")
+        utils.send_to_websockets("commissions")
 
     @app.post("/finish_commission")
     @auth_basic(_auth_check)
@@ -147,7 +147,7 @@ def load_wsgi_endpoints(app: Bottle):
         image_file = request.files.image_file
         with Db() as db:
             functions.finish_commission(db, commission_id, image_file)
-        utils.send_to_websockets("refresh")
+        utils.send_to_websockets("commissions")
 
     @app.get("/assign_commission/<commission_id>/<user_id>")
     @auth_basic(_auth_check)
@@ -162,7 +162,7 @@ def load_wsgi_endpoints(app: Bottle):
                     artist_name = db.get_full_name_from_id(user_id)
                     db.set_preferred_artist(commission_id, artist_name, True)
             functions.assign_commission(db, commission_id, user_id)
-            utils.send_to_websockets("refresh")
+            utils.send_to_websockets("commissions")
 
     @app.post("/add_new_user")
     @view("redirect_to_main.tpl")
@@ -333,7 +333,7 @@ def load_wsgi_endpoints(app: Bottle):
             return
         print(f"New Ko-fi commission! {data}")
         functions.add_commission(data)
-        utils.send_to_websockets("refresh")
+        utils.send_to_websockets("commissions")
 
 
 def _get_user(db: Db, username: str):

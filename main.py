@@ -26,7 +26,6 @@ while True:
 # * Add tracking for which users have websockets open
 # * Figure out way to make multiple actions in a row bog things down less. Threading of sending websockets?
 # * Time counter of how long something has been in its current status
-# * Allow upload/drag-and-drop of finished images onto commissions
 # * Change buttons to progress bar?
 # * Change "User" role to "Artist" and get rid of "Is Artist"
 # * Look into splitting out commission updates from websockets

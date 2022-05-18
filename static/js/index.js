@@ -64,17 +64,19 @@ function handle_websocket(msg) {
     // refresh_button.disabled = true;
     console.debug(msg);
     if (msg.data === "ping") {
-        // do nothing
-    } else if (msg.data === "users" && current_user_role !== "user") {
-        ajax_call(`/fetch_users`, fetch_users_callback);
-    } else if (msg.data === "queue_open") {
+        return;
+    }
+    if (msg.data === "refresh" || msg.data === "users" || msg.data === "queue_open") {
         if (current_user_role !== "user") {
             ajax_call(`/fetch_users`, fetch_users_callback);
         }
+    }
+    if (msg.data === "refresh" || msg.data === "queue_open") {
         if (current_user_is_artist) {
             ajax_call(`/fetch_queue_open`, fetch_queue_open_callback);
         }
-    } else {
+    }
+    if (msg.data === "refresh" || msg.data === "commissions") {
         let arg1 = opened_details.length === 0 ? "_" : opened_details.join(",");
         let hidden_queues = [];
         document.querySelectorAll(".show_hide_commissions_checkbox").forEach(function (e) {
@@ -84,12 +86,6 @@ function handle_websocket(msg) {
         })
         let arg2 = hidden_queues.length === 0 ? "_" : hidden_queues.join(",");
         ajax_call(`/fetch_commissions/${arg1}/${arg2}`, fetch_commissions_callback);
-        if (current_user_role !== "user") {
-            ajax_call(`/fetch_users`, fetch_users_callback);
-        }
-        if (current_user_is_artist) {
-            ajax_call(`/fetch_queue_open`, fetch_queue_open_callback);
-        }
     }
 }
 
