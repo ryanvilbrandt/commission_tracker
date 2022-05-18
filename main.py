@@ -20,7 +20,6 @@ while True:
 # TODO:
 # * Finish commission confirmation
 # * Order commissions by when an artist accepts them
-# * Make is_artist and queue_open checkboxes work without redirect page
 # * Notes field for each commission? Editable on the web page
 # * Can view the history of each commissions
 # * Add tracking for which users have websockets open

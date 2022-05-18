@@ -212,6 +212,6 @@ summary {
 }
 
 .upload_preview {
-    max-height: 100px;
-    max-width: 100px;
+    max-height: 200px;
+    max-width: 200px;
 }
