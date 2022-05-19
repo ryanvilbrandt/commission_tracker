@@ -109,6 +109,20 @@ summary {
   cursor: pointer;
 }
 
+.commission_title_container {
+    display: flex;
+}
+
+.commission_title {
+    flex: 1;
+}
+
+.created_updated {
+    flex: 0;
+    white-space: nowrap;
+    font-size: 0.8em;
+}
+
 .accepted, .claimed {
     background-color: #F4900C;
 }

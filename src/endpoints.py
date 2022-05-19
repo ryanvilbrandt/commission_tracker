@@ -2,13 +2,13 @@ import os
 import sqlite3
 import sys
 from json import loads
-from time import ctime
+from time import ctime, mktime, strptime
 from typing import Optional, List, Dict
 
 import bcrypt
 from bottle_websocket import websocket
 
-from bottle import static_file, Bottle, view, auth_basic, request, abort, template
+from bottle import static_file, Bottle, view, auth_basic, request, abort
 from markdown2 import Markdown
 from src import utils, functions
 from src.db.db import Db
@@ -406,6 +406,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
             "commissions": []
         }
     # Organize commissions into queues
+    time_offset = 7 * 3600
     for commission in db.get_all_commissions_with_users():
         # Modify data
         if str(commission["id"]) in opened_commissions:
@@ -415,6 +416,8 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
         else:
             commission["assigned_string"] = "Assigned to {}".format(commission["full_name"])
         commission["status"], commission["status_text"] = utils.get_status(commission)
+        commission["created_epoch"] = int(mktime(strptime(commission["created_ts"], "%a %b %d %H:%M:%S %Y"))) - time_offset
+        commission["updated_epoch"] = int(mktime(strptime(commission["updated_ts"], "%Y-%m-%d %H:%M:%S"))) - time_offset
         # Assign to queue
         if commission["preferred_artist"] is None:
             new_commissions["commissions"].append(commission)

@@ -1,7 +1,6 @@
 import {ajax_call} from "./utils.js";
 import {ws_init, ws_load, ws_close} from "./mywebsocket.js";
 
-let refresh_button = null;
 let opened_details = [];
 let current_user_role = null;
 let current_user_is_artist = null;
@@ -9,13 +8,6 @@ let current_user_is_artist = null;
 export function init(v_current_user_role, v_current_user_is_artist) {
     current_user_role = v_current_user_role;
     current_user_is_artist = v_current_user_is_artist === "1";
-    // refresh_button = document.querySelector("#refresh_button");
-    // refresh_button.onclick = function() {
-    //     refresh_button.disabled = true;
-    //     // document.querySelector("#commissions_container").innerHTML = "";
-    //     let arg = opened_details.length === 0 ? "_" : opened_details.join(",");
-    //     ajax_call(`/fetch_commissions/${arg}`, fetch_commissions_callback)
-    // }
 
     apply_commission_hooks();
     // Handle bug where page can be reloaded with checkboxes unchecked
@@ -33,6 +25,8 @@ export function init(v_current_user_role, v_current_user_is_artist) {
         console.log("Closing websocket");
         ws_close();
     });
+
+    timestamp_update_w_timer();
 }
 
 function apply_commission_hooks() {
@@ -54,14 +48,39 @@ function apply_user_hooks() {
     document.querySelectorAll(".delete_user").forEach(e => e.onclick = click_delete_user);
 }
 
+function timestamp_update_w_timer() {
+    timestamp_update();
+    window.setTimeout(timestamp_update_w_timer, 950);
+}
+
+function timestamp_update() {
+    const s = Math.floor(Date.now() / 1000);
+    document.querySelectorAll(".created_text").forEach(function (e) {
+        e.innerText = `created ${epoch_to_text(e, s)} ago`;
+    })
+    document.querySelectorAll(".updated_text").forEach(function (e) {
+        e.innerText = `updated ${epoch_to_text(e, s)} ago`;
+    })
+}
+
+function epoch_to_text(e, now_epoch) {
+    let age = now_epoch - parseInt(e.attributes["epoch"].value);
+    if (age < 60) {
+        return age + "s";
+    } else if (age < 3600) {
+        return Math.floor(age / 60) + "m";
+    } else {
+        return Math.floor(age / 3600) + "h";
+    }
+}
+
 function fetch_commissions_callback(xhttp) {
     document.querySelector("#commissions").innerHTML = xhttp.responseText;
     apply_commission_hooks();
-    // refresh_button.disabled = false;
+    timestamp_update();
 }
 
 function handle_websocket(msg) {
-    // refresh_button.disabled = true;
     console.debug(msg);
     if (msg.data === "ping") {
         return;

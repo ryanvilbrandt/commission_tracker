@@ -37,7 +37,15 @@
 % span_all = "_span_all" if queue_type == "new_commissions" else ""
 <details class="commission_description{{ span_all }}" commission_id="{{ commission['id'] }}" queue_name="{{ queue_name }}"{{ open }}{{ hidden_text }}>
     % star = " ⭐" if commission["is_exclusive"] else ""
-    <summary class="{{ commission['status'] }}">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }}</summary>
+    <summary class="{{ commission['status'] }} commission_title_container">
+        <span class="commission_title">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }}</span>
+        % if current_user["role"] != "user":
+        <span class="created_updated">
+            <span class="created_text" epoch="{{ commission['created_epoch'] }}"></span>&nbsp;&nbsp;&nbsp;
+            <span class="updated_text" epoch="{{ commission['updated_epoch'] }}"></span>
+        </span>
+        % end
+    </summary>
     <p><a href="{{ commission["url"] }}" target="_blank">Link to commission details</a></p>
     % if queue_type == "other_commissions" or queue_type == "my_commissions":
     <p><b>Upload File:</b> <input type="file" class="commission-upload" commission_id="{{ commission['id'] }}"></p>
