@@ -1,0 +1,4 @@
+Username,Full Name,Password,Role,Is Artist,Queue Open
+god_user,God User,password,god,FALSE,FALSE
+example_admin,Example Admin,password,admin,FALSE,FALSE
+example_user,Example User,password,user,TRUE,TRUE

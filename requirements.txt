@@ -3,3 +3,6 @@ fasteners
 git+https://github.com/ryanvilbrandt/bottle.git@master
 bottle_websocket
 google-api-python-client
+markdown2
+faker
+requests

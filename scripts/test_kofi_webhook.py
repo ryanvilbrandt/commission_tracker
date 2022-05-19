@@ -6,12 +6,14 @@ from uuid import uuid4
 from faker import Faker
 from requests import post
 
+from src.utils import load_config
+
 
 def create_fake_commission():
     fake = Faker()
-    # print(dir(fake))
-    # help(fake.pyfloat)
-    post("http://10.0.0.2:40404/kofi_webhook", data={
+    config = load_config()
+    host, port = config.get("Settings", "host"), config.getint("Settings", "port")
+    r = post(f"http://{host}:{port}/kofi_webhook", data={
         "data": dumps({
             "message_id": str(uuid4()),
             "timestamp": ctime(),
@@ -32,8 +34,11 @@ def create_fake_commission():
             "tier_name": None,
         })
     })
+    print(r)
 
 
 if __name__ == "__main__":
-    for _ in range(11):
+    if not os.path.isdir("src"):
+        os.chdir("..")
+    for _ in range(1):
         create_fake_commission()
