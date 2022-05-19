@@ -94,6 +94,11 @@ code {
     color: gray;
 }
 
+.queue_hidden_label {
+    font-style: italic;
+    font-size: 0.8em;
+}
+
 .queue_closed {
     text-decoration: line-through;
 }

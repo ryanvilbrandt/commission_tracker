@@ -85,12 +85,12 @@ function handle_websocket(msg) {
     if (msg.data === "ping") {
         return;
     }
-    if (msg.data === "refresh" || msg.data === "users" || msg.data === "queue_open") {
+    if (msg.data === "refresh" || msg.data === "users") {
         if (current_user_role !== "user") {
             ajax_call(`/fetch_users`, fetch_users_callback);
         }
     }
-    if (msg.data === "refresh" || msg.data === "queue_open") {
+    if (msg.data === "refresh") {
         if (current_user_is_artist) {
             ajax_call(`/fetch_queue_open`, fetch_queue_open_callback);
         }

@@ -304,7 +304,7 @@ def load_wsgi_endpoints(app: Bottle):
             if response is None:
                 abort(400, f"No user found with id={user_id}")
                 return
-        utils.send_to_websockets("queue_open")
+        utils.send_to_websockets("refresh")
 
     @app.error(401)
     @view("error_401.tpl")

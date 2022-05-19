@@ -1,6 +1,5 @@
 % hidden_text = " hidden" if hidden else ""
 % empty_queue_text = "None" if queue_open else "Queue closed"
-<div class="commission_container queue_hidden" queue_name="{{ queue_name }}_inverted"{{ " hidden" if not hidden else "" }}><em>Hidden</em></div>
 % if not commissions:
 <div class="commission_container" queue_name="{{ queue_name }}"{{ hidden_text }}><em>{{ empty_queue_text }}</em></div>
 % else:

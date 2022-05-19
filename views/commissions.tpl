@@ -5,7 +5,8 @@
     <h2 class="commission_header{{ " queue_hidden" if hidden else "" }}{{ " queue_closed" if not queue_open else "" }}" id="{{ queue_name }}">
         % checked = " checked" if not hidden else ""
         <input type="checkbox" class="show_hide_commissions_checkbox" queue_owner="{{ queue_name }}" title="Show/Hide Commissions"{{ checked }}>
-        Commissions assigned to me{{ " (Why do you have any???)" if not current_user["is_artist"] else "" }}:
+        Commissions assigned to me{{ " (Why do you have any???)" if not current_user["is_artist"] else "" }}
+        <span class="queue_hidden_label" queue_name="{{ queue_name }}_inverted"{{ "" if hidden else " hidden" }}>(hidden)</span>
     </h2>
     <% include(
         "commissions_div.tpl",
@@ -25,7 +26,8 @@
     <h2 class="commission_header{{ " queue_hidden" if hidden else "" }}" id="{{ queue_name }}">
         % checked = " checked" if not hidden else ""
         <input type="checkbox" class="show_hide_commissions_checkbox" queue_owner="{{ queue_name }}" title="Show/Hide Commissions"{{ checked }}>
-        New commissions (needs assignment):
+        New commissions (needs assignment)
+        <span class="queue_hidden_label" queue_name="{{ queue_name }}_inverted"{{ "" if hidden else " hidden" }}>(hidden)</span>
     </h2>
     <% include(
         "commissions_div.tpl",
@@ -44,7 +46,8 @@
 <h2 class="commission_header{{ " queue_hidden" if hidden else "" }}" id="{{ queue_name }}">
     % checked = " checked" if not hidden else ""
     <input type="checkbox" class="show_hide_commissions_checkbox" queue_owner="{{ queue_name }}" title="Show/Hide Commissions"{{ checked }}>
-    Available commissions:
+    Available commissions
+    <span class="queue_hidden_label" queue_name="{{ queue_name }}_inverted"{{ "" if hidden else " hidden" }}>(hidden)</span>
 </h2>
 <% include(
     "commissions_div.tpl",
@@ -62,7 +65,8 @@
     <h2 class="commission_header user_commissions{{ " queue_hidden" if d["hidden"] else "" }}{{ " queue_closed" if not d["user"]["queue_open"] else "" }}" id="{{ user }}_commissions">
         % checked = " checked" if not d["hidden"] else ""
         <input type="checkbox" class="show_hide_commissions_checkbox" queue_owner="{{ user }}" title="Show/Hide Commissions"{{ checked }}>
-        {{ d["user"]["full_name"] }}'s commissions:
+        {{ d["user"]["full_name"] }}'s commissions
+        <span class="queue_hidden_label" queue_name="{{ user }}_inverted"{{ "" if d["hidden"] else " hidden" }}>(hidden)</span>
     </h2>
     <div class="commission_stats">
         % if current_user["role"] != "user":
@@ -90,7 +94,8 @@
 <h2 class="commission_header{{ " queue_hidden" if hidden else "" }}" id="{{ queue_name }}">
     % checked = " checked" if not hidden else ""
     <input type="checkbox" class="show_hide_commissions_checkbox" queue_owner="{{ queue_name }}" title="Show/Hide Commissions"{{ checked }}>
-    Finished commissions:
+    Finished commissions
+    <span class="queue_hidden_label" queue_name="{{ queue_name }}_inverted"{{ "" if hidden else " hidden" }}>(hidden)</span>
 </h2>
 <% include(
     "commissions_div.tpl",
