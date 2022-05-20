@@ -65,7 +65,7 @@
                 Role<br>
                 <input type="radio" id="add_new_user_admin" name="role" value="admin" required>
                 <label for="add_new_user_admin">Admin</label><br>
-                <input type="radio" id="add_new_user_user" name="role" value="user" required>
+                <input type="radio" id="add_new_user_user" name="role" value="user" required checked>
                 <label for="add_new_user_user">User</label><br>
             </p>
             <label for="add_new_user_is_artist">Is an artist?</label>
