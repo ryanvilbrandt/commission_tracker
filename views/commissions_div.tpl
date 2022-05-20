@@ -47,8 +47,15 @@
     </summary>
     <p><a href="{{ commission["url"] }}" target="_blank">Link to commission details</a></p>
     % if queue_type == "other_commissions" or queue_type == "my_commissions":
-    <p><b>Upload File:</b> <input type="file" class="commission-upload" commission_id="{{ commission['id'] }}"></p>
-    <p><img class="upload_preview" commission_id="{{ commission['id'] }}" hidden></p>
+    <p hidden><input type="file" class="commission-upload" commission_id="{{ commission['id'] }}"></p>
+    <div class="commission_upload_drag" commission_id="{{ commission['id'] }}">
+        <img class="upload_preview" commission_id="{{ commission['id'] }}" hidden>
+        <div>
+            Upload the finished commission by
+            <span class="commission_upload_click" commission_id="{{ commission['id'] }}">clicking</span>
+            or dragging the file here.
+        </div>
+    </div>
     % elif queue_type == "finished_commissions":
     <p><a href="/get_finished_commission_image/{{ commission["uploaded_filename"] }}" target="_blank">Uploaded File</a></p>
     % end

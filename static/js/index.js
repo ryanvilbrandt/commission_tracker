@@ -4,6 +4,7 @@ import {ws_init, ws_load, ws_close} from "./mywebsocket.js";
 let opened_details = [];
 let current_user_role = null;
 let current_user_is_artist = null;
+let uploaded_files_dict = {};
 
 export function init(v_current_user_role, v_current_user_is_artist) {
     current_user_role = v_current_user_role;
@@ -36,6 +37,8 @@ function apply_commission_hooks() {
     document.querySelectorAll(".assign_to_user_button").forEach(e => e.onclick = click_assign);
     // document.querySelectorAll(".undo_invoiced_button").forEach(e => e.onclick = click_undo_invoiced);
     // document.querySelectorAll(".undo_paid_button").forEach(e => e.onclick = click_undo_paid);
+    document.querySelectorAll(".commission_upload_drag").forEach(e => init_commission_upload_drag(e));
+    document.querySelectorAll(".commission_upload_click").forEach(e => e.onclick = commission_upload_click);
     document.querySelectorAll(".commission-upload").forEach(e => init_commission_upload(e));
 }
 
@@ -250,8 +253,7 @@ function paid(event) {
 
 function finished(event) {
     const commission_id = event.target.getAttribute("commission_id");
-    const uploaded_files = document.querySelector(`.commission-upload[commission_id="${commission_id}"]`).files;
-    console.log(uploaded_files);
+    const uploaded_file = uploaded_files_dict[commission_id];
     // if (uploaded_files.length === 0) {
     //     let confirmation = window.confirm(
     //         "Are you sure you want mark this commission as finished without uploading a file?"
@@ -259,7 +261,7 @@ function finished(event) {
     //     if (!confirmation) return;
     // }
     let form_data = new FormData();
-    form_data.append("image_file", uploaded_files[0]);
+    form_data.append("image_file", uploaded_file);
     form_data.append("commission_id", event.target.attributes["commission_id"].value);
     console.log(form_data);
     ajax_call(`/finish_commission`, callback, null, form_data);
@@ -306,24 +308,60 @@ function close_error(e) {
     overlay.removeChild(message);
 }
 
+function init_commission_upload_drag(element) {
+    ["drag", "dragstart"].forEach(prop => element.addEventListener(prop, function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }));
+    ["dragover", "dragenter"].forEach(prop => element.addEventListener(prop, function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        element.classList.add("is_a_drag");
+    }));
+    ["dragleave", "dragend"].forEach(prop => element.addEventListener(prop, function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        element.classList.remove("is_a_drag");
+    }));
+    element.addEventListener("drop", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        element.classList.remove("is_a_drag");
+        const file = e.dataTransfer.files[0];
+        const commission_id = element.attributes["commission_id"].value;
+        create_commissions_preview(file, commission_id);
+    });
+}
+
+
+function commission_upload_click(e) {
+    const commission_id = e.target.getAttribute("commission_id");
+    document.querySelector(`.commission-upload[commission_id="${commission_id}"]`).click();
+}
+
 function init_commission_upload(element) {
-    element.addEventListener("change", on_commission_upload, false);
+    element.addEventListener("change", on_commission_upload_change, false);
     // Check if the file_list is already filled on load (can happen on refresh) and undisable button immediately
     const file_list = element.files;
     if (file_list.length > 0) {
-        on_commission_upload(null, element);
+        on_commission_upload_change(null, element);
     }
 }
 
-function on_commission_upload(event, v_element=null) {
-    let element;
+function on_commission_upload_change(event, v_element=null) {
+    let file_element;
     if (v_element !== null) {
-        element = v_element;
+        file_element = v_element;
     } else {
-        element = event.target;
+        file_element = event.target;
     }
-    const file = element.files[0];
-    const commission_id = element.getAttribute("commission_id");
+    const file = file_element.files[0];
+    const commission_id = file_element.getAttribute("commission_id");
+    create_commissions_preview(file, commission_id);
+}
+
+function create_commissions_preview(file, commission_id) {
+    uploaded_files_dict[commission_id] = file;
     const finished_button = document.querySelector(`.finished_button[commission_id="${commission_id}"]`);
     finished_button.disabled = false;
     finished_button.classList.remove("disabled_button");

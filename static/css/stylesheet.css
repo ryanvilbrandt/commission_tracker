@@ -175,6 +175,38 @@ summary {
     cursor: default;
 }
 
+.commission_upload_drag {
+    background-color: white;
+    outline: 2px dashed black;
+    outline-offset: -0.2em;
+    padding: 1em;
+}
+
+.is_a_drag {
+    background-color: lightgray;
+    outline-offset: -0.4em;
+    animation: ease-in-out;
+}
+
+.commission_upload_click {
+    color: dodgerblue;
+    cursor: pointer;
+}
+
+.commission_upload_click:hover {
+    color: deepskyblue;
+}
+
+.commission_upload_click:active {
+    color: blue;
+}
+
+.upload_preview {
+    max-height: 200px;
+    max-width: 200px;
+    margin: 0.5em;
+}
+
 .admin_checkbox {
     margin: auto;
     width: 100%;
@@ -228,9 +260,4 @@ summary {
     border-radius: 5px;
     background-color: white;
     padding: 0 1rem;
-}
-
-.upload_preview {
-    max-height: 200px;
-    max-width: 200px;
 }
