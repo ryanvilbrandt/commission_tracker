@@ -186,8 +186,8 @@ def load_wsgi_endpoints(app: Bottle):
                     request.forms["full_name"],
                     bcrypt.hashpw(request.forms["password"].encode(), bcrypt.gensalt()),
                     new_user_role,
-                    request.forms.get("is_artist", False),
-                    request.forms.get("queue_open", False),
+                    request.forms.get("is_artist") == "on",
+                    request.forms.get("queue_open") == "on",
                 )
             except sqlite3.IntegrityError as e:
                 if str(e) == "UNIQUE constraint failed: users.username":
