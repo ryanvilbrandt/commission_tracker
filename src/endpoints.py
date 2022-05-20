@@ -416,7 +416,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
         else:
             commission["assigned_string"] = "Assigned to {}".format(commission["full_name"])
         commission["status"], commission["status_text"] = utils.get_status(commission)
-        commission["created_epoch"] = int(mktime(strptime(commission["created_ts"], "%a %b %d %H:%M:%S %Y")))
+        commission["created_epoch"] = int(mktime(strptime(commission["created_ts"], "%Y-%m-%dT%H:%M:%SZ"))) - time_offset
         commission["updated_epoch"] = int(mktime(strptime(commission["updated_ts"], "%Y-%m-%d %H:%M:%S"))) - time_offset
         # Assign to queue
         if commission["preferred_artist"] is None:
