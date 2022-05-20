@@ -1,6 +1,6 @@
 # Quickstart
 
-## Kofi
+## Ko-fi
 
 ### Basic Server Setup
 
@@ -10,24 +10,24 @@
    1. You can create a `users.csv` file in the `scripts` directory to automate the creation of the God user and any other users when you run this script. Use the `users.csv.dist` file as a template.
 4. Run `main.py` to start the server.
 
-### Integrating with Kofi
+### Integrating with Ko-fi
 
 The following instructions assume you have a domain that can be used to hit the machine you're using to run Commission Tracker.
 
 1. Edit conf/config.ini
    1. Change the `host` value to the local IP of the machine Commission Tracker is running on.
    2. Set `port` to whatever value you want. Set it to port 80 if you want users to hit the Commissions Tracker without having to specify a port in their URL.
-2. Go to the [Kofi webhooks](https://ko-fi.com/manage/webhooks) page and set `{domain}/kofi_webhook` as the webhook URL, where `{domain}` is the domain you have set up for your machine.
-3. Add a `KOFI_VERIFICATION_TOKEN` environment variable using the verification token provided by the Kofi webhooks page, under the `Advanced` accordion.
+2. Go to the [Ko-fi webhooks](https://ko-fi.com/manage/webhooks) page and set `{domain}/kofi_webhook` as the webhook URL, where `{domain}` is the domain you have set up for your machine.
+3. Add a `KOFI_VERIFICATION_TOKEN` environment variable using the verification token provided by the Ko-fi webhooks page, under the `Advanced` accordion.
 4. Stop `main.py` if it's running, and start it again.
    1. On Windows, you may need to logout and back in for your environment variable change to take effect.
-5. Use the "Test a webhook" buttons on the Kofi webhook page. You should see a commission appear on the Commission Tracker. 
+5. Use the "Test a webhook" buttons on the Ko-fi webhook page. You should see a commission appear on the Commission Tracker. 
 
 You can also use the `scripts/test_kofi_webhook.py` script to push 
 
 ## Google Sheets
 
-_Note:_ This method has been disabled in this version of the Commission Tracker. Use the Kofi setup above.
+_Note:_ This method has been disabled in this version of the Commission Tracker. Use the Ko-fi setup above.
 
 1. Install Python 3.10+.
 2. Install dependencies with `pip install -r requirements.txt`.

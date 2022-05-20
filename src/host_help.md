@@ -27,7 +27,7 @@ Lastly, you can add new users using the "**Add new user**" form. You can only cr
 
 ## Commission Queues
 
-The main part of the Commission Tracker website is the commission queues. Here you can see all new commissions that have been received from Kofi, all commissions that are assigned to particular Artists, all commissions that are available to be assigned to/claimed by Artists, and all finish commissions.
+The main part of the Commission Tracker website is the commission queues. Here you can see all new commissions that have been received from Ko-fi, all commissions that are assigned to particular Artists, all commissions that are available to be assigned to/claimed by Artists, and all finish commissions.
 
 You can show or hide any commission queue by clicking the checkbox beside the queue.
 
@@ -35,7 +35,7 @@ All commissions initially display in their compact form, with their details hidd
 
 ### New Commissions
 
-When new commissions come in from Kofi, due to a quirk in Kofi's system, the Commission Tracker can't automatically determine if these commissions should be made available for any Artist to claim, or assigned to a specific Artist. This will have to be your job. Until these commissions are remove from the New Commissions queue, *Artists will not be able to see them.*
+When new commissions come in from Ko-fi, due to a quirk in Ko-fi's system, the Commission Tracker can't automatically determine if these commissions should be made available for any Artist to claim, or assigned to a specific Artist. This will have to be your job. Until these commissions are remove from the New Commissions queue, *Artists will not be able to see them.*
 
 Click the "Link to commission details" hyperlink to determine what queue the commission should go into. If it's a commission for any Artist, select "Any Artist" from the "Assign to an artist:" dropdown. If it's a commission for a specific Artist, select their name. Then, click the "Assign" button. *Note: During testing, these links will be fake, so just make stuff up.*
 

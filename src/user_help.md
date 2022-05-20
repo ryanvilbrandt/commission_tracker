@@ -12,9 +12,9 @@ You can show or hide any commission queue by clicking the checkbox beside the qu
 
 All commissions initially display in their compact form, with their details hidden. To show the details of any commission, just click the commission name. To hide the commission details, just click the name again.
 
-Due to a quirk in Kofi's system, the Commissions Tracker can't automatically fill out the details of the commissions. Instead, it provides a link to the details on Kofi's website. Clicking this link will open those details in a new tab. You *do not* need to be logged in to Kofi to view these commission details. *Note: During testing, these links will be fake, so feel free to just pretend to do them. Just, I dunno, wave your stylus at your tablet in a vaguely threatening manner or something. Show it who's boss.*
+Due to a quirk in Ko-fi's system, the Commissions Tracker can't automatically fill out the details of the commissions. Instead, it provides a link to the details on Ko-fi's website. Clicking this link will open those details in a new tab. You *do not* need to be logged in to Ko-fi to view these commission details. *Note: During testing, these links will be fake, so feel free to just pretend to do them. Just, I dunno, wave your stylus at your tablet in a vaguely threatening manner or something. Show it who's boss.*
 
-*Note:* There is a bug on Kofi's website where refreshing the commissions details tab can sometimes cause the commission details to disappear. If this happens, close that tab and click the link from the commissions details on Commission Tracker again. 
+*Note:* There is a bug on Ko-fi's website where refreshing the commissions details tab can sometimes cause the commission details to disappear. If this happens, close that tab and click the link from the commissions details on Commission Tracker again. 
 
 ### Your Commissions
 
