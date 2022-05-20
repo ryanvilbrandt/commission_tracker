@@ -77,8 +77,10 @@ code {
     grid-column: 1 / span 3;
 }
 
-.show_hide_commissions_checkbox {
-    margin: auto;
+.show_hide_icon {
+    cursor: pointer;
+    height: 0.75em;
+    width: 1em;
 }
 
 .user_meta_header {

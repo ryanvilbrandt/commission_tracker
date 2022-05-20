@@ -76,8 +76,11 @@
             <input type="submit" value="Add New User">
         </form>
     </div>
+    % end
+    <div style="margin-top: 1em; text-align: center; font-size: 0.7rem;">
+        <a style="color: lightgray;" href="https://fontawesome.com/license">Eye Icons by Font Awesome</a>
+    </div>
 </div>
-% end
 
 <div id="websocket_error_overlay" hidden></div>
 

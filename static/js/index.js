@@ -11,11 +11,6 @@ export function init(v_current_user_role, v_current_user_is_artist) {
     current_user_is_artist = v_current_user_is_artist === "1";
 
     apply_commission_hooks();
-    // Handle bug where page can be reloaded with checkboxes unchecked
-    document.querySelectorAll(".show_hide_commissions_checkbox").forEach(function (e) {
-        e.target = e;
-        show_hide_commissions(e);
-    });
     document.querySelectorAll("#force_update_button").forEach(e => e.onclick = force_update);
     apply_user_hooks();
 
@@ -32,7 +27,7 @@ export function init(v_current_user_role, v_current_user_is_artist) {
 
 function apply_commission_hooks() {
     document.querySelectorAll("details").forEach(e => e.ontoggle = open_details);
-    document.querySelectorAll(".show_hide_commissions_checkbox").forEach(e => e.onclick = show_hide_commissions);
+    document.querySelectorAll(".show_hide_icon").forEach(e => e.onclick = show_hide_commissions);
     document.querySelectorAll(".action_button").forEach(button => set_action_button(button));
     document.querySelectorAll(".assign_to_user_button").forEach(e => e.onclick = click_assign);
     // document.querySelectorAll(".undo_invoiced_button").forEach(e => e.onclick = click_undo_invoiced);
@@ -102,8 +97,8 @@ function handle_websocket(msg) {
     if (msg.data === "refresh" || msg.data === "commissions") {
         let arg1 = opened_details.length === 0 ? "_" : opened_details.join(",");
         let hidden_queues = [];
-        document.querySelectorAll(".show_hide_commissions_checkbox").forEach(function (e) {
-            if (!e.checked) {
+        document.querySelectorAll(".show_hide_icon").forEach(function (e) {
+            if (!e.classList.contains("hide") && e.hidden) {
                 hidden_queues.push(e.attributes["queue_owner"].value);
             }
         })
@@ -140,15 +135,15 @@ function open_details(e) {
 }
 
 function show_hide_commissions(e) {
-    let checkbox = e.target;
-    let queue_name = checkbox.attributes["queue_owner"].value;
-    let hidden = !checkbox.checked;
+    let show_hide_icon = e.target;
+    let queue_name = show_hide_icon.attributes["queue_owner"].value;
+    let hidden = !show_hide_icon.classList.contains("hide");
     document.querySelectorAll(`[queue_name="${queue_name}"]`).forEach(e => e.hidden = hidden);
     document.querySelectorAll(`[queue_name="${queue_name}_inverted"]`).forEach(e => e.hidden = !hidden);
     if (hidden) {
-        checkbox.parentElement.classList.add("queue_hidden");
+        show_hide_icon.parentElement.classList.add("queue_hidden");
     } else {
-        checkbox.parentElement.classList.remove("queue_hidden");
+        show_hide_icon.parentElement.classList.remove("queue_hidden");
     }
 }
 
