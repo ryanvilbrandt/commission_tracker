@@ -45,7 +45,10 @@
         </span>
         % end
     </summary>
-    <p><a href="{{ commission["url"] }}" target="_blank">Link to commission details</a></p>
+    <p>
+        <b>Status:</b> {{ commission["status_text"] }}<br>
+        <a href="{{ commission["url"] }}" target="_blank">Link to commission details</a>
+    </p>
     % if queue_type == "other_commissions" or queue_type == "my_commissions":
     <p hidden><input type="file" class="commission-upload" commission_id="{{ commission['id'] }}"></p>
     <div class="commission_upload_drag" commission_id="{{ commission['id'] }}">
@@ -62,7 +65,6 @@
     % if current_user["role"] != "user":
     <hr>
     <p>
-        <b>Status:</b> {{ commission["status_text"] }}<br>
         <b>Assigned to:</b> {{ commission["full_name"] }}<br>
         <b>Email:</b> {{ commission['email'] }}
         % if commission["message"]:
