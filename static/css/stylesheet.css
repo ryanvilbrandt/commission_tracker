@@ -49,7 +49,7 @@ code {
 #commissions {
   width: 100%;
   display: grid;
-  grid-template-columns: 9em auto 1fr;
+  grid-template-columns: 6em auto 1fr;
 }
 
 #my_commissions, #other_commissions, #finished_commissions, .commission_container {
@@ -188,16 +188,16 @@ summary {
     animation: ease-in-out;
 }
 
-.commission_upload_click {
+.clickable {
     color: dodgerblue;
     cursor: pointer;
 }
 
-.commission_upload_click:hover {
+.clickable:hover {
     color: deepskyblue;
 }
 
-.commission_upload_click:active {
+.clickable:active {
     color: blue;
 }
 

@@ -39,7 +39,8 @@ function apply_commission_hooks() {
     // document.querySelectorAll(".undo_paid_button").forEach(e => e.onclick = click_undo_paid);
     document.querySelectorAll(".commission_upload_drag").forEach(e => init_commission_upload_drag(e));
     document.querySelectorAll(".commission_upload_click").forEach(e => e.onclick = commission_upload_click);
-    document.querySelectorAll(".commission-upload").forEach(e => init_commission_upload(e));
+    document.querySelectorAll(".commission_upload").forEach(e => init_commission_upload(e));
+    document.querySelectorAll(".commission_finish").forEach(e => e.onclick = finished);
 }
 
 function apply_user_hooks() {
@@ -224,8 +225,6 @@ function set_action_button(button) {
         button.onclick = invoiced;
     } else if (button.classList.contains("paid")) {
         button.onclick = paid;
-    } else if (button.classList.contains("finished_button")) {
-        button.onclick = finished;
     } else {
         console.error(`Unknown button class: ${button.classList}`);
     }
@@ -336,7 +335,7 @@ function init_commission_upload_drag(element) {
 
 function commission_upload_click(e) {
     const commission_id = e.target.getAttribute("commission_id");
-    document.querySelector(`.commission-upload[commission_id="${commission_id}"]`).click();
+    document.querySelector(`.commission_upload[commission_id="${commission_id}"]`).click();
 }
 
 function init_commission_upload(element) {
@@ -362,11 +361,6 @@ function on_commission_upload_change(event, v_element=null) {
 
 function create_commissions_preview(file, commission_id) {
     uploaded_files_dict[commission_id] = file;
-    const finished_button = document.querySelector(`.finished_button[commission_id="${commission_id}"]`);
-    finished_button.disabled = false;
-    finished_button.classList.remove("disabled_button");
-    finished_button.title = "Mark as Finished";
-
     const reader = new FileReader();
     const upload_preview = document.querySelector(`.upload_preview[commission_id="${commission_id}"]`);
     reader.onload = (function(aImg) {
@@ -375,5 +369,7 @@ function create_commissions_preview(file, commission_id) {
             aImg.hidden = false;
         };
     })(upload_preview);
+    document.querySelector(`.upload_confirmation[commission_id="${commission_id}"]`).hidden = false;
+    document.querySelector(`.upload_prompt[commission_id="${commission_id}"]`).hidden = true;
     reader.readAsDataURL(file);
 }

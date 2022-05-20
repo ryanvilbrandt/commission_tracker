@@ -26,9 +26,6 @@
             % elif not commission["paid"]:
                 <button class="paid action_button" title="Mark as Paid" commission_id="{{ commission['id'] }}">💸</button>
             % end
-            % if not commission["finished"] and (queue_type == "my_commissions" or queue_type == "other_commissions"):
-                <button class="finished_button action_button disabled_button" title="You must upload a file to this commission before marking it as Finished." commission_id="{{ commission['id'] }}" disabled>🎉</button>
-            % end
         % end
     % end
 </div>
@@ -50,13 +47,19 @@
         <a href="{{ commission["url"] }}" target="_blank">Link to commission details</a>
     </p>
     % if queue_type == "other_commissions" or queue_type == "my_commissions":
-    <p hidden><input type="file" class="commission-upload" commission_id="{{ commission['id'] }}"></p>
+    <p hidden><input type="file" class="commission_upload" commission_id="{{ commission['id'] }}"></p>
     <div class="commission_upload_drag" commission_id="{{ commission['id'] }}">
-        <img class="upload_preview" commission_id="{{ commission['id'] }}" hidden>
-        <div>
-            Upload the finished commission by
-            <span class="commission_upload_click" commission_id="{{ commission['id'] }}">clicking</span>
+        <div class="upload_prompt" commission_id="{{ commission['id'] }}">
+            Select the finished commission image to upload<br>by
+            <span class="commission_upload_click clickable" commission_id="{{ commission['id'] }}">clicking this link</span>
             or dragging the file here.
+        </div>
+        <img class="upload_preview" commission_id="{{ commission['id'] }}" hidden>
+        <div class="upload_confirmation" commission_id="{{ commission['id'] }}" hidden>
+            Is the above image file the one you want to upload?<br>You can
+            <span class="commission_finish clickable" commission_id="{{ commission['id'] }}">upload it</span>
+            and mark this commission as finished, or
+            <span class="commission_upload_click clickable" commission_id="{{ commission['id'] }}">select a new file.</span>
         </div>
     </div>
     % elif queue_type == "finished_commissions":
