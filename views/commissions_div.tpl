@@ -18,8 +18,9 @@
 <details class="commission_description{{ span_all }}" commission_id="{{ commission['id'] }}" queue_name="{{ queue_name }}"{{ open }}{{ hidden_text }}>
     % star = " ⭐" if commission["is_exclusive"] else ""
     % num_characters = " ({})".format(commission["num_characters"]) if queue_type != "new_commissions" else ""
+    % finished_by = " -- Commission by {}".format(commission["full_name"]) if queue_type == "finished_commissions" else ""
     <summary class="{{ commission['status'] }} commission_title_container">
-        <span class="commission_title">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }}{{num_characters}}</span>
+        <span class="commission_title">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }}{{ num_characters }}{{ finished_by }}</span>
         % if current_user["role"] != "user":
         <span class="created_updated">
             <span class="created_text" epoch="{{ commission['created_epoch'] }}"></span>&nbsp;&nbsp;&nbsp;

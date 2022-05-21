@@ -436,6 +436,15 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
                 d["meta"]["invoiced"] += 1
             if not commission["accepted"]:
                 d["meta"]["not_accepted"] += 1
+    # Sort commissions
+    def sort_key(d):
+        return d["updated_epoch"], d["created_epoch"]
+    my_commissions["commissions"] = sorted(my_commissions["commissions"], key=sort_key)
+    new_commissions["commissions"] = sorted(new_commissions["commissions"], key=sort_key)
+    available_commissions["commissions"] = sorted(available_commissions["commissions"], key=sort_key)
+    for d in other_commissions.values():
+        d["commissions"] = sorted(d["commissions"], key=sort_key)
+    finished_commissions["commissions"] = sorted(finished_commissions["commissions"], key=sort_key)
     return {
         "my_commissions": my_commissions,
         "new_commissions": new_commissions,

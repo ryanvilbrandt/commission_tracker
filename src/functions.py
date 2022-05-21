@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 from typing import Optional, Dict, Union
 
 import bottle
@@ -162,7 +163,11 @@ def finish_commission(db: Db, commission_id: int, image_file: bottle.FileUpload)
     commission = db.get_commission_by_id(commission_id)
     commissioner_name = re.sub(r"\W", "_", commission["name"].lower())
     assigned_artist = db.get_username_from_id(commission["assigned_to"])
-    _, ext = os.path.splitext(image_file.filename)
+    try:
+        _, ext = os.path.splitext(image_file.filename)
+    except Exception:
+        print(image_file, file=sys.stderr)
+        raise
     os.makedirs("finished_commissions", exist_ok=True)
     filename = f"{commission['id']:>02}_{commissioner_name}_by_{assigned_artist}{ext}"
     filepath = f"finished_commissions/{filename}"
@@ -173,7 +178,7 @@ def finish_commission(db: Db, commission_id: int, image_file: bottle.FileUpload)
         filepath = f"finished_commissions/{filename}"
     image_file.save(filepath)
     db.finish_commission(commission_id, filename)
-    db.assign_commission(commission_id, -1)
+    # db.assign_commission(commission_id, -1)
     return db.update_ts(commission_id)
 
 
