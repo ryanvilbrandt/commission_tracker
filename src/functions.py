@@ -121,6 +121,7 @@ def claim_commission(db: Db, user_id: int, commission_id: int) -> Optional[dict]
     db.assign_commission(commission_id, user_id)
     # if auto_accept:
     db.accept_commission(commission_id, accepted=True)
+    db.unfinish_commission(commission_id)
     return db.update_ts(commission_id)
 
 
