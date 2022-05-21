@@ -9,14 +9,14 @@ One way you will be helping the Artist is to handle adding new users, changing p
 These users have three roles:
 
 * God: This is a hardcoded user in the Commission Tracker. You cannot make any changes to this role, so don't even try. ;) 
-* Admin: This is your role. God and Admins share the same abilities to edit users, manage commissions, etc. The only difference is that only God can make changes to any user with the Admin role. (Note: The name of this role will be changed to "Host" in the near future)
-* User: This is the role all Artists will have. (Note: The name of this role will be changed to "Artist" in the near future)
+* Admin: This is your role. God and Admins share the same abilities to edit users, manage commissions, etc. The only difference is that only God can make changes to any user with the Admin role.
+* User: This is the role all Artists will have.
 
 You can view the Username, Full Name, and Role of each user, as well as if they're an Artist and if their queue is open. 
 
 You can make the following changes to each user, by clicking the button with the corresponding emoji:
 
-* 🇺 Change Username: Changes the username of the given user. This is the username they use to login to the Commission Tracker. After changing this, the user will need to close and reopen their browser to be prompted to log back in.
+* 🇺 Change Username: Changes the username of the given user. This is the username they use to log into the Commission Tracker. After changing this, the user will need to close and reopen their browser to be prompted to log back in.
 * 🇫 Change Full Name: Changes the full name/displayed name of the given user.
 * 🔒 Change Password: Changes the password of the given user. After changing this, the user will need to close and reopen their browser to be prompted to log back in.
 * ❌ Delete User: Deletes the given user. *This cannot be undone!*
@@ -29,15 +29,19 @@ Lastly, you can add new users using the "**Add new user**" form. You can only cr
 
 The main part of the Commission Tracker website is the commission queues. Here you can see all new commissions that have been received from Ko-fi, all commissions that are assigned to particular Artists, all commissions that are available to be assigned to/claimed by Artists, and all finish commissions.
 
-You can show or hide any commission queue by clicking the checkbox beside the queue.
+You can <img style="height: 0.9em;" src="/static/img/eye-solid.svg"> Show or <img style="height: 0.9em;" src="/static/img/eye-slash-solid.svg"> Hide any commission queue by clicking the eye icon beside the queue.
+
+### Commissions Details
 
 All commissions initially display in their compact form, with their details hidden. To show the details of any commission, just click the commission name. To hide the commission details, just click the name again.
 
+Anything in the commission details above the horizontal bar is visible to everyone viewing the commission details. Anything below the bar is visible only to admins. 
+
 ### New Commissions
 
-When new commissions come in from Ko-fi, due to a quirk in Ko-fi's system, the Commission Tracker can't automatically determine if these commissions should be made available for any Artist to claim, or assigned to a specific Artist. This will have to be your job. Until these commissions are remove from the New Commissions queue, *Artists will not be able to see them.*
+When new commissions come in from Ko-fi, due to a quirk in Ko-fi's system, the Commission Tracker can't automatically determine if these commissions should be made available for any Artist to claim, or assigned to a specific Artist, or any other details about the commission. This will have to be your job. Until these commissions are moved out of the New Commissions queue, *Artists will not be able to see them.*
 
-Click the "Link to commission details" hyperlink to determine what queue the commission should go into. If it's a commission for any Artist, select "Any Artist" from the "Assign to an artist:" dropdown. If it's a commission for a specific Artist, select their name. Then, click the "Assign" button. *Note: During testing, these links will be fake, so just make stuff up.*
+Click the "Link to commission details" hyperlink to determine what queue the commission should go into, and how many characters the commissioner has requested. If it's a commission for any Artist, select "Any Artist" from the "Assign to an artist:" dropdown. If it's a commission for a specific Artist, select their name. Then, click the "Assign" button. *Note: During testing, some of these links will be fake or for Test commissions, so just make stuff up.*
 
 Note that any commissions assigned directly to Artists from this queue will be marked as ⭐ Exclusive, meaning they're intended to be *only* picked up by that Artist. 
 
@@ -47,11 +51,13 @@ One job you'll have as a Host is to help manage the queues of Artists, in case t
 
 ### Commission Queue Metrics
 
-When things get busy, there can be a lot of commissions in all the queues, and it can get hard to keep track of which Artists have how many commissions assigned to them. For this, each user's commission queue has metrics beside them in the form of emoji on colored backgrounds. At a glance, you can see how many commissions the Artist has ✋ Assigned to them, and how many of those commissions they have ❌ Not Yet Accepted.
+When things get busy, there can be a lot of commissions in all the queues, and it can get hard to keep track of which Artists have how many commissions assigned to them. For this, each user's commission queue has metrics beside them in the form of emoji on colored backgrounds. At a glance, you can see how many commissions the Artist has ✋ Assigned to them.
 
 ### Finished Commissions
 
-After an Artist finishes a commission, they will upload the image file to the commission and click the 🎉 Finished button. You can see these commissions in the **Finished commissions** queue, and also see what filename the commission's picture was saved as.
+After an Artist finishes a commission, they will upload the image file to the commission, and mark the commission as Finished. You can see these commissions in the **Finished commissions** queue, and in the details you can download the file that was uploaded to that commission.
+
+When emailing the commissions out to the commissioners at the end of the stream, you will need to check the Ko-fi link for that commission for the preferred contact email the commissioner provided when filling out the commission form. If the commissioner did not provide a preferred contact email, get in touch with God, and he will provide you with the user's Ko-fi email. 
 
 ### Opening/Closing Commissions Queues
 

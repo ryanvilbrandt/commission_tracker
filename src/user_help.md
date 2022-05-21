@@ -35,3 +35,7 @@ You can even Claim commissions from other Artist's queues if necessary. Please c
 When you've finished a commission, save the commission as an image file. Then, open the commission details. You can then either drag the image file into the area with the dashed outline to select that file for uploading, or click the blue "clicking this link" text to open a file browser. Once you've selected an image file to upload, you can click the blue "upload it" text, or select a new image file. Clicking "upload it" will remove the commission from your queue, upload your image file to the website, and mark the commission as Finished. 
 
 You can claim any commission from the Finished queue if you wish to do more work on it.
+
+### Opening/Closing Commissions Queues
+
+When you are done working for the day, it's a good idea to close your commission queue. This puts a strikethrough effect on your queue's name on everyone else's screen. You can toggle whether your queue is opened or closed by clicking the ☑️ **Queue Open?** checkbox in the top right of the page.
