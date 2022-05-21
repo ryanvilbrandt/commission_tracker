@@ -130,10 +130,8 @@ def get_status(commission: dict) -> Tuple[str, str]:
         return "new", "New"
     elif commission["finished"]:
         return "finished", r"Finished! \o/"
-    elif commission["accepted"]:
-        return "accepted", "Accepted"
     elif commission["assigned_to"] != -1:
-        return "not_accepted", "Not yet accepted"
+        return "claimed", "Claimed"
     elif commission["is_exclusive"]:
         return "exclusive", f"Exclusive Request for {commission['preferred_artist']}"
     else:

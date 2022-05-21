@@ -267,14 +267,6 @@ function click_assign(event) {
     ajax_call(`/assign_commission/${commission_id}/${user_id}`, callback);
 }
 
-function click_undo_invoiced(event) {
-    ajax_call(`/commission_action/undo_invoiced/${event.target.attributes["commission_id"].value}`, callback);
-}
-
-function click_undo_paid(event) {
-    ajax_call(`/commission_action/undo_paid/${event.target.attributes["commission_id"].value}`, callback);
-}
-
 function callback(xhttp) {
     console.log(xhttp.status);
     if (xhttp.status < 400) {

@@ -5,27 +5,11 @@
 % else:
 % for commission in commissions:
 <div class="commission_buttons" queue_name="{{ queue_name }}"{{ hidden_text }}>
-    % if queue_type != "new_commissions":
-        % if queue_type != "my_commissions" and current_user["is_artist"]:
+    % if queue_type != "new_commissions" and current_user["is_artist"]:
+        % if queue_type == "my_commissions":
+            <button class="reject action_button" title="Reject commission" commission_id="{{ commission['id'] }}">❌</button>
+        % else:
             <button class="claim action_button" title="Claim commission" commission_id="{{ commission['id'] }}">✋</button>
-        % end
-        % if not queue_type == "finished_commissions":
-            % if queue_type == "my_commissions":
-                % if not commission["accepted"]:
-                    <button class="accept action_button" title="Accept commission" commission_id="{{ commission['id'] }}">✅</button>
-                % end
-                <button class="reject action_button" title="Reject commission" commission_id="{{ commission['id'] }}">❌</button>
-            % end
-            % if queue_type == "other_commissions" and not commission["accepted"] and current_user["role"] != "user":
-                <button class="accept action_button" title="Accept commission" commission_id="{{ commission['id'] }}">✅</button>
-            % end
-        % end
-        % if queue_type == "my_commissions" or current_user["role"] != "user":
-            % if not commission["invoiced"]:
-                <button class="invoiced action_button" title="Mark as Emailed" commission_id="{{ commission['id'] }}">📮</button>
-            % elif not commission["paid"]:
-                <button class="paid action_button" title="Mark as Paid" commission_id="{{ commission['id'] }}">💸</button>
-            % end
         % end
     % end
 </div>
