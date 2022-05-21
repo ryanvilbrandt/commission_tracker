@@ -47,8 +47,11 @@
             <span class="commission_upload_click clickable" commission_id="{{ commission['id'] }}">select a new file.</span>
         </div>
     </div>
+        % if commission["uploaded_filename"]:
+        <p><a href="/get_finished_commission_image/{{ commission["uploaded_filename"] }}" target="_blank">Previously uploaded file</a></p>
+        % end
     % elif queue_type == "finished_commissions":
-    <p><a href="/get_finished_commission_image/{{ commission["uploaded_filename"] }}" target="_blank">Uploaded File</a></p>
+    <p><a href="/get_finished_commission_image/{{ commission["uploaded_filename"] }}" target="_blank">Uploaded file</a></p>
     % end
     % if current_user["role"] != "user":
     <hr>
