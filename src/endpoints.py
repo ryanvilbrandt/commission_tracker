@@ -152,17 +152,12 @@ def load_wsgi_endpoints(app: Bottle):
     @app.get("/assign_commission/<commission_id>/<user_id>")
     @auth_basic(_auth_check)
     def assign_commission(commission_id: int, user_id: int):
-        with Db() as db:
-            _permissions_check(db, request.auth[0])
-            commission = db.get_commission_by_id(commission_id)
-            if commission["preferred_artist"] is None:
-                if user_id == "-1":
-                    db.set_preferred_artist(commission_id, "Any", False)
-                else:
-                    artist_name = db.get_full_name_from_id(user_id)
-                    db.set_preferred_artist(commission_id, artist_name, True)
-            functions.assign_commission(db, commission_id, user_id)
-            utils.send_to_websockets("commissions")
+        _assign_commission(commission_id, user_id)
+
+    @app.get("/assign_new_commission/<commission_id>/<user_id>/<num_characters>")
+    @auth_basic(_auth_check)
+    def assign_new_commission(commission_id: int, user_id: int, num_characters: str):
+        _assign_commission(commission_id, user_id, num_characters)
 
     @app.post("/add_new_user")
     @view("redirect_to_main.tpl")
@@ -446,3 +441,19 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
         "other_commissions": other_commissions,
         "finished_commissions": finished_commissions,
     }
+
+
+def _assign_commission(commission_id: int, user_id: int, num_characters: str=None):
+    with Db() as db:
+        _permissions_check(db, request.auth[0])
+        commission = db.get_commission_by_id(commission_id)
+        if commission["preferred_artist"] is None:
+            if user_id == "-1":
+                db.set_preferred_artist(commission_id, "Any", False)
+            else:
+                artist_name = db.get_full_name_from_id(user_id)
+                db.set_preferred_artist(commission_id, artist_name, True)
+        if num_characters is not None:
+            db.set_num_characters(commission_id, num_characters)
+        functions.assign_commission(db, commission_id, user_id)
+        utils.send_to_websockets("commissions")

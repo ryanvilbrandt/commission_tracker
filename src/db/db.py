@@ -238,6 +238,10 @@ class Db:
         sql = "UPDATE commissions SET updated_ts=CURRENT_TIMESTAMP WHERE id=? RETURNING *;"
         return self._fetch_one(sql, [commission_id])
 
+    def set_num_characters(self, commission_id: int, num_characters: str):
+        sql = "UPDATE commissions SET num_characters=? WHERE id=?;"
+        self.cur.execute(sql, [num_characters, commission_id])
+
     def set_preferred_artist(self, commission_id: int, preferred_artist: str, is_exclusive: bool):
         sql = "UPDATE commissions SET preferred_artist=?, is_exclusive=? WHERE id=?;"
         self.cur.execute(sql, [preferred_artist, is_exclusive, commission_id])

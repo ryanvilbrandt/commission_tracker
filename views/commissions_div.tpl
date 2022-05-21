@@ -17,8 +17,9 @@
 % span_all = "_span_all" if queue_type == "new_commissions" else ""
 <details class="commission_description{{ span_all }}" commission_id="{{ commission['id'] }}" queue_name="{{ queue_name }}"{{ open }}{{ hidden_text }}>
     % star = " ⭐" if commission["is_exclusive"] else ""
+    % num_characters = " ({})".format(commission["num_characters"]) if queue_type != "new_commissions" else ""
     <summary class="{{ commission['status'] }} commission_title_container">
-        <span class="commission_title">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }}</span>
+        <span class="commission_title">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }}{{num_characters}}</span>
         % if current_user["role"] != "user":
         <span class="created_updated">
             <span class="created_text" epoch="{{ commission['created_epoch'] }}"></span>&nbsp;&nbsp;&nbsp;
@@ -58,6 +59,16 @@
         <br><b>Message:</b> {{ commission["message"] }}
         % end
     </p>
+    % if queue_type == "new_commissions":
+    <p>How many characters is this commission asking for?</p>
+    <p>
+        <input type="radio" id="new_comm_1_character" name="num_characters" class="num_characters" value="1 char" commission_id="{{ commission['id'] }}">
+        <label for="new_comm_1_character">1 character</label><br>
+        <input type="radio" id="new_comm_2_characters" name="num_characters" class="num_characters" value="2 char" commission_id="{{ commission['id'] }}">
+        <label for="new_comm_2_characters">2 characters</label><br>
+    </p>
+    <p class="assign_new_commission_error_text" commission_id="{{ commission['id'] }}" hidden>You must specify if this commission requests either 1 or 2 characters.</p>
+    % end
     <p>
         <label for="assign_users_dropdown_{{ commission['id'] }}">Assign to an artist:</label>
         <select name="assign_users" id="assign_users_dropdown_{{ commission['id'] }}">
@@ -72,7 +83,7 @@
             % end
         % end
         </select>
-        <button class="assign_to_user_button" commission_id="{{ commission['id'] }}">Assign</button>
+        <button class="assign_to_user_button" commission_id="{{ commission['id'] }}" new_commission="{{ queue_type == "new_commissions" }}">Assign</button>
     </p>
     % end
 </details>

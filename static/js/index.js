@@ -262,9 +262,30 @@ function finished(event) {
 }
 
 function click_assign(event) {
-    let commission_id = event.target.attributes["commission_id"].value;
-    let user_id = document.querySelector(`#assign_users_dropdown_${commission_id}`).value;
-    ajax_call(`/assign_commission/${commission_id}/${user_id}`, callback);
+    const commission_id = event.target.attributes["commission_id"].value;
+    const user_id = document.querySelector(`#assign_users_dropdown_${commission_id}`).value;
+    const new_commission = event.target.attributes["new_commission"].value === "True";
+    let url;
+    if (!new_commission) {
+        url = `/assign_commission/${commission_id}/${user_id}`;
+    } else {
+        let num_characters = null;
+        document.querySelectorAll(`.num_characters[commission_id="${commission_id}"]`).forEach(
+            function (element) {
+                if (element.checked) {
+                    num_characters = element.value;
+                }
+            }
+        );
+        if (num_characters === null) {
+            document.querySelector(`.assign_new_commission_error_text[commission_id="${commission_id}"]`).hidden = false;
+            return;
+        }
+        url = `/assign_new_commission/${commission_id}/${user_id}/${num_characters}`;
+    }
+    // Close commission
+    ajax_call(url, callback);
+    document.querySelector(`details[commission_id="${commission_id}"]`).open = false;
 }
 
 function callback(xhttp) {

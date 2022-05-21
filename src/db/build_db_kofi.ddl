@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS commissions (
     price TEXT DEFAULT '',
     message TEXT DEFAULT '',
     url TEXT DEFAULT '',
+    num_characters TEXT DEFAULT NULL,
     preferred_artist INTEGER DEFAULT NULL,
     is_exclusive BOOLEAN DEFAULT NULL,
     assigned_to INTEGER DEFAULT -1,

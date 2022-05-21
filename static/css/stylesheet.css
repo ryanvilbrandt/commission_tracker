@@ -209,6 +209,11 @@ summary {
     margin: 0.5em;
 }
 
+.assign_new_commission_error_text {
+    color: red;
+    font-size: 0.9em;
+}
+
 .admin_checkbox {
     margin: auto;
     width: 100%;
