@@ -265,6 +265,7 @@ function finished(event) {
     form_data.append("commission_id", event.target.attributes["commission_id"].value);
     console.log(form_data);
     ajax_call(`/finish_commission`, callback, null, form_data);
+    document.querySelector(`details[commission_id="${commission_id}"]`).open = false;
 }
 
 function click_assign(event) {
