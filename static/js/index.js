@@ -220,6 +220,8 @@ function set_action_button(button) {
         button.onclick = invoiced;
     } else if (button.classList.contains("paid")) {
         button.onclick = paid;
+    } else if (button.classList.contains("archive")) {
+        button.onclick = archive;
     } else {
         console.error(`Unknown button class: ${button.classList}`);
     }
@@ -243,6 +245,10 @@ function invoiced(event) {
 
 function paid(event) {
     ajax_call(`/commission_action/paid/${event.target.attributes["commission_id"].value}`, callback);
+}
+
+function archive(event) {
+    ajax_call(`/commission_action/archive/${event.target.attributes["commission_id"].value}`, callback);
 }
 
 function finished(event) {

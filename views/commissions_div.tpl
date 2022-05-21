@@ -12,6 +12,9 @@
             <button class="claim action_button" title="Claim commission" commission_id="{{ commission['id'] }}">✋</button>
         % end
     % end
+    % if queue_type == "finished_commissions" and current_user["role"] != "user":
+        <button class="archive action_button" title="Archive commission" commission_id="{{ commission['id'] }}">📁</button>
+    % end
 </div>
 % open = " open" if commission.get('open') else ""
 % span_all = "_span_all" if queue_type == "new_commissions" else ""

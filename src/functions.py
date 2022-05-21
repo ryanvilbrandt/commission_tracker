@@ -177,6 +177,11 @@ def finish_commission(db: Db, commission_id: int, image_file: bottle.FileUpload)
     return db.update_ts(commission_id)
 
 
+def archive_commission(db: Db, commission_id: int) -> Optional[dict]:
+    db.archive_commission(commission_id)
+    return db.update_ts(commission_id)
+
+
 if __name__ == "__main__":
     os.chdir("..")
     # update_commissions_information()

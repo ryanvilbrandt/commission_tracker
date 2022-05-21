@@ -193,7 +193,7 @@ class Db:
 
     def get_all_commissions(self) -> Iterator[dict]:
         sql = """
-            SELECT * FROM commissions;
+            SELECT * FROM commissions WHERE NOT archived;
         """
         return self._fetch_all(sql)
 
@@ -204,7 +204,8 @@ class Db:
                 u.username,
                 u.full_name
             FROM commissions c
-            INNER JOIN users u ON c.assigned_to = u.id;
+            INNER JOIN users u ON c.assigned_to = u.id
+            WHERE NOT archived;
         """
         return self._fetch_all(sql)
 
@@ -272,4 +273,8 @@ class Db:
 
     def unfinish_commission(self, commission_id: int):
         sql = "UPDATE commissions SET finished=FALSE WHERE id=?;"
+        self.cur.execute(sql, [commission_id])
+
+    def archive_commission(self, commission_id: int):
+        sql = "UPDATE commissions SET archived=TRUE WHERE id=?;"
         self.cur.execute(sql, [commission_id])

@@ -136,6 +136,8 @@ def load_wsgi_endpoints(app: Bottle):
                 functions.invoice_commission(db, commission_id, invoiced=False)
             elif action == "undo_paid":
                 functions.pay_commission(db, commission_id, paid=False)
+            elif action == "archive":
+                functions.archive_commission(db, commission_id)
             else:
                 abort(400, f"Unknown action: {action}")
         utils.send_to_websockets("commissions")
