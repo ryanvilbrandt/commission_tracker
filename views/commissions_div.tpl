@@ -60,7 +60,6 @@
     <hr>
     <p>
         <b>Assigned to:</b> {{ commission["full_name"] }}<br>
-        <b>Email:</b> {{ commission['email'] }}
         % if commission["message"]:
         <br><b>Message:</b> {{ commission["message"] }}
         % end
