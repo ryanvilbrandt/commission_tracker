@@ -12,7 +12,7 @@
 
 ### Integrating with Ko-fi
 
-The following instructions assume you have a domain that can be used to hit the machine you're using to run Commission Tracker.
+The following instructions assume you have a domain that can be used to hit the machine you're using to run Commission Tracker, and have configured your network to allow it to be hit from the public internet.
 
 1. Edit conf/config.ini
    1. Change the `host` value to the local IP of the machine Commission Tracker is running on.
@@ -23,7 +23,7 @@ The following instructions assume you have a domain that can be used to hit the 
    1. On Windows, you may need to logout and back in for your environment variable change to take effect.
 5. Use the "Test a webhook" buttons on the Ko-fi webhook page. You should see a commission appear on the Commission Tracker. 
 
-You can also use the `scripts/test_kofi_webhook.py` script to push 
+You can also use the `scripts/test_kofi_webhook.py` script to make randomized calls to your webhook.
 
 ## Google Sheets
 
