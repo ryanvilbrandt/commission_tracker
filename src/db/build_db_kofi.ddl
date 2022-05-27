@@ -26,6 +26,8 @@ CREATE TABLE IF NOT EXISTS commissions (
     finished BOOLEAN DEFAULT FALSE,
     uploaded_filename TEXT DEFAULT NULL,
     archived BOOLEAN DEFAULT FALSE,
+    removed BOOLEAN DEFAULT FALSE,
+    refunded BOOLEAN DEFAULT FALSE,
     UNIQUE (created_ts, email) ON CONFLICT IGNORE
 );
 PRAGMA case_sensitive_like=ON;

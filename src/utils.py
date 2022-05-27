@@ -126,10 +126,14 @@ def link_images(s: str) -> List[str]:
 
 
 def get_status(commission: dict) -> Tuple[str, str]:
-    if commission["preferred_artist"] is None:
-        return "new", "New"
+    if commission["removed"]:
+        if commission["refunded"]:
+            return "refunded", "Refunded"
+        return "removed", "Removed, Needs To Be Refunded"
     elif commission["finished"]:
         return "finished", r"Finished! \o/"
+    elif commission["preferred_artist"] is None:
+        return "new", "New"
     elif commission["assigned_to"] != -1:
         return "claimed", "Claimed"
     elif commission["is_exclusive"]:

@@ -11,6 +11,10 @@
         % else:
             <button class="claim action_button" title="Claim commission" commission_id="{{ commission['id'] }}">✋</button>
         % end
+    % elif queue_type == "removed_commissions" and not current_user["is_artist"]:
+        % if not commission["refunded"]:
+        <button class="refund action_button" title="Commission has been refunded through Ko-fi" commission_id="{{ commission['id'] }}">💸</button>
+        % end
     % end
 </div>
 % open = " open" if commission.get('open') else ""
@@ -72,22 +76,27 @@
     </p>
     <p class="assign_new_commission_error_text" commission_id="{{ commission['id'] }}" hidden>You must specify if this commission requests either 1 or 2 characters.</p>
     % end
-    <p>
-        <label for="assign_users_dropdown_{{ commission['id'] }}">Assign to an artist:</label>
-        <select name="assign_users" id="assign_users_dropdown_{{ commission['id'] }}">
-        % if queue_type == "new_commissions":
-            <option value="-1">Any Artist</option>
-        % else:
-            <option value="-1">Unassigned</option>
-        % end
-        % for user in users:
-            % if user["is_artist"] and user["queue_open"]:
-            <option value="{{ user["id"] }}">{{ user["full_name"] }}</option>
+    % if not commission["refunded"]:
+        <p>
+            <label for="assign_users_dropdown_{{ commission['id'] }}">Assign to an artist:</label>
+            <select name="assign_users" id="assign_users_dropdown_{{ commission['id'] }}">
+            % if queue_type == "new_commissions":
+                <option value="-1">Any Artist</option>
+            % else:
+                <option value="-1">Unassigned</option>
             % end
+            % for user in users:
+                % if user["is_artist"] and user["queue_open"]:
+                <option value="{{ user["id"] }}">{{ user["full_name"] }}</option>
+                % end
+            % end
+            </select>
+            <button class="assign_to_user_button" commission_id="{{ commission['id'] }}" new_commission="{{ queue_type == "new_commissions" }}">Assign</button>
+        </p>
+        % if queue_type != "removed_commissions":
+        <p><button class="remove_commission_button" commission_id="{{ commission['id'] }}">🛑 Remove Commission</button></p>
         % end
-        </select>
-        <button class="assign_to_user_button" commission_id="{{ commission['id'] }}" new_commission="{{ queue_type == "new_commissions" }}">Assign</button>
-    </p>
+    % end
     % end
 </details>
 % end

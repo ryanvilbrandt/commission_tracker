@@ -30,6 +30,7 @@ function apply_commission_hooks() {
     document.querySelectorAll(".show_hide_icon").forEach(e => e.onclick = show_hide_commissions);
     document.querySelectorAll(".action_button").forEach(button => set_action_button(button));
     document.querySelectorAll(".assign_to_user_button").forEach(e => e.onclick = click_assign);
+    document.querySelectorAll(".remove_commission_button").forEach(e => e.onclick = click_remove);
     // document.querySelectorAll(".undo_invoiced_button").forEach(e => e.onclick = click_undo_invoiced);
     // document.querySelectorAll(".undo_paid_button").forEach(e => e.onclick = click_undo_paid);
     document.querySelectorAll(".commission_upload_drag").forEach(e => init_commission_upload_drag(e));
@@ -222,33 +223,43 @@ function set_action_button(button) {
         button.onclick = paid;
     } else if (button.classList.contains("archive")) {
         button.onclick = archive;
+    } else if (button.classList.contains("refund")) {
+        button.onclick = refund;
     } else {
         console.error(`Unknown button class: ${button.classList}`);
     }
 }
 
 function claim(event) {
-    ajax_call(`/commission_action/claim/${event.target.attributes["commission_id"].value}`, callback);
+    commission_action("claim", event.target.getAttribute("commission_id"));
 }
 
 function accept(event) {
-    ajax_call(`/commission_action/accept/${event.target.attributes["commission_id"].value}`, callback);
+    commission_action("accept", event.target.getAttribute("commission_id"));
 }
 
 function reject(event) {
-    ajax_call(`/commission_action/reject/${event.target.attributes["commission_id"].value}`, callback);
+    commission_action("reject", event.target.getAttribute("commission_id"));
 }
 
 function invoiced(event) {
-    ajax_call(`/commission_action/invoiced/${event.target.attributes["commission_id"].value}`, callback);
+    commission_action("invoiced", event.target.getAttribute("commission_id"));
 }
 
 function paid(event) {
-    ajax_call(`/commission_action/paid/${event.target.attributes["commission_id"].value}`, callback);
+    commission_action("paid", event.target.getAttribute("commission_id"));
 }
 
 function archive(event) {
-    ajax_call(`/commission_action/archive/${event.target.attributes["commission_id"].value}`, callback);
+    commission_action("archive", event.target.getAttribute("commission_id"));
+}
+
+function refund(event) {
+    commission_action("refund", event.target.getAttribute("commission_id"));
+}
+
+function commission_action(action, commission_id) {
+    ajax_call(`/commission_action/${action}/${commission_id}`, callback);
 }
 
 function finished(event) {
@@ -293,6 +304,15 @@ function click_assign(event) {
     // Close commission
     ajax_call(url, callback);
     document.querySelector(`details[commission_id="${commission_id}"]`).open = false;
+}
+
+function click_remove(event) {
+    let confirmation = window.confirm(
+        "Are you sure you want to remove that commission? " +
+        "It will need to be manually refunded through the Ko-fi website."
+    );
+    if (!confirmation) return;
+    commission_action("remove", event.target.getAttribute("commission_id"));
 }
 
 function callback(xhttp) {

@@ -159,11 +159,11 @@ summary {
     background-color: #78B159;
 }
 
-.finished_not_emailed {
+.finished_not_emailed, .removed {
     background-color: #FF0000;
 }
 
-.finished {
+.finished, .refunded {
     background-color: #E6E7E8;
 }
 

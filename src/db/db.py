@@ -278,3 +278,11 @@ class Db:
     def archive_commission(self, commission_id: int):
         sql = "UPDATE commissions SET archived=TRUE WHERE id=?;"
         self.cur.execute(sql, [commission_id])
+
+    def remove_commission(self, commission_id: int, remove=True):
+        sql = "UPDATE commissions SET removed=? WHERE id=?;"
+        self.cur.execute(sql, [remove, commission_id])
+
+    def refund_commission(self, commission_id: int):
+        sql = "UPDATE commissions SET refunded=TRUE WHERE id=?;"
+        self.cur.execute(sql, [commission_id])

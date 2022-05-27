@@ -123,7 +123,7 @@ def load_wsgi_endpoints(app: Bottle):
         with Db() as db:
             if action == "claim":
                 current_user = db.get_user_from_username(request.auth[0])
-                functions.claim_commission(db, current_user["id"], commission_id)
+                functions.claim_commission(db, commission_id, current_user["id"])
             elif action == "accept":
                 functions.accept_commission(db, commission_id)
             elif action == "reject":
@@ -138,6 +138,10 @@ def load_wsgi_endpoints(app: Bottle):
                 functions.pay_commission(db, commission_id, paid=False)
             elif action == "archive":
                 functions.archive_commission(db, commission_id)
+            elif action == "remove":
+                functions.remove_commission(db, commission_id)
+            elif action == "refund":
+                functions.refund_commission(db, commission_id)
             else:
                 abort(400, f"Unknown action: {action}")
         utils.send_to_websockets("commissions")
@@ -401,6 +405,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
     available_commissions = {"hidden": "available_commissions" in hidden_queues, "commissions": []}
     other_commissions = {}
     finished_commissions = {"hidden": "finished_commissions" in hidden_queues, "commissions": []}
+    removed_commissions = {"hidden": "removed_commissions" in hidden_queues, "commissions": []}
     # Build user-specific commission queues
     for user in db.get_all_artists():
         other_commissions[user["username"]] = {
@@ -423,16 +428,20 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
         commission["created_epoch"] = int(mktime(strptime(commission["created_ts"], "%Y-%m-%dT%H:%M:%SZ"))) - time_offset
         commission["updated_epoch"] = int(mktime(strptime(commission["updated_ts"], "%Y-%m-%d %H:%M:%S"))) - time_offset
         # Assign to queue
-        if commission["preferred_artist"] is None:
+        if commission["status"] == "new":
             new_commissions["commissions"].append(commission)
-        elif commission["finished"]:
-            finished_commissions["commissions"].append(commission)
-        elif commission["assigned_to"] == current_user["id"]:
-            my_commissions["commissions"].append(commission)
-        elif commission["assigned_to"] == -1:  # Unassigned and claimable
+        elif commission["status"] in ("claimable", "exclusive"):
             available_commissions["commissions"].append(commission)
+        elif commission["status"] == "finished":
+            finished_commissions["commissions"].append(commission)
+        elif commission["status"] in ("removed", "refunded"):
+            removed_commissions["commissions"].append(commission)
         else:
-            other_commissions[commission["username"]]["commissions"].append(commission)
+            # In an Artist's commission queue
+            if commission["assigned_to"] == current_user["id"]:
+                my_commissions["commissions"].append(commission)
+            else:
+                other_commissions[commission["username"]]["commissions"].append(commission)
     # Fill out metadata for each "other" commission
     for d in other_commissions.values():
         for commission in d["commissions"]:
@@ -458,6 +467,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
         "available_commissions": available_commissions,
         "other_commissions": other_commissions,
         "finished_commissions": finished_commissions,
+        "removed_commissions": removed_commissions,
     }
 
 

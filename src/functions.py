@@ -95,35 +95,15 @@ def add_commission(data: Dict[str, Union[str, bool, None]]) -> Optional[dict]:
 
 
 def assign_commission(db: Db, commission_id: int, user_id: int) -> Optional[dict]:
-    db.unfinish_commission(commission_id)
+    db.assign_commission(commission_id, user_id)
     db.accept_commission(commission_id, False)
-    db.assign_commission(commission_id, user_id)
-    return db.update_ts(commission_id)
-
-
-def claim_commission(db: Db, user_id: int, commission_id: int) -> Optional[dict]:
-    # commission = db.get_commission_by_id(commission_id)
-    # The commission must not currently be assigned to anyone to allow a claim
-    # if commission["assigned_to"] != -1:
-    #     print(f"A user (id={user_id}) tried to claim a commission that was already claimed. How??")
-    #     raise Exception(
-    #         f"You tried to claim a commission that was already claimed. Please tell Trick-Candle how."
-    #     )
-    # # If the commission is exclusive and in the voided-queue, claim will give it back to the original
-    # # requested artist
-    # if not commission["allow_any_artist"] and commission["channel_name"] == "voided-queue":
-    #     name = commission["artist_choice"]
-    #     auto_accept = False
-    # else:
-    #     # If the commission is limited to a specific artist, the claiming artist must be that artist
-    #     if not commission["allow_any_artist"] and commission["artist_choice_id"] != user_id:
-    #         return None
-    #     auto_accept = True
-    db.assign_commission(commission_id, user_id)
-    # if auto_accept:
-    db.accept_commission(commission_id, accepted=True)
     db.unfinish_commission(commission_id)
+    db.remove_commission(commission_id, False)
     return db.update_ts(commission_id)
+
+
+def claim_commission(db: Db, commission_id: int, user_id: int) -> Optional[dict]:
+    return assign_commission(db, commission_id, user_id)
 
 
 # @staticmethod
@@ -184,6 +164,16 @@ def finish_commission(db: Db, commission_id: int, image_file: bottle.FileUpload)
 
 def archive_commission(db: Db, commission_id: int) -> Optional[dict]:
     db.archive_commission(commission_id)
+    return db.update_ts(commission_id)
+
+
+def remove_commission(db: Db, commission_id: int) -> Optional[dict]:
+    db.remove_commission(commission_id)
+    return db.update_ts(commission_id)
+
+
+def refund_commission(db: Db, commission_id: int) -> Optional[dict]:
+    db.refund_commission(commission_id)
     return db.update_ts(commission_id)
 
 
