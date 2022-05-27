@@ -3,6 +3,7 @@ __pycache__/
 
 *.db
 *.ini
+*.log
 server.lock
 
 scripts/users.csv

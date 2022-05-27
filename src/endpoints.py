@@ -326,11 +326,18 @@ def load_wsgi_endpoints(app: Bottle):
             abort(403)
             return
         if data.get("type") != "Commission":
-            print(f"Received non-commission data. Skipping. {data}")
-            return
-        print(f"New Ko-fi commission! {data}")
-        functions.add_commission(data)
-        utils.send_to_websockets("commissions")
+            log = f"Received non-commission data. Skipping. {data}"
+            print(log)
+        else:
+            log = f"New Ko-fi commission! {data}"
+            print(log)
+            functions.add_commission(data)
+            utils.send_to_websockets("commissions")
+        try:
+            with open("audit.log", "a") as f:
+                f.write(log + "\r\n")
+        except Exception as e:
+            print(e, file=sys.stderr)
 
 
 def _get_user(db: Db, username: str):

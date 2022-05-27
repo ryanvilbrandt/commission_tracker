@@ -19,7 +19,6 @@ while True:
 
 # TODO:
 # * Notes field for each commission? Editable on the web page
-# * Order commissions by when an artist accepts them
 # * Can view the history of each commissions
 # * Add tracking for which users have websockets open
 # * Figure out way to make multiple actions in a row bog things down less. Threading of sending websockets?
