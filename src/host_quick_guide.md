@@ -18,6 +18,7 @@ Commission requests must not:
 
 * Request more than 2 characters (assuming they paid for the extra character)
 * Request something more complex than a sketch, or with a background
+* Request a character design
 * Be racist, hateful, or intended to insult or harm others
 * Depict excessive violence, gore, or self harm
 * Attempt to copy the style of another artist
