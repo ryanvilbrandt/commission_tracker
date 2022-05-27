@@ -5,4 +5,21 @@
 * If Artists with empty queues aren't taking commissions, assign commissions to them.
 * Keep an eye on chat and answer any questions people may have about their commissions.
 
+### Guidelines for Commissions
+
+All commissions must meet the following guidelines:
+
+* PG-13
+* Have a reference picture attached, or be loose enough in their requirements (e.g. Artists' Choice)
+
+Commission requests must not: 
+
+* Request more than 2 characters (assuming they paid for the extra character)
+* Request something more complex than a sketch
+* Be racist, hateful, or intended to insult or harm others
+* Depict excessive violence, gore, or self harm
+* Attempt to copy the style of another artist
+* Include NSFW/fetish material
+
+
 See the full <a href="/host_help" target="_blank">help page for Hosts</a> for more info.
