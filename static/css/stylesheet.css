@@ -130,6 +130,11 @@ summary {
     font-size: 0.8em;
 }
 
+.created_text, .updated_text {
+    display: inline-block;
+    width: 8em;
+}
+
 .accepted, .claimed {
     background-color: #F4900C;
 }
