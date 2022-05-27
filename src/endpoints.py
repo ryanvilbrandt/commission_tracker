@@ -454,7 +454,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
                 d["meta"]["not_accepted"] += 1
     # Sort commissions
     def sort_key(d):
-        return d["updated_epoch"], d["created_epoch"]
+        return d["updated_epoch"], d["created_epoch"], d["id"]
     my_commissions["commissions"] = sorted(my_commissions["commissions"], key=sort_key)
     new_commissions["commissions"] = sorted(new_commissions["commissions"], key=sort_key)
     available_commissions["commissions"] = sorted(available_commissions["commissions"], key=sort_key)

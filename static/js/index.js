@@ -276,7 +276,7 @@ function finished(event) {
     form_data.append("commission_id", event.target.attributes["commission_id"].value);
     console.log(form_data);
     ajax_call(`/finish_commission`, callback, null, form_data);
-    document.querySelector(`details[commission_id="${commission_id}"]`).open = false;
+    close_details(commission_id);
 }
 
 function click_assign(event) {
@@ -303,7 +303,7 @@ function click_assign(event) {
     }
     // Close commission
     ajax_call(url, callback);
-    document.querySelector(`details[commission_id="${commission_id}"]`).open = false;
+    close_details(commission_id);
 }
 
 function click_remove(event) {
@@ -312,7 +312,13 @@ function click_remove(event) {
         "It will need to be manually refunded through the Ko-fi website."
     );
     if (!confirmation) return;
-    commission_action("remove", event.target.getAttribute("commission_id"));
+    const commission_id = event.target.getAttribute("commission_id");
+    commission_action("remove", commission_id);
+    document.querySelector(`details[commission_id="${commission_id}"]`).open = false;
+}
+
+function close_details(commission_id) {
+    document.querySelector(`details[commission_id="${commission_id}"]`).open = false;
 }
 
 function callback(xhttp) {
