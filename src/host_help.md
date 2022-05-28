@@ -43,9 +43,9 @@ When new commissions come in from Ko-fi, due to a quirk in Ko-fi's system, the C
 
 Click the "Link to commission details" hyperlink to go to the commission's details on the Ko-fi website. First, you should determine if this commission meets the restrictions and guidelines for acceptable commissions. You can see those guidelines at the top of page in the "How To Use The Commission Tracker" section. You can read the full Terms of Service [here](https://docs.google.com/document/d/1VyYlwrIJtY-shMFs4OwztA-ONfj2b67PsNEF63HmCLE/view). If you decide that a commission should be removed, click the `🛑 Remove Commission` button.
 
-Once you've decided the commission is acceptable to pass on to the Artists, you should look at the commission details webpage in Ko-fi to determine what queue the commission should go into, and how many characters the commissioner has requested. If it's a commission for any Artist, select "Any Artist" from the "Assign to an artist:" dropdown. If it's a commission for a specific Artist, select their name. Then, click the "Assign" button. *Note: During testing, some of these links will be fake or for Test commissions, so just make stuff up.*
+Once you've decided the commission is acceptable to pass on to the Artists, you should look at the commission details webpage in Ko-fi to determine what queue the commission should go into, and how many characters the commissioner has requested. If it's a commission for any Artist, select "Any Artist" from the "Assign to an artist:" dropdown. If it's a commission for a specific Artist, select their name. Then, click the "Assign" button.
 
-Note that any commissions assigned directly to Artists from this queue will be marked as ⭐ Exclusive, meaning they're intended to be *only* picked up by that Artist. 
+Note that any commissions assigned directly to Artists from this queue will be marked as ⭐ Exclusive, meaning they're intended to be *only* picked up by that Artist.
 
 ### Assigning/Unassigning Commissions
 
