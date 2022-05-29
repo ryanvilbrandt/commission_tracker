@@ -11,9 +11,13 @@
         % else:
             <button class="claim action_button" title="Claim commission" commission_id="{{ commission['id'] }}">✋</button>
         % end
+    % elif queue_type == "finished_commissions" and not current_user["is_artist"]:
+        % if not commission["emailed"]:
+        <button class="emailed action_button" title="Commission has been emailed to the commissioner" commission_id="{{ commission['id'] }}">📧</button>
+        % end
     % elif queue_type == "removed_commissions" and not current_user["is_artist"]:
         % if not commission["refunded"]:
-        <button class="refund action_button" title="Commission has been refunded through Ko-fi" commission_id="{{ commission['id'] }}">💸</button>
+        <button class="refunded action_button" title="Commission has been refunded through Ko-fi" commission_id="{{ commission['id'] }}">💸</button>
         % end
     % end
 </div>

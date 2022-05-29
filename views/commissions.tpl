@@ -68,11 +68,6 @@
         {{ d["user"]["full_name"] }}'s commissions
         <span class="queue_hidden_label" queue_name="{{ user }}_inverted"{{ "" if d["hidden"] else " hidden" }}>(hidden)</span>
     </h2>
-    <div class="commission_stats">
-        % if not current_user["is_artist"]:
-        <span class="user_meta_header accepted" title="Assigned">✋: {{ d["meta"]["assigned"] }}</span>
-        % end
-    </div>
     <% include(
         "commissions_div.tpl",
         commissions=d["commissions"],

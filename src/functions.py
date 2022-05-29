@@ -96,7 +96,6 @@ def add_commission(data: Dict[str, Union[str, bool, None]]) -> Optional[dict]:
 
 def assign_commission(db: Db, commission_id: int, user_id: int) -> Optional[dict]:
     db.assign_commission(commission_id, user_id)
-    db.accept_commission(commission_id, False)
     db.unfinish_commission(commission_id)
     db.remove_commission(commission_id, False)
     return db.update_ts(commission_id)
@@ -106,36 +105,8 @@ def claim_commission(db: Db, commission_id: int, user_id: int) -> Optional[dict]
     return assign_commission(db, commission_id, user_id)
 
 
-# @staticmethod
-# def check_if_user_can_accept_reject(db: Db, member: Member, message_id: int, action: str):
-#     commission = db.get_commission_by_message_id(message_id)
-#     name = get_name_by_member_id(member.id)
-#     if name != commission["assigned_to"]:
-#         print(f"A user ({member} | {name}) tried to {action} a commission "
-#               f"when it wasn't assigned to them ({commission['assigned_to']}).")
-#         member.send(f"You can't {action} a commission that isn't assigned to you.", delete_after=60)
-#         return None
-#     return commission
-
-
-def accept_commission(db: Db, commission_id: int) -> Optional[dict]:
-    db.accept_commission(commission_id, accepted=True)
-    return db.update_ts(commission_id)
-
-
 def reject_commission(db: Db, commission_id: int) -> Optional[dict]:
-    db.accept_commission(commission_id, accepted=False)
     db.assign_commission(commission_id, -1)
-    return db.update_ts(commission_id)
-
-
-def invoice_commission(db: Db, commission_id: int, invoiced: bool=True) -> Optional[dict]:
-    db.invoice_commission(commission_id, invoiced=invoiced)
-    return db.update_ts(commission_id)
-
-
-def pay_commission(db: Db, commission_id: int, paid: bool=True) -> Optional[dict]:
-    db.pay_commission(commission_id, paid=paid)
     return db.update_ts(commission_id)
 
 
@@ -162,8 +133,8 @@ def finish_commission(db: Db, commission_id: int, image_file: bottle.FileUpload)
     return db.update_ts(commission_id)
 
 
-def archive_commission(db: Db, commission_id: int) -> Optional[dict]:
-    db.archive_commission(commission_id)
+def email_commission(db: Db, commission_id: int) -> Optional[dict]:
+    db.email_commission(commission_id)
     return db.update_ts(commission_id)
 
 
@@ -174,6 +145,11 @@ def remove_commission(db: Db, commission_id: int) -> Optional[dict]:
 
 def refund_commission(db: Db, commission_id: int) -> Optional[dict]:
     db.refund_commission(commission_id)
+    return db.update_ts(commission_id)
+
+
+def archive_commission(db: Db, commission_id: int) -> Optional[dict]:
+    db.archive_commission(commission_id)
     return db.update_ts(commission_id)
 
 

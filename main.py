@@ -18,9 +18,12 @@ while True:
         sleep(10)
 
 # TODO:
+# * Totals on every queue
+# * Try click-uploading commissions and see why it breaks
 # * Notes field for each commission? Editable on the web page
 # * Can view the history of each commissions
 # * Add tracking for which users have websockets open
 # * Figure out way to make multiple actions in a row bog things down less. Threading of sending websockets?
 # * Change buttons to progress bar?
 # * Look into splitting out commission updates from websockets
+# * Look into hooking Queue Open/Close to the Twitch Overlay

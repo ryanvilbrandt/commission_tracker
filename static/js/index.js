@@ -211,51 +211,17 @@ function change_queue_open(event) {
 }
 
 function set_action_button(button) {
-    if (button.classList.contains("claim")) {
-        button.onclick = claim;
-    } else if (button.classList.contains("accept")) {
-        button.onclick = accept;
-    } else if (button.classList.contains("reject")) {
-        button.onclick = reject;
-    } else if (button.classList.contains("invoiced")) {
-        button.onclick = invoiced;
-    } else if (button.classList.contains("paid")) {
-        button.onclick = paid;
-    } else if (button.classList.contains("archive")) {
-        button.onclick = archive;
-    } else if (button.classList.contains("refund")) {
-        button.onclick = refund;
-    } else {
-        console.error(`Unknown button class: ${button.classList}`);
+    const action_list = ["claim", "reject", "emailed", "refunded", "archive"];
+    for (let i=0; i<action_list.length; i++) {
+        if (button.classList.contains(action_list[i])) {
+            button.onclick = event => commission_action(
+                action_list[i],
+                event.target.getAttribute("commission_id")
+            );
+            return;
+        }
     }
-}
-
-function claim(event) {
-    commission_action("claim", event.target.getAttribute("commission_id"));
-}
-
-function accept(event) {
-    commission_action("accept", event.target.getAttribute("commission_id"));
-}
-
-function reject(event) {
-    commission_action("reject", event.target.getAttribute("commission_id"));
-}
-
-function invoiced(event) {
-    commission_action("invoiced", event.target.getAttribute("commission_id"));
-}
-
-function paid(event) {
-    commission_action("paid", event.target.getAttribute("commission_id"));
-}
-
-function archive(event) {
-    commission_action("archive", event.target.getAttribute("commission_id"));
-}
-
-function refund(event) {
-    commission_action("refund", event.target.getAttribute("commission_id"));
+    console.error(`Unknown button class: ${button.classList}`);
 }
 
 function commission_action(action, commission_id) {

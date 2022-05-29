@@ -255,18 +255,6 @@ class Db:
         sql = "UPDATE commissions SET assigned_to=? WHERE id=?;"
         self.cur.execute(sql, [assigned_to, commission_id])
 
-    def accept_commission(self, commission_id: int, accepted=True):
-        sql = "UPDATE commissions SET accepted=? WHERE id=?;"
-        self.cur.execute(sql, [accepted, commission_id])
-
-    def invoice_commission(self, commission_id: int, invoiced=True):
-        sql = "UPDATE commissions SET invoiced=? WHERE id=?;"
-        self.cur.execute(sql, [invoiced, commission_id])
-
-    def pay_commission(self, commission_id: int, paid=True):
-        sql = "UPDATE commissions SET paid=? WHERE id=?;"
-        self.cur.execute(sql, [paid, commission_id])
-
     def finish_commission(self, commission_id: int, filename: str):
         sql = "UPDATE commissions SET finished=TRUE, uploaded_filename=? WHERE id=?;"
         self.cur.execute(sql, [filename, commission_id])
@@ -275,8 +263,8 @@ class Db:
         sql = "UPDATE commissions SET finished=FALSE WHERE id=?;"
         self.cur.execute(sql, [commission_id])
 
-    def archive_commission(self, commission_id: int):
-        sql = "UPDATE commissions SET archived=TRUE WHERE id=?;"
+    def email_commission(self, commission_id: int):
+        sql = "UPDATE commissions SET emailed=TRUE WHERE id=?;"
         self.cur.execute(sql, [commission_id])
 
     def remove_commission(self, commission_id: int, remove=True):
@@ -285,4 +273,8 @@ class Db:
 
     def refund_commission(self, commission_id: int):
         sql = "UPDATE commissions SET refunded=TRUE WHERE id=?;"
+        self.cur.execute(sql, [commission_id])
+
+    def archive_commission(self, commission_id: int):
+        sql = "UPDATE commissions SET archived=TRUE WHERE id=?;"
         self.cur.execute(sql, [commission_id])

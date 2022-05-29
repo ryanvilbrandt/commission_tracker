@@ -20,14 +20,12 @@ CREATE TABLE IF NOT EXISTS commissions (
     preferred_artist INTEGER DEFAULT NULL,
     is_exclusive BOOLEAN DEFAULT NULL,
     assigned_to INTEGER DEFAULT -1,
-    accepted BOOLEAN DEFAULT FALSE,
-    invoiced BOOLEAN DEFAULT TRUE,
-    paid BOOLEAN DEFAULT TRUE,
     finished BOOLEAN DEFAULT FALSE,
     uploaded_filename TEXT DEFAULT NULL,
-    archived BOOLEAN DEFAULT FALSE,
+    emailed BOOLEAN DEFAULT FALSE,
     removed BOOLEAN DEFAULT FALSE,
     refunded BOOLEAN DEFAULT FALSE,
+    archived BOOLEAN DEFAULT FALSE,
     UNIQUE (created_ts, email) ON CONFLICT IGNORE
 );
 PRAGMA case_sensitive_like=ON;

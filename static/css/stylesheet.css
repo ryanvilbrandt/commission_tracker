@@ -103,6 +103,7 @@ code {
 
 .queue_closed {
     text-decoration: line-through;
+    text-decoration-thickness: 0.105em;
 }
 
 details {
@@ -135,35 +136,31 @@ summary {
     width: 8em;
 }
 
-.accepted, .claimed {
+.claimed_status {
     background-color: #F4900C;
 }
 
-.not_accepted {
-    background-color: #FFC0CB;
-}
-
-.claimable {
+.claimable_status {
     background-color: #55ACEE;
 }
 
-.exclusive {
+.exclusive_status {
     background-color: #AA8ED6;
 }
 
-.invoiced, .new {
+.new_status {
     background-color: #FDCB58;
 }
 
-.paid {
+.finished_status {
     background-color: #78B159;
 }
 
-.finished_not_emailed, .removed {
+.removed_status {
     background-color: #FF0000;
 }
 
-.finished, .refunded {
+.emailed_status, .refunded_status {
     background-color: #E6E7E8;
 }
 

@@ -124,24 +124,16 @@ def load_wsgi_endpoints(app: Bottle):
             if action == "claim":
                 current_user = db.get_user_from_username(request.auth[0])
                 functions.claim_commission(db, commission_id, current_user["id"])
-            elif action == "accept":
-                functions.accept_commission(db, commission_id)
             elif action == "reject":
                 functions.reject_commission(db, commission_id)
-            elif action == "invoiced":
-                functions.invoice_commission(db, commission_id)
-            elif action == "paid":
-                functions.pay_commission(db, commission_id)
-            elif action == "undo_invoiced":
-                functions.invoice_commission(db, commission_id, invoiced=False)
-            elif action == "undo_paid":
-                functions.pay_commission(db, commission_id, paid=False)
-            elif action == "archive":
-                functions.archive_commission(db, commission_id)
+            elif action == "emailed":
+                functions.email_commission(db, commission_id)
             elif action == "remove":
                 functions.remove_commission(db, commission_id)
-            elif action == "refund":
+            elif action == "refunded":
                 functions.refund_commission(db, commission_id)
+            elif action == "archive":
+                functions.archive_commission(db, commission_id)
             else:
                 abort(400, f"Unknown action: {action}")
         utils.send_to_websockets("commissions")
@@ -428,13 +420,13 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
         commission["created_epoch"] = int(mktime(strptime(commission["created_ts"], "%Y-%m-%dT%H:%M:%SZ"))) - time_offset
         commission["updated_epoch"] = int(mktime(strptime(commission["updated_ts"], "%Y-%m-%d %H:%M:%S"))) - time_offset
         # Assign to queue
-        if commission["status"] == "new":
+        if commission["status"] == "new_status":
             new_commissions["commissions"].append(commission)
-        elif commission["status"] in ("claimable", "exclusive"):
+        elif commission["status"] in ("claimable_status", "exclusive_status"):
             available_commissions["commissions"].append(commission)
-        elif commission["status"] == "finished":
+        elif commission["status"] in ("finished_status", "emailed_status"):
             finished_commissions["commissions"].append(commission)
-        elif commission["status"] in ("removed", "refunded"):
+        elif commission["status"] in ("removed_status", "refunded_status"):
             removed_commissions["commissions"].append(commission)
         else:
             # In an Artist's commission queue
@@ -444,14 +436,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
                 other_commissions[commission["username"]]["commissions"].append(commission)
     # Fill out metadata for each "other" commission
     for d in other_commissions.values():
-        for commission in d["commissions"]:
-            d["meta"]["assigned"] += 1
-            if commission["paid"]:
-                d["meta"]["paid"] += 1
-            elif commission["invoiced"]:
-                d["meta"]["invoiced"] += 1
-            if not commission["accepted"]:
-                d["meta"]["not_accepted"] += 1
+        d["meta"]["assigned"] = len(d["commissions"])
     # Sort commissions
     def sort_key(d):
         return d["updated_epoch"], d["created_epoch"], d["id"]
