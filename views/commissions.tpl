@@ -5,7 +5,7 @@
     <h2 class="commission_header{{ " queue_hidden" if hidden else "" }}{{ " queue_closed" if not queue_open else "" }}" id="{{ queue_name }}">
         <img class="show_hide_icon" src="/static/img/eye-solid.svg" queue_owner="{{ queue_name }}" queue_name="{{ queue_name }}" title="Click to hide this commission queue"{{ " hidden" if hidden else "" }}>
         <img class="show_hide_icon hide" src="/static/img/eye-slash-solid.svg" queue_owner="{{ queue_name }}" queue_name="{{ queue_name }}_inverted" title="Click to show this commission queue"{{ " hidden" if not hidden else "" }}>
-        Commissions assigned to me{{ " (Why do you have any???)" if not current_user["is_artist"] else "" }}
+        Commissions assigned to me ({{ len(commissions[queue_name]["commissions"]) }})
         <span class="queue_hidden_label" queue_name="{{ queue_name }}_inverted"{{ "" if hidden else " hidden" }}>(hidden)</span>
     </h2>
     <% include(
@@ -26,7 +26,7 @@
     <h2 class="commission_header{{ " queue_hidden" if hidden else "" }}" id="{{ queue_name }}">
         <img class="show_hide_icon" src="/static/img/eye-solid.svg" queue_owner="{{ queue_name }}" queue_name="{{ queue_name }}" title="Click to hide this commission queue"{{ " hidden" if hidden else "" }}>
         <img class="show_hide_icon hide" src="/static/img/eye-slash-solid.svg" queue_owner="{{ queue_name }}" queue_name="{{ queue_name }}_inverted" title="Click to show this commission queue"{{ " hidden" if not hidden else "" }}>
-        New commissions (needs assignment)
+        New commissions (needs assignment) ({{ len(commissions[queue_name]["commissions"]) }})
         <span class="queue_hidden_label" queue_name="{{ queue_name }}_inverted"{{ "" if hidden else " hidden" }}>(hidden)</span>
     </h2>
     <% include(
@@ -46,7 +46,7 @@
 <h2 class="commission_header{{ " queue_hidden" if hidden else "" }}" id="{{ queue_name }}">
     <img class="show_hide_icon" src="/static/img/eye-solid.svg" queue_owner="{{ queue_name }}" queue_name="{{ queue_name }}" title="Click to hide this commission queue"{{ " hidden" if hidden else "" }}>
     <img class="show_hide_icon hide" src="/static/img/eye-slash-solid.svg" queue_owner="{{ queue_name }}" queue_name="{{ queue_name }}_inverted" title="Click to show this commission queue"{{ " hidden" if not hidden else "" }}>
-    Available commissions
+    Available commissions ({{ len(commissions[queue_name]["commissions"]) }})
     <span class="queue_hidden_label" queue_name="{{ queue_name }}_inverted"{{ "" if hidden else " hidden" }}>(hidden)</span>
 </h2>
 <% include(
@@ -65,7 +65,7 @@
     <h2 class="commission_header user_commissions{{ " queue_hidden" if d["hidden"] else "" }}{{ " queue_closed" if not d["user"]["queue_open"] else "" }}" id="{{ user }}_commissions">
         <img class="show_hide_icon" src="/static/img/eye-solid.svg" queue_owner="{{ user }}" queue_name="{{ user }}" title="Click to hide this commission queue"{{ " hidden" if d["hidden"] else "" }}>
         <img class="show_hide_icon hide" src="/static/img/eye-slash-solid.svg" queue_owner="{{ user }}" queue_name="{{ user }}_inverted" title="Click to show this commission queue"{{ " hidden" if not d["hidden"] else "" }}>
-        {{ d["user"]["full_name"] }}'s commissions
+        {{ d["user"]["full_name"] }}'s commissions ({{ len(d["commissions"]) }})
         <span class="queue_hidden_label" queue_name="{{ user }}_inverted"{{ "" if d["hidden"] else " hidden" }}>(hidden)</span>
     </h2>
     <% include(
@@ -86,7 +86,7 @@
 <h2 class="commission_header{{ " queue_hidden" if hidden else "" }}" id="{{ queue_name }}">
     <img class="show_hide_icon" src="/static/img/eye-solid.svg" queue_owner="{{ queue_name }}" queue_name="{{ queue_name }}" title="Click to hide this commission queue"{{ " hidden" if hidden else "" }}>
     <img class="show_hide_icon hide" src="/static/img/eye-slash-solid.svg" queue_owner="{{ queue_name }}" queue_name="{{ queue_name }}_inverted" title="Click to show this commission queue"{{ " hidden" if not hidden else "" }}>
-    Finished commissions
+    Finished commissions ({{ len(commissions[queue_name]["commissions"]) }})
     <span class="queue_hidden_label" queue_name="{{ queue_name }}_inverted"{{ "" if hidden else " hidden" }}>(hidden)</span>
 </h2>
 <% include(
@@ -106,7 +106,7 @@
     <h2 class="commission_header{{ " queue_hidden" if hidden else "" }}" id="{{ queue_name }}">
         <img class="show_hide_icon" src="/static/img/eye-solid.svg" queue_owner="{{ queue_name }}" queue_name="{{ queue_name }}" title="Click to hide this commission queue"{{ " hidden" if hidden else "" }}>
         <img class="show_hide_icon hide" src="/static/img/eye-slash-solid.svg" queue_owner="{{ queue_name }}" queue_name="{{ queue_name }}_inverted" title="Click to show this commission queue"{{ " hidden" if not hidden else "" }}>
-        Removed commissions
+        Removed commissions ({{ len(commissions[queue_name]["commissions"]) }})
         <span class="queue_hidden_label" queue_name="{{ queue_name }}_inverted"{{ "" if hidden else " hidden" }}>(hidden)</span>
     </h2>
     <% include(
