@@ -1,6 +1,6 @@
 import os
 from json import dumps
-from time import ctime
+from time import strftime
 from uuid import uuid4
 
 from faker import Faker
@@ -16,7 +16,7 @@ def create_fake_commission():
     r = post(f"http://{host}:{port}/kofi_webhook", data={
         "data": dumps({
             "message_id": str(uuid4()),
-            "timestamp": ctime(),
+            "timestamp": strftime("%Y-%m-%dT%H:%M:%SZ"),
             "type": "Commission",
             "is_public": True,
             "from_name": fake.name(),
