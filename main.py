@@ -18,6 +18,7 @@ while True:
         sleep(10)
 
 # TODO:
+# * Fix unicode in notes
 # * Look into hooking Queue Open/Close to the Twitch Overlay
 # * Add tracking for which users have websockets open
 # * Figure out way to make multiple actions in a row bog things down less.
