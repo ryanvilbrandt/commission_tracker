@@ -1,7 +1,7 @@
 import os.path
 import sqlite3
 from collections import OrderedDict
-from typing import Optional, Iterator, Union
+from typing import Optional, Iterator, Union, List
 
 DB_CONN = None
 
@@ -215,6 +215,18 @@ class Db:
         """
         return self._fetch_all(sql, [user_id])
 
+    def get_notes(self, commission_ids: List[int]) -> Iterator[dict]:
+        sql = """
+            SELECT 
+                n.*,
+                u.full_name 
+            FROM notes n
+            INNER JOIN users u ON n.user_id = u.id 
+            WHERE n.commission_id IN ({}) 
+            ORDER BY n.created_ts;
+        """.format(", ".join(map(str, commission_ids)))
+        return self._fetch_all(sql)
+
     def add_commission(self, created_ts, name, email, price, message, url) -> dict:
         sql = """
         INSERT INTO commissions(created_ts, name, email, price, message, url)
@@ -278,3 +290,7 @@ class Db:
     def archive_commission(self, commission_id: int):
         sql = "UPDATE commissions SET archived=TRUE WHERE id=?;"
         self.cur.execute(sql, [commission_id])
+
+    def add_note(self, commission_id: int, user_id: int, text: str):
+        sql = "INSERT INTO notes (commission_id, user_id, text) VALUES (?, ?, ?);"
+        self.cur.execute(sql, [commission_id, user_id, text])

@@ -8,12 +8,15 @@ from requests import post
 
 from src.utils import load_config
 
+if not os.path.isdir("src"):
+    os.chdir("..")
+config = load_config()
+HOST, PORT = config.get("Settings", "host"), config.getint("Settings", "port")
+
 
 def create_fake_commission():
     fake = Faker()
-    config = load_config()
-    host, port = config.get("Settings", "host"), config.getint("Settings", "port")
-    r = post(f"http://{host}:{port}/kofi_webhook", data={
+    r = post(f"http://{HOST}:{PORT}/kofi_webhook", data={
         "data": dumps({
             "message_id": str(uuid4()),
             "timestamp": strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -37,8 +40,16 @@ def create_fake_commission():
     print(r)
 
 
+def test_note():
+    r = post(f"http://{HOST}:{PORT}/add_note", data={
+        "commission_id": 85,
+        "user_id": 4,
+        "text": "I like reading about cats dying!"
+    })
+    print(r)
+
+
 if __name__ == "__main__":
-    if not os.path.isdir("src"):
-        os.chdir("..")
-    for _ in range(1):
-        create_fake_commission()
+    # for _ in range(1):
+    #     create_fake_commission()
+    test_note()

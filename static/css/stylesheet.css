@@ -216,6 +216,12 @@ summary {
     font-size: 0.9em;
 }
 
+.notes_attribution {
+    font-size: 0.8em;
+    font-style: italic;
+    padding-left: 2em;
+}
+
 .admin_checkbox {
     margin: auto;
     width: 100%;

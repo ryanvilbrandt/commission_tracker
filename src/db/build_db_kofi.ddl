@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE,
     full_name TEXT DEFAULT '',
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
     is_artist BOOLEAN DEFAULT FALSE,
     queue_open BOOLEAN DEFAULT FALSE
 );
-CREATE TABLE IF NOT EXISTS commissions (
+CREATE TABLE commissions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     created_ts TIMESTAMP,
     updated_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -27,6 +27,13 @@ CREATE TABLE IF NOT EXISTS commissions (
     refunded BOOLEAN DEFAULT FALSE,
     archived BOOLEAN DEFAULT FALSE,
     UNIQUE (created_ts, email) ON CONFLICT IGNORE
+);
+CREATE TABLE notes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    commission_id INTEGER,
+    user_id INTEGER,
+    created_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    text TEXT
 );
 PRAGMA case_sensitive_like=ON;
 

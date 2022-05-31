@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import sys
+from collections import defaultdict
 from json import loads
 from time import ctime, mktime, strptime
 from typing import Optional, List, Dict
@@ -25,7 +26,7 @@ password_hash_cache = {}
 def init(cfg):
     global START_TIME, MD, HOST_QUICK_GUIDE_MD, USER_QUICK_GUIDE_MD, HOST_HELP_MD, USER_HELP_MD
     START_TIME = ctime()
-    MD = Markdown()
+    MD = Markdown(extras=["break-on-newline"])
     with open("src/host_quick_guide.md", "rb") as f:
         HOST_QUICK_GUIDE_MD = MD.convert(f.read())
     with open("src/user_quick_guide.md", "rb") as f:
@@ -156,6 +157,16 @@ def load_wsgi_endpoints(app: Bottle):
     @auth_basic(_auth_check)
     def assign_new_commission(commission_id: int, user_id: int, num_characters: str):
         _assign_commission(commission_id, user_id, num_characters)
+
+    @app.post("/add_note")
+    @auth_basic(_auth_check)
+    def add_note():
+        commission_id = request.params["commission_id"]
+        user_id = request.params["user_id"]
+        text = request.params["text"]
+        with Db() as db:
+            db.add_note(commission_id, user_id, text)
+        utils.send_to_websockets("commissions")
 
     @app.post("/add_new_user")
     @view("redirect_to_main.tpl")
@@ -391,6 +402,16 @@ def _get_users(db: Db, current_user: dict) -> List[dict]:
     return users
 
 
+def _get_notes(db: Db, commission_ids: List[int]):
+    notes = db.get_notes(commission_ids)
+    notes_dict = defaultdict(list)
+    for note in notes:
+        # Convert to markdown and strip post paragraph tag
+        note["text"] = MD.convert(note["text"])[:-5]
+        notes_dict[note["commission_id"]].append(note)
+    return notes_dict
+
+
 def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str], hidden_queues: List[str]) -> Dict[str, dict]:
     my_commissions = {"hidden": "my_commissions" in hidden_queues, "commissions": []}
     new_commissions = {"hidden": "new_commissions" in hidden_queues, "commissions": []}
@@ -403,12 +424,15 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
         other_commissions[user["username"]] = {
             "user": user,
             "hidden": user["username"] in hidden_queues,
-            "meta": {"assigned": 0, "paid": 0, "invoiced": 0, "not_accepted": 0},
             "commissions": []
         }
+    # Get commission notes
+    commissions = list(db.get_all_commissions_with_users())
+    commission_ids = [c["id"] for c in commissions]
+    notes_dict = _get_notes(db, commission_ids)
     # Organize commissions into queues
     time_offset = 7 * 3600
-    for commission in db.get_all_commissions_with_users():
+    for commission in commissions:
         # Modify data
         if str(commission["id"]) in opened_commissions:
             commission["open"] = True
@@ -419,6 +443,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
         commission["status"], commission["status_text"] = utils.get_status(commission)
         commission["created_epoch"] = int(mktime(strptime(commission["created_ts"], "%Y-%m-%dT%H:%M:%SZ"))) - time_offset
         commission["updated_epoch"] = int(mktime(strptime(commission["updated_ts"], "%Y-%m-%d %H:%M:%S"))) - time_offset
+        commission["notes"] = notes_dict.get(commission["id"], [])
         # Assign to queue
         if commission["status"] == "new_status":
             new_commissions["commissions"].append(commission)
@@ -434,9 +459,6 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
                 my_commissions["commissions"].append(commission)
             else:
                 other_commissions[commission["username"]]["commissions"].append(commission)
-    # Fill out metadata for each "other" commission
-    for d in other_commissions.values():
-        d["meta"]["assigned"] = len(d["commissions"])
     # Sort commissions
     def sort_key(d):
         return d["updated_epoch"], d["created_epoch"], d["id"]

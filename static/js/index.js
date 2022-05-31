@@ -37,6 +37,8 @@ function apply_commission_hooks() {
     document.querySelectorAll(".commission_upload_click").forEach(e => e.onclick = commission_upload_click);
     document.querySelectorAll(".commission_upload").forEach(e => init_commission_upload(e));
     document.querySelectorAll(".commission_finish").forEach(e => e.onclick = finished);
+    document.querySelectorAll(".add_note_button").forEach(e => e.onclick = click_add_note);
+    document.querySelectorAll(".submit_note_button").forEach(e => e.onclick = click_submit_note);
 }
 
 function apply_user_hooks() {
@@ -242,6 +244,35 @@ function finished(event) {
     form_data.append("commission_id", event.target.attributes["commission_id"].value);
     console.log(form_data);
     ajax_call(`/finish_commission`, callback, null, form_data);
+    close_details(commission_id);
+}
+
+function click_add_note(event) {
+    const parent = event.target.parentElement;
+    parent.hidden = true;
+    const submit_note_container = parent.nextElementSibling;
+    submit_note_container.hidden = false;
+    const textarea = submit_note_container.querySelector(".submit_note_text");
+    textarea.focus();
+    textarea.addEventListener("keypress", event => {
+        if (event.ctrlKey && event.key === "Enter") {
+            submit_note_container.querySelector(".submit_note_button").click();
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    });
+}
+
+function click_submit_note(event) {
+    const commission_id = event.target.getAttribute("commission_id");
+    const user_id = event.target.getAttribute("user_id");
+    const text = event.target.parentElement.querySelector(".submit_note_text").value;
+    const params = {
+        "commission_id": commission_id,
+        "user_id": user_id,
+        "text": text,
+    }
+    ajax_call("/add_note", callback, params);
     close_details(commission_id);
 }
 

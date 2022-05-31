@@ -62,45 +62,63 @@
     % elif queue_type == "finished_commissions":
     <p><a href="/get_finished_commission_image/{{ commission["uploaded_filename"] }}" target="_blank">Uploaded file</a></p>
     % end
-    % if current_user["role"] != "user":
-    <hr>
-    <p>
-        <b>Assigned to:</b> {{ commission["full_name"] }}<br>
-        % if commission["message"]:
-        <br><b>Message:</b> {{ commission["message"] }}
-        % end
-    </p>
-    % if queue_type == "new_commissions":
-    <p>How many characters is this commission asking for?</p>
-    <p>
-        <input type="radio" id="new_comm_1_character" name="num_characters" class="num_characters" value="1 char" commission_id="{{ commission['id'] }}">
-        <label for="new_comm_1_character">1 character</label><br>
-        <input type="radio" id="new_comm_2_characters" name="num_characters" class="num_characters" value="2 char" commission_id="{{ commission['id'] }}">
-        <label for="new_comm_2_characters">2 characters</label><br>
-    </p>
-    <p class="assign_new_commission_error_text" commission_id="{{ commission['id'] }}" hidden>You must specify if this commission requests either 1 or 2 characters.</p>
-    % end
-    % if not commission["refunded"]:
+    % if commission["notes"]:
+        <hr>
+        <p><b>Notes:</b></p>
+        % for note in commission["notes"]:
         <p>
-            <label for="assign_users_dropdown_{{ commission['id'] }}">Assign to an artist:</label>
-            <select name="assign_users" id="assign_users_dropdown_{{ commission['id'] }}">
-            % if queue_type == "new_commissions":
-                <option value="-1">Any Artist</option>
-            % else:
-                <option value="-1">Unassigned</option>
-            % end
-            % for user in users:
-                % if user["is_artist"] and user["queue_open"]:
-                <option value="{{ user["id"] }}">{{ user["full_name"] }}</option>
-                % end
-            % end
-            </select>
-            <button class="assign_to_user_button" commission_id="{{ commission['id'] }}" new_commission="{{ queue_type == "new_commissions" }}">Assign</button>
+            <span class="note_text">{{! note["text"] }}</span><br>
+            <span class="notes_attribution">{{ note["full_name"] }} ({{ note["created_ts"] }})</span>
         </p>
-        % if queue_type != "removed_commissions":
-        <p><button class="remove_commission_button" commission_id="{{ commission['id'] }}">🛑 Remove Commission</button></p>
         % end
     % end
+    <p>
+        <button class="add_note_button">Add Note</button>
+    </p>
+    <p hidden>
+        <label for="note_text">Note:</label><br>
+        <textarea class="submit_note_text" name="note_text" rows="4" cols="50"></textarea><br>
+        <button class="submit_note_button" commission_id="{{ commission['id'] }}" user_id="{{ current_user['id'] }}">Submit</button>
+    </p>
+    % if current_user["role"] != "user":
+        <hr>
+        <p>
+            <b>Assigned to:</b> {{ commission["full_name"] }}<br>
+            % if commission["message"]:
+            <br><b>Message:</b> {{ commission["message"] }}
+            % end
+        </p>
+        % if queue_type == "new_commissions":
+        <p>How many characters is this commission asking for?</p>
+        <p>
+            <input type="radio" id="new_comm_1_character" name="num_characters" class="num_characters" value="1 char" commission_id="{{ commission['id'] }}">
+            <label for="new_comm_1_character">1 character</label><br>
+            <input type="radio" id="new_comm_2_characters" name="num_characters" class="num_characters" value="2 char" commission_id="{{ commission['id'] }}">
+            <label for="new_comm_2_characters">2 characters</label><br>
+        </p>
+        <p class="assign_new_commission_error_text" commission_id="{{ commission['id'] }}" hidden>You must specify if this commission requests either 1 or 2 characters.</p>
+        % end
+        % if not commission["refunded"]:
+            <p>
+                <label for="assign_users_dropdown_{{ commission['id'] }}">Assign to an artist:</label>
+                <select name="assign_users" id="assign_users_dropdown_{{ commission['id'] }}">
+                % if queue_type == "new_commissions":
+                    <option value="-1">Any Artist</option>
+                % else:
+                    <option value="-1">Unassigned</option>
+                % end
+                % for user in users:
+                    % if user["is_artist"] and user["queue_open"]:
+                    <option value="{{ user["id"] }}">{{ user["full_name"] }}</option>
+                    % end
+                % end
+                </select>
+                <button class="assign_to_user_button" commission_id="{{ commission['id'] }}" new_commission="{{ queue_type == "new_commissions" }}">Assign</button>
+            </p>
+            % if queue_type != "removed_commissions":
+            <p><button class="remove_commission_button" commission_id="{{ commission['id'] }}">🛑 Remove Commission</button></p>
+            % end
+        % end
     % end
 </details>
 % end
