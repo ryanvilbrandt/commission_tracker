@@ -19,6 +19,15 @@ while True:
 
 # TODO:
 # * Fix unicode in notes
+# * Add Export Images option. Group images by commissioner name/email
+# * Add sorting options for the user:
+#   * Updated TS
+#   * Email
+#   * Username
+#   * Created TS
+#   * Commission ID
+# * Add ability to visually group commissions together by user
+# * Add "unclick" admin buttons for emailed and refunded
 # * Look into hooking Queue Open/Close to the Twitch Overlay
 # * Add tracking for which users have websockets open
 # * Figure out way to make multiple actions in a row bog things down less.
