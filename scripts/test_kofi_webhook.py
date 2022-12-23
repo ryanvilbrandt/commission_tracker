@@ -40,6 +40,30 @@ def create_fake_commission():
     print(r)
 
 
+def add_commission():
+    r = post(f"http://{HOST}:{PORT}/kofi_webhook", data={
+        "data": dumps({
+            "message_id": None,
+            "timestamp": strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "type": "Commission",
+            "is_public": True,
+            "from_name": "null_void",
+            "message": "(CozyCon: Sun) ~Zesty~ 5-Minute Doodle",
+            "amount": "75.00",
+            "url": "https://ko-fi.com/home/coffeeshop?txid=0febccf2-10aa-4ecb-8234-15c8bc870c6f&mode=r",
+            "email": "rbixby@hotmail.com",
+            "currency": "USD",
+            "is_subscription_payment": False,
+            "is_first_subscription_payment": False,
+            "kofi_transaction_id": None,
+            "verification_token": os.environ["KOFI_VERIFICATION_TOKEN"],
+            "shop_items": None,
+            "tier_name": None,
+        })
+    })
+    print(r)
+
+
 def test_note():
     r = post(f"http://{HOST}:{PORT}/add_note", data={
         "commission_id": 85,
@@ -50,6 +74,7 @@ def test_note():
 
 
 if __name__ == "__main__":
-    # for _ in range(1):
-    #     create_fake_commission()
-    test_note()
+    for _ in range(1):
+        create_fake_commission()
+    # add_commission()
+    # test_note()

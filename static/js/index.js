@@ -29,6 +29,7 @@ function apply_commission_hooks() {
     document.querySelectorAll("details").forEach(e => e.ontoggle = open_details);
     document.querySelectorAll(".show_hide_icon").forEach(e => e.onclick = show_hide_commissions);
     document.querySelectorAll(".action_button").forEach(button => set_action_button(button));
+    document.querySelectorAll(".approve").forEach(e => e.onclick = click_assign);
     document.querySelectorAll(".assign_to_user_button").forEach(e => e.onclick = click_assign);
     document.querySelectorAll(".remove_commission_button").forEach(e => e.onclick = click_remove);
     // document.querySelectorAll(".undo_invoiced_button").forEach(e => e.onclick = click_undo_invoiced);
@@ -278,7 +279,7 @@ function click_submit_note(event) {
 
 function click_assign(event) {
     const commission_id = event.target.attributes["commission_id"].value;
-    const user_id = document.querySelector(`#assign_users_dropdown_${commission_id}`).value;
+    const user_id = -1;
     const new_commission = event.target.attributes["new_commission"].value === "True";
     let url;
     if (!new_commission) {

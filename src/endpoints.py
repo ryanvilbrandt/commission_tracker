@@ -2,7 +2,7 @@ import os
 import sqlite3
 import sys
 from collections import defaultdict
-from json import loads
+from json import loads, dumps
 from time import ctime, mktime, strptime
 from typing import Optional, List, Dict
 
@@ -13,6 +13,7 @@ from bottle import static_file, Bottle, view, auth_basic, request, abort
 from markdown2 import Markdown
 from src import utils, functions
 from src.db.db import Db
+from src.functions import generate_commissions_text_file
 
 START_TIME = None
 MD: Optional[Markdown] = None
@@ -125,8 +126,11 @@ def load_wsgi_endpoints(app: Bottle):
             if action == "claim":
                 current_user = db.get_user_from_username(request.auth[0])
                 functions.claim_commission(db, commission_id, current_user["id"])
+            elif action == "approve":
+                functions.approve_commission(db, commission_id)
             elif action == "reject":
-                functions.reject_commission(db, commission_id)
+                # functions.reject_commission(db, commission_id)
+                functions.remove_commission(db, commission_id)
             elif action == "emailed":
                 functions.email_commission(db, commission_id)
             elif action == "remove":
@@ -137,6 +141,7 @@ def load_wsgi_endpoints(app: Bottle):
                 functions.archive_commission(db, commission_id)
             else:
                 abort(400, f"Unknown action: {action}")
+            generate_commissions_text_file(db)
         utils.send_to_websockets("commissions")
 
     @app.post("/finish_commission")
@@ -146,6 +151,7 @@ def load_wsgi_endpoints(app: Bottle):
         image_file = request.files.image_file
         with Db() as db:
             functions.finish_commission(db, commission_id, image_file)
+            generate_commissions_text_file(db)
         utils.send_to_websockets("commissions")
 
     @app.get("/assign_commission/<commission_id>/<user_id>")
@@ -346,6 +352,21 @@ def load_wsgi_endpoints(app: Bottle):
         except Exception as e:
             print(e, file=sys.stderr)
 
+    @app.post("/test_kofi_webhook")
+    def test_kofi_webhook():
+        print(dict(request.params))
+        if not request.params or "data" not in request.params:
+            print(f"Invalid request: {dict(request.params)}", file=sys.stderr)
+            abort(400)
+            return
+        try:
+            data = loads(request.params["data"])
+        except Exception:
+            print(f"Not valid JSON: {request.params['data']}", file=sys.stderr)
+            abort(400)
+            return
+        print(dumps(data, indent=4))
+
 
 def _get_user(db: Db, username: str):
     current_user = db.get_user_from_username(username)
@@ -454,14 +475,10 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
         elif commission["status"] in ("removed_status", "refunded_status"):
             removed_commissions["commissions"].append(commission)
         else:
-            # In an Artist's commission queue
-            if commission["assigned_to"] == current_user["id"]:
-                my_commissions["commissions"].append(commission)
-            else:
-                other_commissions[commission["username"]]["commissions"].append(commission)
+            other_commissions[commission["username"]]["commissions"].append(commission)
     # Sort commissions
     def sort_key(d):
-        return d["updated_epoch"], d["created_epoch"], d["id"]
+        return d["num_characters"] and d["num_characters"].startswith("Sun"), d["created_epoch"], d["updated_epoch"], d["id"]
     my_commissions["commissions"] = sorted(my_commissions["commissions"], key=sort_key)
     new_commissions["commissions"] = sorted(new_commissions["commissions"], key=sort_key)
     available_commissions["commissions"] = sorted(available_commissions["commissions"], key=sort_key)
@@ -480,7 +497,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
 
 def _assign_commission(commission_id: int, user_id: int, num_characters: str=None):
     with Db() as db:
-        _permissions_check(db, request.auth[0])
+        # _permissions_check(db, request.auth[0])
         commission = db.get_commission_by_id(commission_id)
         if commission["preferred_artist"] is None:
             if user_id == "-1":
@@ -491,4 +508,5 @@ def _assign_commission(commission_id: int, user_id: int, num_characters: str=Non
         if num_characters is not None:
             db.set_num_characters(commission_id, num_characters)
         functions.assign_commission(db, commission_id, user_id)
-        utils.send_to_websockets("commissions")
+        generate_commissions_text_file(db)
+    utils.send_to_websockets("commissions")

@@ -105,6 +105,12 @@ def claim_commission(db: Db, commission_id: int, user_id: int) -> Optional[dict]
     return assign_commission(db, commission_id, user_id)
 
 
+def approve_commission(db: Db, commission_id: int) -> Optional[dict]:
+    db.set_preferred_artist(commission_id, "Any", False)
+    db.assign_commission(commission_id, -1)
+    return db.update_ts(commission_id)
+
+
 def reject_commission(db: Db, commission_id: int) -> Optional[dict]:
     db.assign_commission(commission_id, -1)
     return db.update_ts(commission_id)
@@ -153,6 +159,37 @@ def archive_commission(db: Db, commission_id: int) -> Optional[dict]:
     return db.update_ts(commission_id)
 
 
+def generate_commissions_text_file(db: Db):
+    day_of = "Sun"
+    shared_folder = r"\\marmalade\Users\artis\Desktop"
+    commissions = db.get_all_commissions()
+    filtered_commissions = [c for c in commissions if c["assigned_to"] in (-1, 2) and
+                            not c["finished"] and not c["removed"] and not c["archived"] and
+                            c["num_characters"] and c["num_characters"].startswith(day_of)]
+    def sort_key(d):
+        return d["assigned_to"] == -1, d["created_ts"]
+    sorted_commissions = sorted(filtered_commissions, key=sort_key)
+    def print_queue(commission_type, commissions):
+        filtered_commissions = [c for c in commissions if commission_type in c["num_characters"]]
+        n = 4  # Number of commissions to show
+        s = ""
+        # s = f"{commission_type} Commission Queue:\n"
+        for c in filtered_commissions[:n]:
+            s += f" - {c['name']}"
+            if c["assigned_to"] == 2:
+                s += " (in progress)"
+            s += "\n"
+        if len(filtered_commissions) > n:
+            s += f"({len(filtered_commissions) - n} more)"
+        return s
+    with open(os.path.join(shared_folder, "sketch_queue.txt"), "w") as f:
+        f.write(print_queue("Sketch", sorted_commissions))
+    with open(os.path.join(shared_folder, "doodle_queue.txt"), "w") as f:
+        f.write(print_queue("Doodle", sorted_commissions))
+
+
 if __name__ == "__main__":
     os.chdir("..")
     # update_commissions_information()
+    with Db() as db:
+        generate_commissions_text_file(db)

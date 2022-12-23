@@ -5,30 +5,27 @@
 % else:
 % for commission in commissions:
 <div class="commission_buttons" queue_name="{{ queue_name }}"{{ hidden_text }}>
-    % if queue_type != "new_commissions" and current_user["is_artist"]:
-        % if queue_type == "my_commissions":
-            <button class="reject action_button" title="Reject commission" commission_id="{{ commission['id'] }}">❌</button>
-        % else:
-            <button class="claim action_button" title="Claim commission" commission_id="{{ commission['id'] }}">✋</button>
-        % end
-    % elif queue_type == "finished_commissions" and not current_user["is_artist"]:
+    % if queue_type == "new_commissions":
+        <button class="reject action_button" title="Reject commission" commission_id="{{ commission['id'] }}">❌</button>
+    % elif queue_type == "available_commissions":
+        <button class="claim action_button" title="Claim commission" commission_id="{{ commission['id'] }}">✋</button>
+    % elif queue_type == "finished_commissions":
         % if not commission["emailed"]:
         <button class="emailed action_button" title="Commission has been emailed to the commissioner" commission_id="{{ commission['id'] }}">📧</button>
         % end
-    % elif queue_type == "removed_commissions" and not current_user["is_artist"]:
+    % elif queue_type == "removed_commissions":
         % if not commission["refunded"]:
         <button class="refunded action_button" title="Commission has been refunded through Ko-fi" commission_id="{{ commission['id'] }}">💸</button>
         % end
     % end
 </div>
 % open = " open" if commission.get('open') else ""
-% span_all = "_span_all" if queue_type == "new_commissions" else ""
-<details class="commission_description{{ span_all }}" commission_id="{{ commission['id'] }}" queue_name="{{ queue_name }}"{{ open }}{{ hidden_text }}>
+<details class="commission_description" commission_id="{{ commission['id'] }}" queue_name="{{ queue_name }}"{{ open }}{{ hidden_text }}>
     % star = " ⭐" if commission["is_exclusive"] else ""
-    % num_characters = " ({})".format(commission["num_characters"]) if queue_type != "new_commissions" else ""
+    % commission_type = " ({})".format(commission["num_characters"]) if queue_type != "new_commissions" else ""
     % finished_by = " -- Commission by {}".format(commission["full_name"]) if queue_type == "finished_commissions" else ""
     <summary class="{{ commission['status'] }} commission_title_container">
-        <span class="commission_title">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }}{{ num_characters }}{{ finished_by }}</span>
+        <span class="commission_title">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }}{{ commission_type }}{{ finished_by }}</span>
         % if current_user["role"] != "user":
         <span class="created_updated">
             <span class="created_text" epoch="{{ commission['created_epoch'] }}"></span>&nbsp;&nbsp;&nbsp;
@@ -40,7 +37,25 @@
         <b>Status:</b> {{ commission["status_text"] }}<br>
         <a href="{{ commission["url"] }}" target="_blank">Link to commission details</a>
     </p>
-    % if queue_type == "other_commissions" or queue_type == "my_commissions":
+    % if queue_type == "new_commissions":
+    <p>What type of commission is this?</p>
+    <p>
+        <!--
+        <input type="radio" id="option_1" name="num_characters" class="num_characters" value="Fri Doodle" commission_id="{{ commission['id'] }}">
+        <label for="option_1">(Fri) 5-Minute Doodle</label><br>
+        <input type="radio" id="option_2" name="num_characters" class="num_characters" value="Fri Sketch" commission_id="{{ commission['id'] }}">
+        <label for="option_2">(Fri) Refined Sketch</label><br>
+        -->
+        <input type="radio" id="option_3" name="num_characters" class="num_characters" value="Sun Zesty Doodle" commission_id="{{ commission['id'] }}">
+        <label for="option_3">(Sun) ~Zesty~ 5-Minute Doodle</label><br>
+        <input type="radio" id="option_4" name="num_characters" class="num_characters" value="Sun Zesty Sketch" commission_id="{{ commission['id'] }}">
+        <label for="option_4">(Sun) ~Zesty~ Refined Sketch</label><br>
+    </p>
+    <p class="assign_new_commission_error_text" commission_id="{{ commission['id'] }}" hidden>
+        You must specify what type of commission this is.
+    </p>
+    <p><button class="approve" title="Approve commission" commission_id="{{ commission['id'] }}" new_commission="{{ queue_type == "new_commissions" }}">✔️ Approve</button></p>
+    % elif queue_type == "other_commissions" or queue_type == "my_commissions":
     <p hidden><input type="file" class="commission_upload" commission_id="{{ commission['id'] }}"></p>
     <div class="commission_upload_drag" commission_id="{{ commission['id'] }}">
         <div class="upload_prompt" commission_id="{{ commission['id'] }}">
@@ -88,16 +103,6 @@
             <br><b>Message:</b> {{ commission["message"] }}
             % end
         </p>
-        % if queue_type == "new_commissions":
-        <p>How many characters is this commission asking for?</p>
-        <p>
-            <input type="radio" id="new_comm_1_character" name="num_characters" class="num_characters" value="1 char" commission_id="{{ commission['id'] }}">
-            <label for="new_comm_1_character">1 character</label><br>
-            <input type="radio" id="new_comm_2_characters" name="num_characters" class="num_characters" value="2 char" commission_id="{{ commission['id'] }}">
-            <label for="new_comm_2_characters">2 characters</label><br>
-        </p>
-        <p class="assign_new_commission_error_text" commission_id="{{ commission['id'] }}" hidden>You must specify if this commission requests either 1 or 2 characters.</p>
-        % end
         % if not commission["refunded"]:
             <p>
                 <label for="assign_users_dropdown_{{ commission['id'] }}">Assign to an artist:</label>
