@@ -18,6 +18,12 @@ while True:
         sleep(10)
 
 # TODO:
+# * Commissions in the process of having their image uploaded shouldn't be replaced on websocket push.
+# * "Mark as Finished" and "Change Image" buttons instead of text after an image has been dragged to the box
+# * Add email field to commissions and an "Update Email" button for quick updates of the data
+# * Add "Update name" button to commissions
+# * Add Archive button
+# * Add undo Archive/Email/Refund buttons.
 # * Fix unicode in notes
 # * Add Export Images option. Group images by commissioner name/email
 # * Add sorting options for the user:

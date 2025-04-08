@@ -1,7 +1,7 @@
 ### As a Host, you will need to...
 
 * Keep an eye on the New Commissions queue.
-* Remove any new commissions that violate [Terms of Service](https://docs.google.com/document/d/1VyYlwrIJtY-shMFs4OwztA-ONfj2b67PsNEF63HmCLE/view) (see Guidelines for Commission below).
+* Remove any new commissions that violate Terms of Service (ToS-TBD) (see Guidelines for Commission below).
 * Assign any new commissions to the correct queues.
 * If Artists with empty queues aren't picking up commissions, assign commissions to them.
 * Keep an eye on chat and answer any questions people may have about their commissions.
@@ -16,7 +16,7 @@ All commissions must meet the following guidelines:
 
 Commission requests must not: 
 
-* Request more than 2 characters (assuming they paid for the extra character)
+* Request more than 1 character
 * Request something more complex than a sketch, or with a background
 * Request a character design
 * Be racist, hateful, or intended to insult or harm others

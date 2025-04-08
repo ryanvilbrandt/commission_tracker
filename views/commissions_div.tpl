@@ -8,7 +8,7 @@
     % if queue_type != "new_commissions" and current_user["is_artist"]:
         % if queue_type == "my_commissions":
             <button class="reject action_button" title="Reject commission" commission_id="{{ commission['id'] }}">❌</button>
-        % else:
+        % elif not commission["is_exclusive"]:
             <button class="claim action_button" title="Claim commission" commission_id="{{ commission['id'] }}">✋</button>
         % end
     % elif queue_type == "finished_commissions" and not current_user["is_artist"]:
@@ -24,11 +24,10 @@
 % open = " open" if commission.get('open') else ""
 % span_all = "_span_all" if queue_type == "new_commissions" else ""
 <details class="commission_description{{ span_all }}" commission_id="{{ commission['id'] }}" queue_name="{{ queue_name }}"{{ open }}{{ hidden_text }}>
-    % star = " ⭐" if commission["is_exclusive"] else ""
-    % num_characters = " ({})".format(commission["num_characters"]) if queue_type != "new_commissions" else ""
+    % star = ' <span id="exclusive-star" title="Indicates an exclusive commission, where the client has paid for a particular artist">⭐</span>' if commission["is_exclusive"] else ""
     % finished_by = " -- Commission by {}".format(commission["full_name"]) if queue_type == "finished_commissions" else ""
     <summary class="{{ commission['status'] }} commission_title_container">
-        <span class="commission_title">#{{ commission['id'] }}: {{ commission["name"] }}{{ star }}{{ num_characters }}{{ finished_by }}</span>
+        <span class="commission_title">#{{ commission['id'] }}: {{ commission["name"] }}{{! star }}{{ finished_by }}</span>
         % if current_user["role"] != "user":
         <span class="created_updated">
             <span class="created_text" epoch="{{ commission['created_epoch'] }}"></span>&nbsp;&nbsp;&nbsp;
@@ -44,14 +43,14 @@
     <p hidden><input type="file" class="commission_upload" commission_id="{{ commission['id'] }}"></p>
     <div class="commission_upload_drag" commission_id="{{ commission['id'] }}">
         <div class="upload_prompt" commission_id="{{ commission['id'] }}">
-            Select the finished commission image to upload<br>by
+            Upload the finished commission image by<br>
             <span class="commission_upload_click clickable" commission_id="{{ commission['id'] }}">clicking this link</span>
             or dragging the file here.
         </div>
         <img class="upload_preview" commission_id="{{ commission['id'] }}" hidden>
         <div class="upload_confirmation" commission_id="{{ commission['id'] }}" hidden>
-            Is the above image file the one you want to upload?<br>You can
-            <span class="commission_finish clickable" commission_id="{{ commission['id'] }}">upload it</span>
+            Is the above image file the one you want to upload?<br>
+            <span class="commission_finish clickable" commission_id="{{ commission['id'] }}">Click here to confirm</span>
             and mark this commission as finished, or
             <span class="commission_upload_click clickable" commission_id="{{ commission['id'] }}">select a new file.</span>
         </div>
@@ -89,8 +88,8 @@
             % end
         </p>
         % if queue_type == "new_commissions":
-        <p>How many characters is this commission asking for?</p>
-        <p>
+        <p hidden>How many characters is this commission asking for?</p>
+        <p hidden>
             <input type="radio" id="new_comm_1_character" name="num_characters" class="num_characters" value="1 char" commission_id="{{ commission['id'] }}">
             <label for="new_comm_1_character">1 character</label><br>
             <input type="radio" id="new_comm_2_characters" name="num_characters" class="num_characters" value="2 char" commission_id="{{ commission['id'] }}">

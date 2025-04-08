@@ -276,3 +276,7 @@ summary {
     background-color: white;
     padding: 0 1rem;
 }
+
+#exclusive-star {
+    cursor: help;
+}

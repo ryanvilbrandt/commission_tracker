@@ -106,7 +106,11 @@ def claim_commission(db: Db, commission_id: int, user_id: int) -> Optional[dict]
 
 
 def reject_commission(db: Db, commission_id: int) -> Optional[dict]:
-    db.assign_commission(commission_id, -1)
+    commission = db.get_commission_by_id(commission_id)
+    if commission["is_exclusive"]:
+        db.remove_commission(commission_id)
+    else:
+        db.assign_commission(commission_id, -1)
     return db.update_ts(commission_id)
 
 

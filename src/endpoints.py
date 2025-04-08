@@ -322,6 +322,7 @@ def load_wsgi_endpoints(app: Bottle):
             print(f"Invalid request: {dict(request.params)}", file=sys.stderr)
             abort(400)
             return
+        print(request.params)
         try:
             data = loads(request.params["data"])
         except Exception:
@@ -431,7 +432,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
     commission_ids = [c["id"] for c in commissions]
     notes_dict = _get_notes(db, commission_ids)
     # Organize commissions into queues
-    time_offset = 7 * 3600
+    time_offset = 8 * 3600
     for commission in commissions:
         # Modify data
         if str(commission["id"]) in opened_commissions:

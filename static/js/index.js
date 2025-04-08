@@ -284,18 +284,18 @@ function click_assign(event) {
     if (!new_commission) {
         url = `/assign_commission/${commission_id}/${user_id}`;
     } else {
-        let num_characters = null;
-        document.querySelectorAll(`.num_characters[commission_id="${commission_id}"]`).forEach(
-            function (element) {
-                if (element.checked) {
-                    num_characters = element.value;
-                }
-            }
-        );
-        if (num_characters === null) {
-            document.querySelector(`.assign_new_commission_error_text[commission_id="${commission_id}"]`).hidden = false;
-            return;
-        }
+        let num_characters = 1;
+        // document.querySelectorAll(`.num_characters[commission_id="${commission_id}"]`).forEach(
+        //     function (element) {
+        //         if (element.checked) {
+        //             num_characters = element.value;
+        //         }
+        //     }
+        // );
+        // if (num_characters === null) {
+        //     document.querySelector(`.assign_new_commission_error_text[commission_id="${commission_id}"]`).hidden = false;
+        //     return;
+        // }
         url = `/assign_new_commission/${commission_id}/${user_id}/${num_characters}`;
     }
     // Close commission

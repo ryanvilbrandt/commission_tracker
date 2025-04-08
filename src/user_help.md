@@ -1,6 +1,6 @@
-Welcome to the help guide for the Commission Tracker for Hosts!
+Welcome to the help guide for the Commission Tracker for Artists!
 
-As an Artist, our hope is that the Commission Tracker will help you manage your commissions queues during busy streams!
+We hope that our Commission Tracker will help you manage your commissions queues during busy streams!
 
 ## Commission Queues
 
@@ -22,7 +22,7 @@ These are the commissions that were assigned to you, either because a commission
 
 Any commissions that a commissioner bought from you specifically are ⭐ Exclusive commissions, and will have that star emoji beside them. *These commissions should be prioritized because they cannot be reassigned to other Artists.*
 
-You will see ❌ Reject buttons next to your commissions. If you don't want to work on a commission, click the ❌ Reject button. You are allowed to Reject commissions for any reason, including if you feel are they offensive, abusive, too complex, or even just not your cup of tea. This will move the commission out of your queue so it can be assigned to a different Artist.
+You will see ❌ Reject buttons next to your commissions. If you don't want to work on a commission, click the ❌ Reject button. You are allowed to Reject commissions for any reason, including if you feel they are offensive, abusive, too complex, or even just not your cup of tea. If it is a non-exclusive commission, this will move the commission out of your queue, so it can be assigned to a different Artist. If it is a ⭐ Exclusive commission, it will be removed from the queues completely, and a host will refund the commissioner.
 
 ### Available Commissions
 
@@ -32,9 +32,9 @@ You can even Claim commissions from other Artist's queues if necessary. Please c
 
 ### Finishing Commissions
 
-When you've finished a commission, save the commission as an image file. Then, open the commission details. You can then either drag the image file into the area with the dashed outline to select that file for uploading, or click the blue "clicking this link" text to open a file browser. Once you've selected an image file to upload, you can click the blue "upload it" text, or select a new image file. Clicking "upload it" will remove the commission from your queue, upload your image file to the website, and mark the commission as Finished. 
+When you've finished a commission, save the commission as an image file. Then, open the commission details. You can then either drag the image file into the area with the dashed outline to select that file for uploading, or click the blue "clicking this link" text to open a file browser. Once you've selected an image file to upload, you can click the blue "Click here to confirm" text, or select a new image file. Clicking "upload it" will remove the commission from your queue, upload your image file to the website, and mark the commission as Finished.
 
-You can claim any commission from the Finished queue if you wish to do more work on it.
+You can reclaim any commission you did from the Finished queue if you wish to do more work on it. (Please don't claim commissions you didn't do.)
 
 ### Opening/Closing Commissions Queues
 
