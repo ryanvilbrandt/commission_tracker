@@ -142,3 +142,10 @@ def get_status(commission: dict) -> Tuple[str, str]:
         return "exclusive_status", f"Exclusive Request for {commission['preferred_artist']}"
     else:
         return "claimable_status", "Claimable by Anyone"
+
+
+def get_arg_group(parser, args, group_name):
+    for action in parser._action_groups:
+        if action.title == group_name:
+            return {arg.dest: getattr(args, arg.dest) for arg in action._group_actions}
+    return {}

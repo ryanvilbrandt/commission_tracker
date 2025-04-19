@@ -10,6 +10,18 @@
    1. You can create a `users.csv` file in the `scripts` directory to automate the creation of the God user and any other users when you run this script. Use the `users.csv.dist` file as a template.
 4. Run `main.py` to start the server.
 
+### Windows Batch Helpers
+
+There are several .bat files provided to automate or simplify working with this software.
+1. `install.bat` - Performs a full installation in the root folder of the software utilizing a virtual environment.
+2. `bat/add_fake_comms.bat` - Sends 5 fake commissions to the server.
+3. `bat/setup_users.bat` - Runs `set_god_password.py`. Helpful if you draft `users.csv` prior.
+4. `bat/start_server.bat` - Starts the server, simple as that.
+5. `bat/priv/run.bat` - Runs a single line of batch in the virtual environment set up by `install.bat`.
+6. `bat/priv/run_with_token.bat` - Identical to `run.bat`, with the addition of `KOFI_VERIFICATION_TOKEN` being set in the environment.
+
+Both `add_fake_comms.bat` and `start_server.bat` require that you populate `bat/priv/kofi_verification_token.txt` with your Ko-fi token. This is detailed in the following section.
+
 ### Integrating with Ko-fi
 
 The following instructions assume you have a domain that can be used to hit the machine you're using to run Commission Tracker, and have configured your network to allow it to be hit from the public internet.

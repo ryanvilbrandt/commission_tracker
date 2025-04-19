@@ -21,7 +21,7 @@ class Server:
     server_thread = None
     interval = None
 
-    def __init__(self, host=None, port=None, run_as_thread=None, debug=False):
+    def __init__(self, host=None, port=None, run_as_thread=None, reload=None, debug=False):
         self._get_process_lock()
 
         cfg = load_config()
@@ -47,7 +47,8 @@ class Server:
         self._init_server(
             host=cfg.get("Settings", "host") if host is None else host,
             port=cfg.getint("Settings", "port") if port is None else port,
-            run_as_thread=cfg.getboolean("Settings", "run as thread") if run_as_thread is None else run_as_thread
+            run_as_thread=cfg.getboolean("Settings", "run as thread") if run_as_thread is None else run_as_thread,
+            reload=cfg.get("Settings", "reload") if reload is None else reload
         )
 
     @staticmethod
@@ -56,18 +57,18 @@ class Server:
         if not lock.acquire(blocking=False):
             raise ChildProcessError("Server process is already running")
 
-    def _init_server(self, host=None, port=None, run_as_thread=False):
+    def _init_server(self, host=None, port=None, run_as_thread=False, reload=False):
         if run_as_thread:
             from threading import Thread
-            self.server_thread = Thread(name="CommissionServer", target=self._run_server, args=[host, port],
+            self.server_thread = Thread(name="CommissionServer", target=self._run_server, args=[host, port, reload],
                                         daemon=True)
             self.server_thread.start()
             print("Server thread started.")
         else:
-            self._run_server(host, port)
+            self._run_server(host, port, reload)
 
-    def _run_server(self, host, port):
-        self.app.run(host=host, port=port, reloader=True, server=GeventWebSocketServer)
+    def _run_server(self, host, port, reload):
+        self.app.run(host=host, port=port, reloader=reload, server=GeventWebSocketServer)
         print("Server instance is ending.")
 
 
