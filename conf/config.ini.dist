@@ -2,6 +2,7 @@
 host = localhost
 port = 8000
 run as thread = False
+reload = False
 
 [Logging]
 level = INFO
