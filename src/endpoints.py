@@ -7,12 +7,15 @@ from time import ctime, mktime, strptime
 from typing import Optional, List, Dict
 
 import bcrypt
-from bottle_websocket import websocket
-
 from bottle import static_file, Bottle, view, auth_basic, request, abort
+from bottle_websocket import websocket
+from mako.template import Template
 from markdown2 import Markdown
+from pyinstrument import Profiler
+
 from src import utils, functions
 from src.db.db import Db
+
 
 START_TIME = None
 MD: Optional[Markdown] = None
@@ -39,16 +42,27 @@ def init(cfg):
 
 def load_wsgi_endpoints(app: Bottle):
     @app.get("/")
-    @view("index.tpl")
     @auth_basic(_auth_check)
     def index():
+        profiler = Profiler()
+        profiler.start()
         username = request.auth[0]
         with Db(auto_commit=False) as db:
             current_user = _get_user(db, username)
             users = _get_users(db, current_user)
             commissions = _fetch_commissions(db, current_user, [], [])
-        return {"title": "Commission Tracker", "users": users, "current_user": current_user, "commissions": commissions,
-                "host_quick_guide": HOST_QUICK_GUIDE_MD, "user_quick_guide": USER_QUICK_GUIDE_MD}
+        t = Template(filename="views/index.tpl")
+        r = t.render(
+            title="Commission Tracker",
+            users=users,
+            current_user=current_user,
+            commissions=commissions,
+            host_quick_guide=HOST_QUICK_GUIDE_MD,
+            user_quick_guide=USER_QUICK_GUIDE_MD,
+        )
+        profiler.stop()
+        print(profiler.output_text(unicode=True, color=True))
+        return r
 
     @app.get("/host_help")
     @view("md_page.tpl")
@@ -75,9 +89,10 @@ def load_wsgi_endpoints(app: Bottle):
         return static_file("favicon.ico", root="static")
 
     @app.get("/fetch_commissions/<opened_details>/<hidden_queues>")
-    @view("commissions.tpl")
     @auth_basic(_auth_check)
     def fetch_commissions(opened_details, hidden_queues):
+        profiler = Profiler()
+        profiler.start()
         with Db() as db:
             current_user = db.get_user_from_username(request.auth[0])
             users = _get_users(db, current_user)
@@ -87,20 +102,27 @@ def load_wsgi_endpoints(app: Bottle):
                 [] if opened_details == "_" else opened_details.split(","),
                 [] if hidden_queues == "_" else hidden_queues.split(",")
             )
-        return {"users": users, "current_user": current_user, "commissions": commissions}
+        t = template("commissions.tpl", users=users, current_user=current_user, commissions=commissions)
+        profiler.stop()
+        print(profiler.output_text(unicode=True, color=True))
+        return t
 
     @app.get("/fetch_users")
-    @view("users.tpl")
     @auth_basic(_auth_check)
     def fetch_users():
+        profiler = Profiler()
+        profiler.start()
         with Db() as db:
             current_user = db.get_user_from_username(request.auth[0])
             users = _get_users(db, current_user)
-        return {"users": users}
+        t = template("users.tpl", users=users)
+        profiler.stop()
+        print(profiler.output_text(unicode=True, color=True))
+        return t
 
     @app.get("/fetch_queue_open")
     @auth_basic(_auth_check)
-    def fetch_users():
+    def fetch_queue_open():
         with Db() as db:
             current_user = db.get_user_from_username(request.auth[0])
         return "true" if current_user["queue_open"] else "false"

@@ -1,21 +1,22 @@
-% rebase("base.tpl", title=title)
+<%inherit file='base.tpl'/>
+<%block name="content">
 <div id="content">
     <div id="header">
         <h1>Stream Commission Tracker</h1>
         <div id="user-information">
             <h2>
-                {{ current_user["full_name"] }}
+                ${current_user["full_name"]}
                 % if current_user["role"] != "user":
-                ({{ current_user["role"].title() }})
-                % end
+                (${current_user["role"].title()})
+                % endif
             </h2>
             % if current_user["role"] != "god":
-            <button class="change_user_button change_user_full_name" title="Change Full Name" user_id="{{current_user['id']}}">🇫 Change Full Name</button>
-            <button class="change_user_button change_user_password" title="Change Password" user_id="{{current_user['id']}}">🔒 Change Password</button>
-            % end
+            <button class="change_user_button change_user_full_name" title="Change Full Name" user_id="${current_user['id']}">🇫 Change Full Name</button>
+            <button class="change_user_button change_user_password" title="Change Password" user_id="${current_user['id']}">🔒 Change Password</button>
+            % endif
             % if current_user["is_artist"]:
-            <input class="queue_open_checkbox" id="current_user_queue_open_checkbox" type="checkbox" user_id="{{current_user['id']}}"{{ " checked" if current_user["queue_open"] else "" }}> Queue Open?
-            % end
+            <input class="queue_open_checkbox" id="current_user_queue_open_checkbox" type="checkbox" user_id="${current_user['id']}"${'checked' if current_user["queue_open"] else ''}> Queue Open?
+            % endif
         </div>
     </div>
 
@@ -28,14 +29,14 @@
             If this is your first time logging in here, please click the <code>🔒 Change Password</code> button above to change your password.<br>
             You can also change your displayed name by clicking the <code>🇫 Change Full Name</code> button.</p>
         % if current_user["role"] != "user":
-        {{ !host_quick_guide }}
+        ${host_quick_guide}
         % else:
-        {{ !user_quick_guide }}
-        % end
+        ${user_quick_guide}
+        % endif
     </details>
 
     <div id="commissions">
-        % include("commissions.tpl", commissions=commissions, current_user=current_user, users=users)
+        <%include("commissions.tpl")>
     </div>
 
     % if current_user["role"] != "user":
@@ -76,7 +77,7 @@
             <input type="submit" value="Add New User">
         </form>
     </div>
-    % end
+    % endif
     <div style="margin-top: 1em; text-align: center; font-size: 0.7rem;">
         <a style="color: lightgray;" href="https://fontawesome.com/license">Eye Icons by Font Awesome</a>
     </div>
@@ -88,5 +89,7 @@
 
 <script type="module">
     import { init } from "/static/js/index.js";
-    init("{{ current_user["role"] }}", "{{ current_user["is_artist"] }}");
+    init(${repr(current_user['role'])}, ${repr(current_user['is_artist'])});
 </script>
+
+</%block>

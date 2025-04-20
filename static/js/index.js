@@ -156,7 +156,7 @@ function force_update() {
 
 function change_user_property(event, property) {
     let human_property = property.replace("_", " ");
-    let new_value = window.prompt(`What do you want to change that user's ${human_property} to?`);
+    let new_value = window.prompt(`What do you want to change this user's ${human_property} to?`);
     if (new_value === null) return;
     if (new_value === "") {
         window.alert(`You must supply a valid ${human_property}.`);
@@ -183,7 +183,7 @@ function click_change_password(event) {
 }
 
 function click_delete_user(event) {
-    let confirmation = window.confirm("Are you sure you want to delete that user?");
+    let confirmation = window.confirm("Are you sure you want to delete this user?");
     if (!confirmation) return;
     let user_id = event.target.attributes.user_id.value;
     const params = {
