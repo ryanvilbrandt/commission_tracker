@@ -34,9 +34,10 @@ function apply_commission_hooks() {
     // document.querySelectorAll(".undo_invoiced_button").forEach(e => e.onclick = click_undo_invoiced);
     // document.querySelectorAll(".undo_paid_button").forEach(e => e.onclick = click_undo_paid);
     document.querySelectorAll(".commission_upload_drag").forEach(e => init_commission_upload_drag(e));
-    document.querySelectorAll(".commission_upload_click").forEach(e => e.onclick = commission_upload_click);
+    document.querySelectorAll(".commission_upload_button").forEach(e => e.onclick = commission_upload_button);
+    document.querySelectorAll(".commission_reupload_button").forEach(e => e.onclick = commission_upload_button);
     document.querySelectorAll(".commission_upload").forEach(e => init_commission_upload(e));
-    document.querySelectorAll(".commission_finish").forEach(e => e.onclick = finished);
+    document.querySelectorAll(".commission_finish_button").forEach(e => e.onclick = finished);
     document.querySelectorAll(".add_note_button").forEach(e => e.onclick = click_add_note);
     document.querySelectorAll(".submit_note_button").forEach(e => e.onclick = click_submit_note);
 }
@@ -370,8 +371,7 @@ function init_commission_upload_drag(element) {
     });
 }
 
-
-function commission_upload_click(e) {
+function commission_upload_button(e) {
     const commission_id = e.target.getAttribute("commission_id");
     document.querySelector(`.commission_upload[commission_id="${commission_id}"]`).click();
 }
@@ -407,7 +407,9 @@ function create_commissions_preview(file, commission_id) {
             aImg.hidden = false;
         };
     })(upload_preview);
-    document.querySelector(`.upload_confirmation[commission_id="${commission_id}"]`).hidden = false;
     document.querySelector(`.upload_prompt[commission_id="${commission_id}"]`).hidden = true;
+    document.querySelector(`.commission_upload_buttons[commission_id="${commission_id}"]`).hidden = true;
+    document.querySelector(`.upload_confirmation[commission_id="${commission_id}"]`).hidden = false;
+    document.querySelector(`.commission_reupload_buttons[commission_id="${commission_id}"]`).hidden = false;
     reader.readAsDataURL(file);
 }

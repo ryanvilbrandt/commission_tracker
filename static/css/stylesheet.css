@@ -46,6 +46,17 @@ code {
   margin-bottom: 0.25rem;
 }
 
+.queue_open_checkbox {
+    margin-top: 1.5em;
+    margin-right: 0.5em;
+    transform: scale(1.5);
+    transform-origin: center;
+}
+
+.queue_open_label {
+    font-size: 150%;
+}
+
 #commissions {
   width: 100%;
   display: grid;
@@ -194,6 +205,10 @@ summary {
     background-color: lightgray;
     outline-offset: -0.4em;
     animation: ease-in-out;
+}
+
+.commission_upload_buttons, .commission_reupload_buttons {
+    padding-top: 0.5em;
 }
 
 .clickable {

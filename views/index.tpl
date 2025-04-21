@@ -14,9 +14,6 @@
             <button class="change_user_button change_user_full_name" title="Change Full Name" user_id="${current_user['id']}">🇫 Change Full Name</button>
             <button class="change_user_button change_user_password" title="Change Password" user_id="${current_user['id']}">🔒 Change Password</button>
             % endif
-            % if current_user["is_artist"]:
-            <input class="queue_open_checkbox" id="current_user_queue_open_checkbox" type="checkbox" user_id="${current_user['id']}"${'checked' if current_user["queue_open"] else ''}> Queue Open?
-            % endif
         </div>
     </div>
 
@@ -34,6 +31,11 @@
         ${user_quick_guide}
         % endif
     </details>
+
+    % if current_user["is_artist"]:
+    <input class="queue_open_checkbox" id="current_user_queue_open_checkbox" type="checkbox" user_id="${current_user['id']}"${'checked' if current_user["queue_open"] else ''}>
+    <span class="queue_open_label">Queue Open?</span>
+    % endif
 
     <div id="commissions">
         <%include file="commissions.tpl"/>

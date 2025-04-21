@@ -44,6 +44,7 @@ empty_queue_text = "None" if queue_open else "Queue closed"
 <%
 open = " open" if commission.get('open') else ""
 span_all = "_span_all" if queue_type == "new_commissions" else ""
+exclusive = " exclusive" if queue_open else ""
 %>
 <details class="commission_description${span_all}" commission_id="${commission['id']}" queue_name="${queue_name}"${open}${hidden_text}>
     <%
@@ -51,7 +52,7 @@ span_all = "_span_all" if queue_type == "new_commissions" else ""
     finished_by = " -- Commission by {}".format(commission["full_name"]) if queue_type == "finished_commissions" else ""
     %>
     <summary class="${commission['status']} commission_title_container">
-        <span class="commission_title">#${commission['id']}: ${commission["name"]}${star}${finished_by}</span>
+        <span class="commission_title"><b>#${commission['id']}:</b>&nbsp;&nbsp;&nbsp;&nbsp;${commission["name"]}${star}${finished_by}</span>
         % if current_user["role"] != "user":
         <span class="created_updated">
             <span class="created_text" epoch="${commission['created_epoch']}"></span>&nbsp;&nbsp;&nbsp;
@@ -67,16 +68,18 @@ span_all = "_span_all" if queue_type == "new_commissions" else ""
     <p hidden><input type="file" class="commission_upload" commission_id="${commission['id']}"></p>
     <div class="commission_upload_drag" commission_id="${commission['id']}">
         <div class="upload_prompt" commission_id="${commission['id']}">
-            Upload the finished commission image by<br>
-            <span class="commission_upload_click clickable" commission_id="${commission['id']}">clicking this link</span>
-            or dragging the file here.
+            Upload the finished commission image by clicking the "Upload Commission" button or dragging the file here.
+        </div>
+        <div class="commission_upload_buttons" commission_id="${commission['id']}">
+            <button class="commission_upload_button" commission_id="${commission['id']}">Upload Commission</button>
         </div>
         <img class="upload_preview" commission_id="${commission['id']}" hidden>
         <div class="upload_confirmation" commission_id="${commission['id']}" hidden>
-            Is the above image file the one you want to upload?<br>
-            <span class="commission_finish clickable" commission_id="${commission['id']}">Click here to confirm</span>
-            and mark this commission as finished, or
-            <span class="commission_upload_click clickable" commission_id="${commission['id']}">select a new file.</span>
+            Is the above image file the one you want to upload?
+        </div>
+        <div class="commission_reupload_buttons" commission_id="${commission['id']}" hidden>
+            <button class="commission_finish_button" commission_id="${commission['id']}">Confirm and Submit</button>
+            <button class="commission_reupload_button" commission_id="${commission['id']}">Upload New File</button>
         </div>
     </div>
         % if commission["uploaded_filename"]:

@@ -137,9 +137,10 @@ def get_status(commission: dict) -> Tuple[str, str]:
     elif commission["preferred_artist"] is None:
         return "new_status", "New"
     elif commission["assigned_to"] != -1:
-        return "claimed_status", "Claimed"
-    elif commission["is_exclusive"]:
-        return "exclusive_status", f"Exclusive Request for {commission['preferred_artist']}"
+        if commission["is_exclusive"]:
+            return "exclusive_status", f"Exclusive Request for {commission['preferred_artist']}"
+        else:
+            return "claimed_status", "Claimed"
     else:
         return "claimable_status", "Claimable by Anyone"
 

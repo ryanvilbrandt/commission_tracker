@@ -7,7 +7,7 @@ from time import ctime, mktime, strptime
 from typing import Optional, List, Dict
 
 import bcrypt
-from bottle import static_file, Bottle, view, auth_basic, request, abort
+from bottle import static_file, Bottle, auth_basic, request, abort
 from bottle_websocket import websocket
 from mako.lookup import TemplateLookup
 from markdown2 import Markdown
@@ -15,6 +15,8 @@ from pyinstrument import Profiler
 
 from src import utils, functions
 from src.db.db import Db
+
+ENABLE_PROFILING = False
 
 START_TIME = None
 MD: Optional[Markdown] = None
@@ -45,8 +47,9 @@ def load_wsgi_endpoints(app: Bottle):
     @app.get("/")
     @auth_basic(_auth_check)
     def index():
-        profiler = Profiler()
-        profiler.start()
+        if ENABLE_PROFILING:
+            profiler = Profiler()
+            profiler.start()
         username = request.auth[0]
         with Db(auto_commit=False) as db:
             current_user = _get_user(db, username)
@@ -61,21 +64,22 @@ def load_wsgi_endpoints(app: Bottle):
             host_quick_guide=HOST_QUICK_GUIDE_MD,
             user_quick_guide=USER_QUICK_GUIDE_MD,
         )
-        profiler.stop()
-        print(profiler.output_text(unicode=True, color=True))
+        if ENABLE_PROFILING:
+            profiler.stop()
+            print(profiler.output_text(unicode=True, color=True))
         return r
 
     @app.get("/host_help")
-    @view("md_page.tpl")
     @auth_basic(_auth_check)
     def host_help():
-        return {"title": "Commission Tracker Help for Hosts", "md": HOST_HELP_MD}
+        t = TEMPLATE_LOOKUP.get_template("md_page.tpl")
+        return t.render(title="Commission Tracker Help for Hosts", md=HOST_HELP_MD)
 
     @app.get("/user_help")
-    @view("md_page.tpl")
     @auth_basic(_auth_check)
     def host_help():
-        return {"title": "Commission Tracker Help for Artists", "md": USER_HELP_MD}
+        t = TEMPLATE_LOOKUP.get_template("md_page.tpl")
+        return t.render(title="Commission Tracker Help for Artists", md=USER_HELP_MD)
 
     @app.get("/static/<path:path>", name="static")
     def static(path):
@@ -92,8 +96,9 @@ def load_wsgi_endpoints(app: Bottle):
     @app.get("/fetch_commissions/<opened_details>/<hidden_queues>")
     @auth_basic(_auth_check)
     def fetch_commissions(opened_details, hidden_queues):
-        profiler = Profiler()
-        profiler.start()
+        if ENABLE_PROFILING:
+            profiler = Profiler()
+            profiler.start()
         with Db() as db:
             current_user = db.get_user_from_username(request.auth[0])
             users = _get_users(db, current_user)
@@ -109,22 +114,25 @@ def load_wsgi_endpoints(app: Bottle):
             current_user=current_user,
             commissions=commissions,
         )
-        profiler.stop()
-        print(profiler.output_text(unicode=True, color=True))
+        if ENABLE_PROFILING:
+            profiler.stop()
+            print(profiler.output_text(unicode=True, color=True))
         return r
 
     @app.get("/fetch_users")
     @auth_basic(_auth_check)
     def fetch_users():
-        profiler = Profiler()
-        profiler.start()
+        if ENABLE_PROFILING:
+            profiler = Profiler()
+            profiler.start()
         with Db() as db:
             current_user = db.get_user_from_username(request.auth[0])
             users = _get_users(db, current_user)
         t = TEMPLATE_LOOKUP.get_template("users.tpl")
         r = t.render(users=users)
-        profiler.stop()
-        print(profiler.output_text(unicode=True, color=True))
+        if ENABLE_PROFILING:
+            profiler.stop()
+            print(profiler.output_text(unicode=True, color=True))
         return r
 
     @app.get("/fetch_queue_open")
@@ -198,7 +206,6 @@ def load_wsgi_endpoints(app: Bottle):
         utils.send_to_websockets("commissions")
 
     @app.post("/add_new_user")
-    @view("redirect_to_main.tpl")
     @auth_basic(_auth_check)
     def add_new_user():
         current_user = request.auth[0]
@@ -227,10 +234,8 @@ def load_wsgi_endpoints(app: Bottle):
                     abort(400, f"A user with the username '{new_username}' already exists.")
                 raise
         utils.send_to_websockets("users")
-        return {
-            "title": f"Added user '{new_username}'",
-            "message": f"'{new_username}' has been added to the database."
-        }
+        t = TEMPLATE_LOOKUP.get_template("redirect_to_main.tpl")
+        return t.render(title=f"Added user '{new_username}'", message=f"'{new_username}' has been added to the database.")
 
     @app.post("/delete_user")
     @auth_basic(_auth_check)
@@ -340,10 +345,11 @@ def load_wsgi_endpoints(app: Bottle):
         utils.send_to_websockets("refresh")
 
     @app.error(401)
-    @view("error_401.tpl")
     def invalid_user(*args):
         if request.auth is not None:
             _delete_from_password_cache(request.auth[0])
+        t = TEMPLATE_LOOKUP.get_template("error_401.tpl")
+        return t.render()
 
     @app.post("/kofi_webhook")
     def kofi_webhook():
@@ -477,7 +483,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
         # Assign to queue
         if commission["status"] == "new_status":
             new_commissions["commissions"].append(commission)
-        elif commission["status"] in ("claimable_status", "exclusive_status"):
+        elif commission["status"] == "claimable_status":
             available_commissions["commissions"].append(commission)
         elif commission["status"] in ("finished_status", "emailed_status"):
             finished_commissions["commissions"].append(commission)

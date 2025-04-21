@@ -6,3 +6,4 @@ bottle_websocket
 markdown2
 faker
 requests
+pyinstrument
