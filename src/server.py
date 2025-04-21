@@ -48,7 +48,7 @@ class Server:
             host=cfg.get("Settings", "host") if host is None else host,
             port=cfg.getint("Settings", "port") if port is None else port,
             run_as_thread=cfg.getboolean("Settings", "run as thread") if run_as_thread is None else run_as_thread,
-            reload=cfg.get("Settings", "reload") if reload is None else reload
+            reload=cfg.getboolean("Settings", "reload") if reload is None else reload
         )
 
     @staticmethod
