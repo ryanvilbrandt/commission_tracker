@@ -87,7 +87,11 @@ def load_wsgi_endpoints(app: Bottle):
 
     @app.get("/get_finished_commission_image/<path:path>")
     def static(path):
-        return static_file(path, root="finished_commissions")
+        if path.endswith(".webp"):
+            mimetype = "image/webp"
+        else:
+            mimetype = True
+        return static_file(path, root="finished_commissions", mimetype=mimetype)
 
     @app.get("/favicon.ico", name="favicon")
     def favicon():
