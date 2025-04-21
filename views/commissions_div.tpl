@@ -52,7 +52,7 @@ exclusive = " exclusive" if queue_open else ""
     finished_by = " -- Commission by {}".format(commission["full_name"]) if queue_type == "finished_commissions" else ""
     %>
     <summary class="${commission['status']} commission_title_container">
-        <span class="commission_title"><b>#${commission['id']}:</b>&nbsp;&nbsp;&nbsp;&nbsp;${commission["name"]}${star}${finished_by}</span>
+        <span class="commission_title"><b>#${commission['id']}</b>&nbsp;&nbsp;&nbsp;&nbsp;${commission["name"]}${star}${finished_by}</span>
         % if current_user["role"] != "user":
         <span class="created_updated">
             <span class="created_text" epoch="${commission['created_epoch']}"></span>&nbsp;&nbsp;&nbsp;
