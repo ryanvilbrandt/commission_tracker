@@ -42,7 +42,7 @@ ${comm_div.render(
         f"{d['user']['full_name']}'s commissions",
         d["user"]["queue_open"],
         d["hidden"],
-        commissions[queue_name]["commissions"],
+        commissions["other_commissions"][user]["commissions"],
     )}
     % endif
 % endfor

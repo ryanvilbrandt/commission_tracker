@@ -22,11 +22,12 @@ HOST_QUICK_GUIDE_MD = None
 USER_QUICK_GUIDE_MD = None
 HOST_HELP_MD = None
 USER_HELP_MD = None
+TEMPLATE_LOOKUP = None
 password_hash_cache = {}
 
 
 def init(cfg):
-    global START_TIME, MD, HOST_QUICK_GUIDE_MD, USER_QUICK_GUIDE_MD, HOST_HELP_MD, USER_HELP_MD
+    global START_TIME, MD, HOST_QUICK_GUIDE_MD, USER_QUICK_GUIDE_MD, HOST_HELP_MD, USER_HELP_MD, TEMPLATE_LOOKUP
     START_TIME = ctime()
     MD = Markdown(extras=["break-on-newline"])
     with open("src/host_quick_guide.md", "rb") as f:
@@ -37,21 +38,21 @@ def init(cfg):
         HOST_HELP_MD = MD.convert(f.read())
     with open("src/user_help.md", "rb") as f:
         USER_HELP_MD = MD.convert(f.read())
+    TEMPLATE_LOOKUP = TemplateLookup(directories=['views'])
 
 
 def load_wsgi_endpoints(app: Bottle):
     @app.get("/")
     @auth_basic(_auth_check)
     def index():
-        # profiler = Profiler()
-        # profiler.start()
+        profiler = Profiler()
+        profiler.start()
         username = request.auth[0]
         with Db(auto_commit=False) as db:
             current_user = _get_user(db, username)
             users = _get_users(db, current_user)
             commissions = _fetch_commissions(db, current_user, [], [])
-        lookup = TemplateLookup(directories=['views'])
-        t = lookup.get_template("index.tpl")
+        t = TEMPLATE_LOOKUP.get_template("index.tpl")
         r = t.render(
             title="Commission Tracker",
             users=users,
@@ -60,8 +61,8 @@ def load_wsgi_endpoints(app: Bottle):
             host_quick_guide=HOST_QUICK_GUIDE_MD,
             user_quick_guide=USER_QUICK_GUIDE_MD,
         )
-        # profiler.stop()
-        # print(profiler.output_text(unicode=True, color=True))
+        profiler.stop()
+        print(profiler.output_text(unicode=True, color=True))
         return r
 
     @app.get("/host_help")
@@ -102,10 +103,15 @@ def load_wsgi_endpoints(app: Bottle):
                 [] if opened_details == "_" else opened_details.split(","),
                 [] if hidden_queues == "_" else hidden_queues.split(",")
             )
-        t = template("commissions.tpl", users=users, current_user=current_user, commissions=commissions)
+        t = TEMPLATE_LOOKUP.get_template("commissions.tpl")
+        r = t.render(
+            users=users,
+            current_user=current_user,
+            commissions=commissions,
+        )
         profiler.stop()
         print(profiler.output_text(unicode=True, color=True))
-        return t
+        return r
 
     @app.get("/fetch_users")
     @auth_basic(_auth_check)
@@ -115,10 +121,11 @@ def load_wsgi_endpoints(app: Bottle):
         with Db() as db:
             current_user = db.get_user_from_username(request.auth[0])
             users = _get_users(db, current_user)
-        t = template("users.tpl", users=users)
+        t = TEMPLATE_LOOKUP.get_template("users.tpl")
+        r = t.render(users=users)
         profiler.stop()
         print(profiler.output_text(unicode=True, color=True))
-        return t
+        return r
 
     @app.get("/fetch_queue_open")
     @auth_basic(_auth_check)
