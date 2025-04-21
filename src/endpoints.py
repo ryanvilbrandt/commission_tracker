@@ -9,13 +9,12 @@ from typing import Optional, List, Dict
 import bcrypt
 from bottle import static_file, Bottle, view, auth_basic, request, abort
 from bottle_websocket import websocket
-from mako.template import Template
+from mako.lookup import TemplateLookup
 from markdown2 import Markdown
 from pyinstrument import Profiler
 
 from src import utils, functions
 from src.db.db import Db
-
 
 START_TIME = None
 MD: Optional[Markdown] = None
@@ -44,14 +43,15 @@ def load_wsgi_endpoints(app: Bottle):
     @app.get("/")
     @auth_basic(_auth_check)
     def index():
-        profiler = Profiler()
-        profiler.start()
+        # profiler = Profiler()
+        # profiler.start()
         username = request.auth[0]
         with Db(auto_commit=False) as db:
             current_user = _get_user(db, username)
             users = _get_users(db, current_user)
             commissions = _fetch_commissions(db, current_user, [], [])
-        t = Template(filename="views/index.tpl")
+        lookup = TemplateLookup(directories=['views'])
+        t = lookup.get_template("index.tpl")
         r = t.render(
             title="Commission Tracker",
             users=users,
@@ -60,8 +60,8 @@ def load_wsgi_endpoints(app: Bottle):
             host_quick_guide=HOST_QUICK_GUIDE_MD,
             user_quick_guide=USER_QUICK_GUIDE_MD,
         )
-        profiler.stop()
-        print(profiler.output_text(unicode=True, color=True))
+        # profiler.stop()
+        # print(profiler.output_text(unicode=True, color=True))
         return r
 
     @app.get("/host_help")

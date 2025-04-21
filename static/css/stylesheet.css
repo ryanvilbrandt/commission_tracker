@@ -77,6 +77,10 @@ code {
     grid-column: 1 / span 3;
 }
 
+#debug {
+    grid-column: 1 / span 10;
+}
+
 .show_hide_icon {
     cursor: pointer;
     height: 0.75em;

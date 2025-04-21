@@ -36,7 +36,7 @@
     </details>
 
     <div id="commissions">
-        <%include("commissions.tpl")>
+        <%include file="commissions.tpl"/>
     </div>
 
     % if current_user["role"] != "user":
@@ -49,7 +49,7 @@
     <h2>Users:</h2>
 
     <div id="users">
-        % include("users.tpl", users=users)
+        <%include file="users.tpl"/>
     </div>
 
     <div id="add_new_user_section">
@@ -89,7 +89,7 @@
 
 <script type="module">
     import { init } from "/static/js/index.js";
-    init(${repr(current_user['role'])}, ${repr(current_user['is_artist'])});
+    init("${current_user['role']}", "${current_user['is_artist']}");
 </script>
 
 </%block>
