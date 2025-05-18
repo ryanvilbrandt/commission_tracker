@@ -1,4 +1,8 @@
-% rebase("base.tpl", title=title)
+<%inherit file='base.tpl'/>
+<%block name="content">
+
 <div id="content">
-    {{ !md }}
+    ${md}
 </div>
+
+</%block>
