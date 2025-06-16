@@ -86,7 +86,7 @@ def load_wsgi_endpoints(app: Bottle):
         return static_file(path, root="static")
 
     @app.get("/get_finished_commission_image/<path:path>")
-    def static(path):
+    def get_finished_commission_image(path):
         if path.endswith(".webp"):
             mimetype = "image/webp"
         else:

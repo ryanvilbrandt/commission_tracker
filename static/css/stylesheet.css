@@ -194,6 +194,10 @@ summary {
     cursor: default;
 }
 
+.disabled {
+    color: gray;
+}
+
 .commission_upload_drag {
     background-color: white;
     outline: 2px dashed black;

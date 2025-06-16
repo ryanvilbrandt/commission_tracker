@@ -5,6 +5,7 @@ let opened_details = [];
 let current_user_role = null;
 let current_user_is_artist = null;
 let uploaded_files_dict = {};
+let auto_refresh = true;
 
 export function init(v_current_user_role, v_current_user_is_artist) {
     current_user_role = v_current_user_role;
@@ -85,20 +86,25 @@ function fetch_commissions_callback(xhttp) {
 
 function handle_websocket(msg) {
     console.debug(msg);
-    if (msg.data === "ping") {
+    if (msg.data === "ping")
         return;
-    }
-    if (msg.data === "refresh" || msg.data === "users") {
+    if (!auto_refresh)
+        return;
+    refresh_data(msg.data);
+}
+
+function refresh_data(mode) {
+    if (mode === "refresh" || mode === "users") {
         if (current_user_role !== "user") {
             ajax_call(`/fetch_users`, fetch_users_callback);
         }
     }
-    if (msg.data === "refresh") {
+    if (mode === "refresh") {
         if (current_user_is_artist) {
             ajax_call(`/fetch_queue_open`, fetch_queue_open_callback);
         }
     }
-    if (msg.data === "refresh" || msg.data === "commissions") {
+    if (mode === "refresh" || mode === "commissions") {
         let arg1 = opened_details.length === 0 ? "_" : opened_details.join(",");
         let hidden_queues = [];
         document.querySelectorAll(".show_hide_icon").forEach(function (e) {
@@ -244,11 +250,13 @@ function finished(event) {
     form_data.append("image_file", uploaded_file);
     form_data.append("commission_id", event.target.attributes["commission_id"].value);
     console.log(form_data);
+    enable_auto_refresh();
     ajax_call(`/finish_commission`, callback, null, form_data);
     close_details(commission_id);
 }
 
 function click_add_note(event) {
+    disable_auto_refresh();
     const parent = event.target.parentElement;
     parent.hidden = true;
     const submit_note_container = parent.nextElementSibling;
@@ -273,6 +281,7 @@ function click_submit_note(event) {
         "user_id": user_id,
         "text": text,
     }
+    enable_auto_refresh();
     ajax_call("/add_note", callback, params);
     close_details(commission_id);
 }
@@ -378,7 +387,7 @@ function commission_upload_button(e) {
 
 function init_commission_upload(element) {
     element.addEventListener("change", on_commission_upload_change, false);
-    // Check if the file_list is already filled on load (can happen on refresh) and undisable button immediately
+    // Check if the file_list is already filled on load (can happen on refresh) and enable the button immediately
     const file_list = element.files;
     if (file_list.length > 0) {
         on_commission_upload_change(null, element);
@@ -398,6 +407,7 @@ function on_commission_upload_change(event, v_element=null) {
 }
 
 function create_commissions_preview(file, commission_id) {
+    disable_auto_refresh();
     uploaded_files_dict[commission_id] = file;
     const reader = new FileReader();
     const upload_preview = document.querySelector(`.upload_preview[commission_id="${commission_id}"]`);
@@ -412,4 +422,18 @@ function create_commissions_preview(file, commission_id) {
     document.querySelector(`.upload_confirmation[commission_id="${commission_id}"]`).hidden = false;
     document.querySelector(`.commission_reupload_buttons[commission_id="${commission_id}"]`).hidden = false;
     reader.readAsDataURL(file);
+}
+
+function enable_auto_refresh() {
+    let e = document.querySelector("#auto_refresh_status");
+    e.innerText = "🔄 Auto-refresh is active";
+    e.classList.remove("disabled");
+    auto_refresh = true;
+}
+
+function disable_auto_refresh() {
+    let e = document.querySelector("#auto_refresh_status");
+    e.innerText = "⏸️ Auto-refresh is paused";
+    e.classList.add("disabled");
+    auto_refresh = false;
 }
