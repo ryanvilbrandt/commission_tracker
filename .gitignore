@@ -8,3 +8,5 @@ server.lock
 
 scripts/users.csv
 finished_commissions/*
+
+node_modules/

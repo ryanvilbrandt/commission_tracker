@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renderData renders expected DOM structure 1`] = `
+"<div>
+  <div
+    class="item"
+  >
+    Item 1
+  </div>
+  <div
+    class="item"
+  >
+    Item 2
+  </div>
+</div>"
+`;

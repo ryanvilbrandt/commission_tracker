@@ -156,7 +156,8 @@ def load_wsgi_endpoints(app: Bottle):
     @auth_basic(_auth_check)
     def send_to_websockets():
         with Db() as db:
-            _permissions_check(db, request.auth[0])
+            if not _permissions_check(db, request.auth[0]):
+                return
         utils.send_to_websockets("refresh")
 
     @app.get("/commission_action/<action>/<commission_id>")
@@ -216,7 +217,8 @@ def load_wsgi_endpoints(app: Bottle):
         new_username = request.forms["username"].lower()
         new_user_role = request.forms["role"].lower()
         with Db() as db:
-            _permissions_check(db, request.auth[0])
+            if not _permissions_check(db, request.auth[0]):
+                return
             current_user_role = db.get_user_role_from_username(current_user)
             if current_user_role == "user":
                 abort(403, "Sorry, only admins can create users.")
@@ -246,7 +248,8 @@ def load_wsgi_endpoints(app: Bottle):
     def delete_user():
         user_id = request.params["user_id"]
         with Db() as db:
-            _permissions_check(db, request.auth[0], user_id, allow_change_self=False)
+            if not _permissions_check(db, request.auth[0], user_id, allow_change_self=False):
+                return
             response = db.delete_user(user_id)
             if response is None:
                 abort(400, f"No user found with id={user_id}")
@@ -401,13 +404,15 @@ def _permissions_check(db, username: str, user_id: Optional[int]=None, allow_cha
     they are not allowed to perform the current operation.
     """
     current_user = _get_user(db, username)
-    if allow_change_self and str(current_user["id"]) == user_id:
-        return True
+    if str(current_user["id"]) == user_id:
+        return allow_change_self
     if current_user["role"] == "user":
         abort(403, "Sorry, only admins can perform that action.")
+        return False
     if current_user["role"] == "admin" and db.get_user_role_from_id(user_id) == "admin":
         abort(403, "Sorry, admins cannot edit other admins.")
-    return str(current_user["id"]) == user_id
+        return False
+    return True
 
 
 def _password_check(password, password_hash):
@@ -471,7 +476,7 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
     commission_ids = [c["id"] for c in commissions]
     notes_dict = _get_notes(db, commission_ids)
     # Organize commissions into queues
-    time_offset = 8 * 3600
+    time_offset = 7 * 3600
     for commission in commissions:
         # Modify data
         if str(commission["id"]) in opened_commissions:
