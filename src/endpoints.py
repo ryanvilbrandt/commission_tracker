@@ -237,7 +237,7 @@ def load_wsgi_endpoints(app: Bottle):
                 if str(e) == "UNIQUE constraint failed: users.username":
                     abort(400, f"A user with the username '{new_username}' already exists.")
                 raise
-        utils.send_to_websockets("users")
+        utils.send_to_websockets("refresh")
         t = TEMPLATE_LOOKUP.get_template("redirect_to_main.tpl")
         return t.render(title=f"Added user '{new_username}'", message=f"'{new_username}' has been added to the database.")
 
@@ -250,8 +250,20 @@ def load_wsgi_endpoints(app: Bottle):
             response = db.delete_user(user_id)
             if response is None:
                 abort(400, f"No user found with id={user_id}")
-        utils.send_to_websockets("users")
+        utils.send_to_websockets("refresh")
         return f"User with id='{user_id}' has been deleted."
+
+    @app.post("/undelete_user")
+    @auth_basic(_auth_check)
+    def undelete_user():
+        user_id = request.params["user_id"]
+        with Db() as db:
+            _permissions_check(db, request.auth[0], user_id, allow_change_self=False)
+            response = db.undelete_user(user_id)
+            if response is None:
+                abort(400, f"No user found with id={user_id}")
+        utils.send_to_websockets("refresh")
+        return f"User with id='{user_id}' has been undeleted."
 
     @app.post("/change_username")
     @auth_basic(_auth_check)
@@ -292,7 +304,7 @@ def load_wsgi_endpoints(app: Bottle):
             response = db.change_full_name(user_id, full_name)
             if response is None:
                 abort(400, f"No user found with id={user_id}")
-        utils.send_to_websockets("users")
+        utils.send_to_websockets("refresh")
         if change_self:
             return f"Your name has been changed to '{full_name}'."
         else:
@@ -332,7 +344,7 @@ def load_wsgi_endpoints(app: Bottle):
             if response is None:
                 abort(400, f"No user found with id={user_id}")
                 return
-        utils.send_to_websockets("users")
+        utils.send_to_websockets("refresh")
 
     @app.post("/change_queue_open")
     @auth_basic(_auth_check)
@@ -397,8 +409,8 @@ def _get_user(db: Db, username: str):
 
 def _permissions_check(db, username: str, user_id: Optional[int]=None, allow_change_self=True) -> bool:
     """
-    Returns True if the user is trying to edit themselves, False otherwise. Raises a 403 HTTPError if
-    they are not allowed to perform the current operation.
+    Returns True if the user is trying to edit themselves, False otherwise.
+    Raises a 403 HTTPError if the user is not allowed to perform the current operation.
     """
     current_user = _get_user(db, username)
     if allow_change_self and str(current_user["id"]) == user_id:
@@ -410,18 +422,21 @@ def _permissions_check(db, username: str, user_id: Optional[int]=None, allow_cha
     return str(current_user["id"]) == user_id
 
 
-def _password_check(password, password_hash):
+def _password_check(password: str, password_hash: bytes):
     return password_hash is not None and bcrypt.checkpw(password.encode("utf-8"), password_hash)
 
 
-def _auth_check(username, password):
+def _auth_check(username: str, password: str) -> bool:
+    # Protect against someone trying to sign in as the "unassigned" user.
+    if username == "unassigned":
+        return False
     if username not in password_hash_cache or not _password_check(password, password_hash_cache[username]):
         with Db(auto_commit=False) as db:
             password_hash_cache[username] = db.get_password_hash_for_username(username)
     return _password_check(password, password_hash_cache[username])
 
 
-def _delete_from_password_cache(username):
+def _delete_from_password_cache(username: str):
     if username in password_hash_cache:
         del password_hash_cache[username]
 
@@ -498,6 +513,17 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
             if commission["assigned_to"] == current_user["id"]:
                 my_commissions["commissions"].append(commission)
             else:
+                username = commission["username"]
+                if username not in other_commissions:
+                    # Can happen if the commission is assigned to a deleted user.
+                    # Make the commission queue belatedly with "(deleted)" appended to the full name.
+                    user = db.get_user_from_username(username)
+                    user["full_name"] += " (deleted)"
+                    other_commissions[username] = {
+                        "user": user,
+                        "hidden": user["username"] in hidden_queues,
+                        "commissions": []
+                    }
                 other_commissions[commission["username"]]["commissions"].append(commission)
     # Sort commissions
     def sort_key(d):

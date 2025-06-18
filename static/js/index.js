@@ -50,6 +50,7 @@ function apply_user_hooks() {
     document.querySelectorAll(".change_user_full_name").forEach(e => e.onclick = click_change_full_name);
     document.querySelectorAll(".change_user_password").forEach(e => e.onclick = click_change_password);
     document.querySelectorAll(".delete_user").forEach(e => e.onclick = click_delete_user);
+    document.querySelectorAll(".undelete_user").forEach(e => e.onclick = click_undelete_user);
 }
 
 function timestamp_update_w_timer() {
@@ -197,6 +198,14 @@ function click_delete_user(event) {
         "user_id": user_id
     }
     ajax_call(`/delete_user`, callback, params);
+}
+
+function click_undelete_user(event) {
+    let user_id = event.target.attributes.user_id.value;
+    const params = {
+        "user_id": user_id
+    }
+    ajax_call(`/undelete_user`, callback, params);
 }
 
 function change_is_artist(event) {
