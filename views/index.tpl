@@ -10,8 +10,8 @@
                 (${current_user["role"].title()})
                 % endif
             </h2>
-            % if current_user["role"] != "god":
             <span id="auto_refresh_status">🔄 Auto-refresh is active</span>
+            % if current_user["role"] != "god":
             <button class="change_user_button change_user_full_name" title="Change Full Name" user_id="${current_user['id']}">🇫 Change Full Name</button>
             <button class="change_user_button change_user_password" title="Change Password" user_id="${current_user['id']}">🔒 Change Password</button>
             % endif
