@@ -7,14 +7,15 @@ from time import ctime, mktime, strptime
 from typing import Optional, List, Dict
 
 import bcrypt
-from bottle import static_file, Bottle, auth_basic, request, abort
 from bottle_websocket import websocket
 from mako.lookup import TemplateLookup
-from markdown2 import Markdown
 from pyinstrument import Profiler
 
+from bottle import static_file, Bottle, auth_basic, request, abort
+from markdown2 import Markdown
 from src import utils, functions
 from src.db.db import Db
+from src.utils import _get_request_params
 
 ENABLE_PROFILING = False
 
@@ -202,9 +203,10 @@ def load_wsgi_endpoints(app: Bottle):
     @app.post("/add_note")
     @auth_basic(_auth_check)
     def add_note():
-        commission_id = request.params["commission_id"]
-        user_id = request.params["user_id"]
-        text = request.params["text"]
+        params = _get_request_params()
+        commission_id = params["commission_id"]
+        user_id = params["user_id"]
+        text = params["text"]
         with Db() as db:
             db.add_note(commission_id, user_id, text)
         utils.send_to_websockets("commissions")
@@ -213,10 +215,11 @@ def load_wsgi_endpoints(app: Bottle):
     @auth_basic(_auth_check)
     def add_new_user():
         current_user = request.auth[0]
-        new_username = request.forms["username"].lower()
-        new_user_role = request.forms["role"].lower()
+        params = _get_request_params()
+        new_username = params["username"].lower()
+        new_user_role = params["role"].lower()
         with Db() as db:
-            _permissions_check(db, request.auth[0])
+            _permissions_check(db, current_user)
             current_user_role = db.get_user_role_from_username(current_user)
             if current_user_role == "user":
                 abort(403, "Sorry, only admins can create users.")
@@ -227,37 +230,52 @@ def load_wsgi_endpoints(app: Bottle):
             try:
                 db.add_user(
                     new_username,
-                    request.forms["full_name"],
-                    bcrypt.hashpw(request.forms["password"].encode(), bcrypt.gensalt()),
+                    params["full_name"],
+                    bcrypt.hashpw(params["password"].encode(), bcrypt.gensalt()),
                     new_user_role,
-                    request.forms.get("is_artist") == "on",
-                    request.forms.get("queue_open") == "on",
+                    params.get("is_artist") == "on",
+                    params.get("queue_open") == "on",
                 )
             except sqlite3.IntegrityError as e:
                 if str(e) == "UNIQUE constraint failed: users.username":
                     abort(400, f"A user with the username '{new_username}' already exists.")
                 raise
-        utils.send_to_websockets("users")
+        utils.send_to_websockets("refresh")
         t = TEMPLATE_LOOKUP.get_template("redirect_to_main.tpl")
         return t.render(title=f"Added user '{new_username}'", message=f"'{new_username}' has been added to the database.")
 
     @app.post("/delete_user")
     @auth_basic(_auth_check)
     def delete_user():
-        user_id = request.params["user_id"]
+        params = _get_request_params()
+        user_id = params["user_id"]
         with Db() as db:
             _permissions_check(db, request.auth[0], user_id, allow_change_self=False)
             response = db.delete_user(user_id)
             if response is None:
                 abort(400, f"No user found with id={user_id}")
-        utils.send_to_websockets("users")
+        utils.send_to_websockets("refresh")
         return f"User with id='{user_id}' has been deleted."
+
+    @app.post("/undelete_user")
+    @auth_basic(_auth_check)
+    def undelete_user():
+        params = _get_request_params()
+        user_id = params["user_id"]
+        with Db() as db:
+            _permissions_check(db, request.auth[0], user_id, allow_change_self=False)
+            response = db.undelete_user(user_id)
+            if response is None:
+                abort(400, f"No user found with id={user_id}")
+        utils.send_to_websockets("refresh")
+        return f"User with id='{user_id}' has been undeleted."
 
     @app.post("/change_username")
     @auth_basic(_auth_check)
     def change_username():
-        user_id = request.params["user_id"]
-        username = request.params["new_value"]
+        params = _get_request_params()
+        user_id = params["user_id"]
+        username = params["new_value"]
         with Db() as db:
             change_self = _permissions_check(db, request.auth[0], user_id)
             if not username:
@@ -283,8 +301,9 @@ def load_wsgi_endpoints(app: Bottle):
     @app.post("/change_full_name")
     @auth_basic(_auth_check)
     def change_full_name():
-        user_id = request.params["user_id"]
-        full_name = request.params["new_value"]
+        params = _get_request_params()
+        user_id = params["user_id"]
+        full_name = params["new_value"]
         with Db() as db:
             change_self = _permissions_check(db, request.auth[0], user_id)
             if not full_name:
@@ -292,7 +311,7 @@ def load_wsgi_endpoints(app: Bottle):
             response = db.change_full_name(user_id, full_name)
             if response is None:
                 abort(400, f"No user found with id={user_id}")
-        utils.send_to_websockets("users")
+        utils.send_to_websockets("refresh")
         if change_self:
             return f"Your name has been changed to '{full_name}'."
         else:
@@ -301,8 +320,9 @@ def load_wsgi_endpoints(app: Bottle):
     @app.post("/change_password")
     @auth_basic(_auth_check)
     def change_password():
-        user_id = request.params["user_id"]
-        password = request.params["new_value"]
+        params = _get_request_params()
+        user_id = params["user_id"]
+        password = params["new_value"]
         with Db() as db:
             change_self = _permissions_check(db, request.auth[0], user_id)
             if not password:
@@ -323,8 +343,9 @@ def load_wsgi_endpoints(app: Bottle):
     @app.post("/change_is_artist")
     @auth_basic(_auth_check)
     def change_is_artist():
-        user_id = request.params["user_id"]
-        is_artist = request.params["is_artist"]
+        params = _get_request_params()
+        user_id = params["user_id"]
+        is_artist = params["is_artist"]
         is_artist = is_artist.lower() == "true"
         with Db() as db:
             _permissions_check(db, request.auth[0], user_id, allow_change_self=False)
@@ -332,13 +353,14 @@ def load_wsgi_endpoints(app: Bottle):
             if response is None:
                 abort(400, f"No user found with id={user_id}")
                 return
-        utils.send_to_websockets("users")
+        utils.send_to_websockets("refresh")
 
     @app.post("/change_queue_open")
     @auth_basic(_auth_check)
     def change_queue_open():
-        user_id = request.params["user_id"]
-        queue_open = request.params["queue_open"]
+        params = _get_request_params()
+        user_id = params["user_id"]
+        queue_open = params["queue_open"]
         queue_open = queue_open.lower() == "true"
         with Db() as db:
             _permissions_check(db, request.auth[0], user_id)
@@ -357,15 +379,16 @@ def load_wsgi_endpoints(app: Bottle):
 
     @app.post("/kofi_webhook")
     def kofi_webhook():
-        if not request.params or "data" not in request.params:
-            print(f"Invalid request: {dict(request.params)}", file=sys.stderr)
+        params = _get_request_params()
+        if not params or "data" not in params:
+            print(f"Invalid request: {dict(params)}", file=sys.stderr)
             abort(400)
             return
-        print(request.params)
+        print(params)
         try:
-            data = loads(request.params["data"])
+            data = loads(params["data"])
         except Exception:
-            print(f"Not valid JSON: {request.params['data']}", file=sys.stderr)
+            print(f"Not valid JSON: {params['data']}", file=sys.stderr)
             abort(400)
             return
         if data.get("verification_token") != os.environ["KOFI_VERIFICATION_TOKEN"]:
@@ -397,8 +420,8 @@ def _get_user(db: Db, username: str):
 
 def _permissions_check(db, username: str, user_id: Optional[int]=None, allow_change_self=True) -> bool:
     """
-    Returns True if the user is trying to edit themselves, False otherwise. Raises a 403 HTTPError if
-    they are not allowed to perform the current operation.
+    Returns True if the user is trying to edit themselves, False otherwise.
+    Raises a 403 HTTPError if the user is not allowed to perform the current operation.
     """
     current_user = _get_user(db, username)
     if allow_change_self and str(current_user["id"]) == user_id:
@@ -410,18 +433,21 @@ def _permissions_check(db, username: str, user_id: Optional[int]=None, allow_cha
     return str(current_user["id"]) == user_id
 
 
-def _password_check(password, password_hash):
+def _password_check(password: str, password_hash: bytes):
     return password_hash is not None and bcrypt.checkpw(password.encode("utf-8"), password_hash)
 
 
-def _auth_check(username, password):
+def _auth_check(username: str, password: str) -> bool:
+    # Protect against someone trying to sign in as the "unassigned" user.
+    if username == "unassigned":
+        return False
     if username not in password_hash_cache or not _password_check(password, password_hash_cache[username]):
         with Db(auto_commit=False) as db:
             password_hash_cache[username] = db.get_password_hash_for_username(username)
     return _password_check(password, password_hash_cache[username])
 
 
-def _delete_from_password_cache(username):
+def _delete_from_password_cache(username: str):
     if username in password_hash_cache:
         del password_hash_cache[username]
 
@@ -498,6 +524,17 @@ def _fetch_commissions(db: Db, current_user: dict, opened_commissions: List[str]
             if commission["assigned_to"] == current_user["id"]:
                 my_commissions["commissions"].append(commission)
             else:
+                username = commission["username"]
+                if username not in other_commissions:
+                    # Can happen if the commission is assigned to a deleted user.
+                    # Make the commission queue belatedly with "(deleted)" appended to the full name.
+                    user = db.get_user_from_username(username)
+                    user["full_name"] += " (deleted)"
+                    other_commissions[username] = {
+                        "user": user,
+                        "hidden": user["username"] in hidden_queues,
+                        "commissions": []
+                    }
                 other_commissions[commission["username"]]["commissions"].append(commission)
     # Sort commissions
     def sort_key(d):
