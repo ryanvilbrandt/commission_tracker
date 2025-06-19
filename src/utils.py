@@ -10,6 +10,8 @@ from typing import List, Tuple
 import gevent
 from geventwebsocket import WebSocketError
 
+from bottle import request
+
 websocket_list = []
 
 
@@ -150,3 +152,15 @@ def get_arg_group(parser, args, group_name):
         if action.title == group_name:
             return {arg.dest: getattr(args, arg.dest) for arg in action._group_actions}
     return {}
+
+
+def _get_request_params(encoding: str = "utf-8") -> dict:
+    """
+    Retrieves the form data and query params from the current request as UTF-8 encoding and returns them as a
+    dictionary. This gets around an issue where bottle parses all incoming data as "latin-1" rather than "utf-8",
+    which should be the default per the HTML5 spec.
+    """
+    d = {}
+    for key in request.params:
+        d[key] = request.params.getunicode(key, encoding=encoding)
+    return d
