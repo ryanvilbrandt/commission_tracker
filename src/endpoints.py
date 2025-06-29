@@ -183,6 +183,8 @@ def load_wsgi_endpoints(app: Bottle):
     @app.post("/finish_commission")
     @auth_basic(_auth_check)
     def finish_commission():
+        print(dict(request.forms))
+        print(dict(request.params))
         commission_id = request.forms.commission_id
         image_file = request.files.image_file
         with Db() as db:
