@@ -116,6 +116,8 @@ def reject_commission(db: Db, commission_id: int) -> Optional[dict]:
 
 def finish_commission(db: Db, commission_id: int, image_file: bottle.FileUpload) -> Optional[dict]:
     commission = db.get_commission_by_id(commission_id)
+    if commission is None:
+        raise ValueError("No commission found for commission_id={!r}".format(commission_id))
     commissioner_name = re.sub(r"\W", "_", commission["name"].lower())
     assigned_artist = db.get_username_from_id(commission["assigned_to"])
     try:
