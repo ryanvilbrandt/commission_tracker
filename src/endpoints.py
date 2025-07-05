@@ -413,6 +413,8 @@ def _permissions_check(db, username: str, user_id: Optional[int]=None, allow_cha
 
 
 def _password_check(password, password_hash):
+    if isinstance(password_hash, str):
+        password_hash = password_hash.encode("utf-8")
     return password_hash is not None and bcrypt.checkpw(password.encode("utf-8"), password_hash)
 
 

@@ -4,11 +4,12 @@ from collections import OrderedDict
 from typing import Optional, Iterator, Union, List
 
 DB_CONN = None
+FILENAME = "main.db"
 
 
 class Db:
 
-    def __init__(self, filename="database_files/main.db", auto_commit=True, auto_close=True):
+    def __init__(self, filename=f"database_files/{FILENAME}", auto_commit=True, auto_close=True):
         if not os.path.isfile(filename):
             raise FileNotFoundError(f"No DB found at {os.path.join(os.getcwd(), filename)}")
         self.conn = sqlite3.connect(filename)
