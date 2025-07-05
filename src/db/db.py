@@ -4,11 +4,12 @@ from collections import OrderedDict
 from typing import Optional, Iterator, Union, List
 
 DB_CONN = None
+FILENAME = "main.db"
 
 
 class Db:
 
-    def __init__(self, filename="database_files/main.db", auto_commit=True, auto_close=True):
+    def __init__(self, filename=f"database_files/{FILENAME}", auto_commit=True, auto_close=True):
         if not os.path.isfile(filename):
             raise FileNotFoundError(f"No DB found at {os.path.join(os.getcwd(), filename)}")
         self.conn = sqlite3.connect(filename)
@@ -93,7 +94,13 @@ class Db:
 
     def delete_user(self, user_id: int):
         sql = """
-            DELETE FROM users WHERE id=? AND NOT role='god' AND NOT role='system' RETURNING id;
+            UPDATE users SET is_active=FALSE WHERE id=? AND NOT role='god' AND NOT role='system' RETURNING id;
+        """
+        return self._scalar(sql, [user_id])
+
+    def undelete_user(self, user_id: int):
+        sql = """
+            UPDATE users SET is_active=TRUE WHERE id=? AND NOT role='god' AND NOT role='system' RETURNING id;
         """
         return self._scalar(sql, [user_id])
 
@@ -137,19 +144,29 @@ class Db:
 
     def get_users(self) -> Iterator[dict]:
         sql = """
-            SELECT id, username, full_name, role, is_artist, queue_open FROM users WHERE NOT role='system'; 
+            SELECT id, username, is_active, full_name, role, is_artist, queue_open 
+            FROM users 
+            WHERE role != 'system'; 
         """
         return self._fetch_all(sql)
 
     def get_password_hash_for_username(self, username: str) -> Optional[str]:
         sql = """
-            SELECT password_hash FROM users WHERE username=?;
+            SELECT password_hash
+            FROM users
+            WHERE username=?
+              AND role != 'system'
+              AND is_active;
         """
         return self._scalar(sql, [username])
 
     def get_user_from_username(self, username: str) -> Optional[dict]:
         sql = """
-            SELECT id, username, full_name, role, is_artist, queue_open FROM users WHERE username=?;
+            SELECT 
+                id, username, full_name, role, is_artist, queue_open 
+            FROM users 
+            WHERE username=?
+              AND role != 'system';
         """
         return self._fetch_one(sql, [username])
 
@@ -158,12 +175,6 @@ class Db:
             SELECT role FROM users WHERE username=? AND NOT role='system';
         """
         return self._scalar(sql, [username])
-
-    def get_user_id_from_full_name(self, full_name: str) -> Optional[int]:
-        sql = """
-            SELECT id FROM users WHERE full_name=? AND NOT role='system';
-        """
-        return self._scalar(sql, [full_name])
 
     def get_username_from_id(self, user_id: int) -> Optional[str]:
         sql = """
@@ -185,7 +196,9 @@ class Db:
 
     def get_all_artists(self) -> Iterator[dict]:
         sql = """
-            SELECT username, full_name, queue_open FROM users WHERE is_artist=TRUE;
+            SELECT username, full_name, queue_open 
+            FROM users 
+            WHERE is_artist AND is_active;
         """
         return self._fetch_all(sql)
 

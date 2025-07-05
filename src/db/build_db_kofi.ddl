@@ -1,6 +1,7 @@
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE,
+    is_active TEXT DEFAULT TRUE,
     full_name TEXT DEFAULT '',
     password_hash TEXT,
     role TEXT DEFAULT 'user',
@@ -37,6 +38,6 @@ CREATE TABLE notes (
 );
 PRAGMA case_sensitive_like=ON;
 
--- The password hash should be set by the script that's calling the DDL file
+-- The password hash should be set by the script calling the DDL file
 INSERT INTO users(id, username, full_name, password_hash, role)
 VALUES (-1, 'unassigned', 'Unassigned', null, 'system');

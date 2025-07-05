@@ -7,14 +7,15 @@ from time import ctime, mktime, strptime
 from typing import Optional, List, Dict
 
 import bcrypt
-from bottle import static_file, Bottle, auth_basic, request, abort
 from bottle_websocket import websocket
 from mako.lookup import TemplateLookup
-from markdown2 import Markdown
 from pyinstrument import Profiler
 
+from bottle import static_file, Bottle, auth_basic, request, abort
+from markdown2 import Markdown
 from src import utils, functions
 from src.db.db import Db
+from src.utils import _get_request_params
 
 ENABLE_PROFILING = False
 
@@ -204,9 +205,10 @@ def load_wsgi_endpoints(app: Bottle):
     @app.post("/add_note")
     @auth_basic(_auth_check)
     def add_note():
-        commission_id = request.params["commission_id"]
-        user_id = request.params["user_id"]
-        text = request.params["text"]
+        params = _get_request_params()
+        commission_id = params["commission_id"]
+        user_id = params["user_id"]
+        text = params["text"]
         with Db() as db:
             db.add_note(commission_id, user_id, text)
         utils.send_to_websockets("commissions")
@@ -215,10 +217,11 @@ def load_wsgi_endpoints(app: Bottle):
     @auth_basic(_auth_check)
     def add_new_user():
         current_user = request.auth[0]
-        new_username = request.forms["username"].lower()
-        new_user_role = request.forms["role"].lower()
+        params = _get_request_params()
+        new_username = params["username"].lower()
+        new_user_role = params["role"].lower()
         with Db() as db:
-            _permissions_check(db, request.auth[0])
+            _permissions_check(db, current_user)
             current_user_role = db.get_user_role_from_username(current_user)
             if current_user_role == "user":
                 abort(403, "Sorry, only admins can create users.")
@@ -229,11 +232,11 @@ def load_wsgi_endpoints(app: Bottle):
             try:
                 db.add_user(
                     new_username,
-                    request.forms["full_name"],
-                    bcrypt.hashpw(request.forms["password"].encode(), bcrypt.gensalt()),
+                    params["full_name"],
+                    bcrypt.hashpw(params["password"].encode(), bcrypt.gensalt()),
                     new_user_role,
-                    request.forms.get("is_artist") == "on",
-                    request.forms.get("queue_open") == "on",
+                    params.get("is_artist") == "on",
+                    params.get("queue_open") == "on",
                 )
             except sqlite3.IntegrityError as e:
                 if str(e) == "UNIQUE constraint failed: users.username":
@@ -246,7 +249,8 @@ def load_wsgi_endpoints(app: Bottle):
     @app.post("/delete_user")
     @auth_basic(_auth_check)
     def delete_user():
-        user_id = request.params["user_id"]
+        params = _get_request_params()
+        user_id = params["user_id"]
         with Db() as db:
             _permissions_check(db, request.auth[0], user_id, allow_change_self=False)
             response = db.delete_user(user_id)
@@ -255,11 +259,25 @@ def load_wsgi_endpoints(app: Bottle):
         utils.send_to_websockets("users")
         return f"User with id='{user_id}' has been deleted."
 
+    @app.post("/undelete_user")
+    @auth_basic(_auth_check)
+    def undelete_user():
+        params = _get_request_params()
+        user_id = params["user_id"]
+        with Db() as db:
+            _permissions_check(db, request.auth[0], user_id, allow_change_self=False)
+            response = db.undelete_user(user_id)
+            if response is None:
+                abort(400, f"No user found with id={user_id}")
+        utils.send_to_websockets("refresh")
+        return f"User with id='{user_id}' has been undeleted."
+
     @app.post("/change_username")
     @auth_basic(_auth_check)
     def change_username():
-        user_id = request.params["user_id"]
-        username = request.params["new_value"]
+        params = _get_request_params()
+        user_id = params["user_id"]
+        username = params["new_value"]
         with Db() as db:
             change_self = _permissions_check(db, request.auth[0], user_id)
             if not username:
@@ -285,8 +303,9 @@ def load_wsgi_endpoints(app: Bottle):
     @app.post("/change_full_name")
     @auth_basic(_auth_check)
     def change_full_name():
-        user_id = request.params["user_id"]
-        full_name = request.params["new_value"]
+        params = _get_request_params()
+        user_id = params["user_id"]
+        full_name = params["new_value"]
         with Db() as db:
             change_self = _permissions_check(db, request.auth[0], user_id)
             if not full_name:
@@ -303,8 +322,9 @@ def load_wsgi_endpoints(app: Bottle):
     @app.post("/change_password")
     @auth_basic(_auth_check)
     def change_password():
-        user_id = request.params["user_id"]
-        password = request.params["new_value"]
+        params = _get_request_params()
+        user_id = params["user_id"]
+        password = params["new_value"]
         with Db() as db:
             change_self = _permissions_check(db, request.auth[0], user_id)
             if not password:
@@ -325,8 +345,9 @@ def load_wsgi_endpoints(app: Bottle):
     @app.post("/change_is_artist")
     @auth_basic(_auth_check)
     def change_is_artist():
-        user_id = request.params["user_id"]
-        is_artist = request.params["is_artist"]
+        params = _get_request_params()
+        user_id = params["user_id"]
+        is_artist = params["is_artist"]
         is_artist = is_artist.lower() == "true"
         with Db() as db:
             _permissions_check(db, request.auth[0], user_id, allow_change_self=False)
@@ -339,8 +360,9 @@ def load_wsgi_endpoints(app: Bottle):
     @app.post("/change_queue_open")
     @auth_basic(_auth_check)
     def change_queue_open():
-        user_id = request.params["user_id"]
-        queue_open = request.params["queue_open"]
+        params = _get_request_params()
+        user_id = params["user_id"]
+        queue_open = params["queue_open"]
         queue_open = queue_open.lower() == "true"
         with Db() as db:
             _permissions_check(db, request.auth[0], user_id)
@@ -359,15 +381,16 @@ def load_wsgi_endpoints(app: Bottle):
 
     @app.post("/kofi_webhook")
     def kofi_webhook():
-        if not request.params or "data" not in request.params:
-            print(f"Invalid request: {dict(request.params)}", file=sys.stderr)
+        params = _get_request_params()
+        if not params or "data" not in params:
+            print(f"Invalid request: {dict(params)}", file=sys.stderr)
             abort(400)
             return
-        print(request.params)
+        print(params)
         try:
-            data = loads(request.params["data"])
+            data = loads(params["data"])
         except Exception:
-            print(f"Not valid JSON: {request.params['data']}", file=sys.stderr)
+            print(f"Not valid JSON: {params['data']}", file=sys.stderr)
             abort(400)
             return
         if data.get("verification_token") != os.environ["KOFI_VERIFICATION_TOKEN"]:
